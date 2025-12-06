@@ -50,7 +50,7 @@ final class Customer extends Model
     /**
      * Get available credit.
      */
-    protected function getAvailableCreditAttribute(): float
+    public function getAvailableCreditAttribute(): float
     {
         if ($this->credit_limit <= 0) {
             return 0;
