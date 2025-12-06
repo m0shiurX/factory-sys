@@ -18,14 +18,15 @@ return new class extends Migration
             $table->string('bill_no')->unique();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
             $table->date('sale_date');
-            $table->decimal('total_weight', 10, 2)->default(0);
-            $table->decimal('sub_total', 12, 2)->default(0);
+            $table->integer('total_pieces')->default(0);
+            $table->decimal('total_weight_kg', 10, 2)->default(0);
+            $table->decimal('total_amount', 12, 2)->default(0);
             $table->decimal('discount', 10, 2)->default(0);
-            $table->decimal('grand_total', 12, 2)->default(0);
+            $table->decimal('net_amount', 12, 2)->default(0);
             $table->decimal('paid_amount', 12, 2)->default(0);
             $table->decimal('due_amount', 12, 2)->default(0);
             $table->foreignId('payment_type_id')->nullable()->constrained()->nullOnDelete();
-            $table->text('note')->nullable();
+            $table->text('notes')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
 

@@ -22,7 +22,7 @@ return new class extends Migration
             $table->unsignedInteger('total_pieces')->default(0);
             $table->decimal('weight_kg', 10, 2)->default(0);
             $table->decimal('rate_per_kg', 10, 2)->default(0);
-            $table->decimal('sub_total', 12, 2)->default(0);
+            $table->decimal('amount', 12, 2)->default(0);
             $table->timestamps();
 
             $table->index('sale_id');
