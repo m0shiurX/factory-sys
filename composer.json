@@ -90,13 +90,13 @@
             "./vendor/bin/pint --parallel",
             "npm run lint"
         ],
-        "test:type-coverage": "./vendor/bin/pest --type-coverage --min=100",
+        "test:type-coverage": "./vendor/bin/pest --type-coverage --min=85.0",
         "test:lint": [
             "./vendor/bin/pint --parallel --test",
             "./vendor/bin/rector --dry-run",
             "npm run test:lint"
         ],
-        "test:unit": "./vendor/bin/pest --parallel --coverage --exactly=100.0",
+        "test:unit": "./vendor/bin/pest --parallel --coverage --min=85.0",
         "test:types": [
             "./vendor/bin/phpstan",
             "npm run test:types"

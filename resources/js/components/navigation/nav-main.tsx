@@ -94,13 +94,11 @@ export function NavMain({
                     >
                         <button
                             onClick={() => toggleExpanded(item.title)}
-                            className={`group/parent relative flex h-8 w-full cursor-pointer items-center gap-3 rounded-md p-2 text-sm transition-all duration-200 ease-linear hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${
-                                isCollapsed ? 'justify-center' : ''
-                            } ${
-                                isItemActive(item)
+                            className={`group/parent relative flex h-8 w-full cursor-pointer items-center gap-3 rounded-md p-2 text-sm transition-all duration-200 ease-linear hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${isCollapsed ? 'justify-center' : ''
+                                } ${isItemActive(item)
                                     ? 'bg-primary font-medium text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
                                     : 'text-sidebar-foreground'
-                            }`}
+                                }`}
                         >
                             <div className="flex aspect-square items-center justify-center">
                                 {item.icon && <item.icon className="size-5" />}
@@ -117,11 +115,10 @@ export function NavMain({
                                             </span>
                                         )}
                                         <ChevronRight
-                                            className={`h-4 w-4 transition-transform duration-200 ease-in-out ${
-                                                expandedItems.has(item.title)
-                                                    ? 'rotate-90'
-                                                    : ''
-                                            }`}
+                                            className={`h-4 w-4 transition-transform duration-200 ease-in-out ${expandedItems.has(item.title)
+                                                ? 'rotate-90'
+                                                : ''
+                                                }`}
                                         />
                                     </div>
                                 </>
@@ -154,11 +151,10 @@ export function NavMain({
                                                 <Link
                                                     key={index}
                                                     href={child.href || '#'}
-                                                    className={`block w-full rounded-md px-3 py-2 text-sm transition-all duration-200 ease-linear hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${
-                                                        isChildActive(child)
-                                                            ? 'bg-primary font-medium text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                                                            : 'text-sidebar-foreground'
-                                                    }`}
+                                                    className={`block w-full rounded-md px-3 py-2 text-sm transition-all duration-200 ease-linear hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${isChildActive(child)
+                                                        ? 'bg-primary font-medium text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+                                                        : 'text-sidebar-foreground'
+                                                        }`}
                                                 >
                                                     {child.title}
                                                 </Link>
@@ -172,11 +168,10 @@ export function NavMain({
                     {/* Submenu with smooth animation - only show when not collapsed */}
                     {!isCollapsed && (
                         <div
-                            className={`overflow-hidden transition-all duration-200 ease-in-out ${
-                                expandedItems.has(item.title)
-                                    ? 'max-h-96 opacity-100'
-                                    : 'max-h-0 opacity-0'
-                            }`}
+                            className={`overflow-hidden transition-all duration-200 ease-in-out ${expandedItems.has(item.title)
+                                ? 'max-h-96 opacity-100'
+                                : 'max-h-0 opacity-0'
+                                }`}
                             onClick={(e) => e.stopPropagation()} // Prevent clicks inside submenu from bubbling up
                         >
                             {item.childRoutes &&
@@ -187,11 +182,10 @@ export function NavMain({
                                                 <Link
                                                     key={index}
                                                     href={child.href || '#'}
-                                                    className={`group relative z-10 flex h-9 w-full cursor-pointer items-center gap-3 rounded-md px-3 pl-10 text-sm transition-all duration-200 ease-linear hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${
-                                                        isChildActive(child)
-                                                            ? 'bg-primary font-medium text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
-                                                            : 'text-sidebar-foreground/70'
-                                                    }`}
+                                                    className={`group relative z-10 flex h-9 w-full cursor-pointer items-center gap-3 rounded-md px-3 pl-10 text-sm transition-all duration-200 ease-linear hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${isChildActive(child)
+                                                        ? 'bg-primary font-medium text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+                                                        : 'text-sidebar-foreground/70'
+                                                        }`}
                                                     onClick={(e) =>
                                                         e.stopPropagation()
                                                     } // Prevent child clicks from bubbling up
@@ -202,7 +196,7 @@ export function NavMain({
                                                     </div>
                                                     {/* Active indicator */}
                                                     {isChildActive(child) && (
-                                                        <div className="absolute top-1/2 left-4.5 h-1 w-1 -translate-y-1/2 rounded-full bg-sidebar-primary"></div>
+                                                        <div className="absolute top-1/2 left-4.5 h-1 w-1 -translate-y-1/2 rounded-full bg-sidebar-accent"></div>
                                                     )}
                                                 </Link>
                                             ),
@@ -218,13 +212,11 @@ export function NavMain({
                 /* Simple Menu Item without Children */
                 <Link
                     href={item.href || '#'}
-                    className={`group/parent relative flex h-8 w-full cursor-pointer items-center gap-3 rounded-md p-2 text-sm transition-all duration-200 ease-linear hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${
-                        isCollapsed ? 'justify-center' : ''
-                    } ${
-                        isItemActive(item)
+                    className={`group/parent relative flex h-8 w-full cursor-pointer items-center gap-3 rounded-md p-2 text-sm transition-all duration-200 ease-linear hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${isCollapsed ? 'justify-center' : ''
+                        } ${isItemActive(item)
                             ? 'bg-primary font-medium text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
                             : 'text-sidebar-foreground'
-                    }`}
+                        }`}
                 >
                     <div className="flex aspect-square items-center justify-center">
                         {item.icon && <item.icon className="size-5" />}
@@ -242,7 +234,7 @@ export function NavMain({
                                 )}
                                 {/* Active indicator */}
                                 {isItemActive(item) && (
-                                    <div className="h-1 w-1 rounded-full bg-sidebar-primary"></div>
+                                    <div className="h-1 w-1 rounded-full bg-sidebar-accent"></div>
                                 )}
                             </div>
                         </>
