@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserEmailResetNotification;
 use App\Http\Controllers\UserEmailVerification;
 use App\Http\Controllers\UserEmailVerificationNotificationController;
+use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserPasswordController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\UserTwoFactorAuthenticationController;
@@ -20,6 +22,17 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', fn() => Inertia::render('admin/dashboard'))->name('dashboard');
 });
 
+// User management routes
+Route::middleware(['auth', 'verified'])->group(function (): void {
+    Route::get('users', [UserManagementController::class, 'index'])->name('users.index');
+    Route::get('users/create', [UserManagementController::class, 'create'])->name('users.create');
+    Route::post('users', [UserManagementController::class, 'store'])->name('users.store');
+    Route::get('users/{user}', [UserManagementController::class, 'show'])->name('users.show');
+    Route::get('users/{user}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
+    Route::put('users/{user}', [UserManagementController::class, 'update'])->name('users.update');
+    Route::delete('users/{user}', [UserManagementController::class, 'destroy'])->name('users.destroy');
+});
+
 // Role management routes
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('roles', [RoleController::class, 'index'])->name('roles.index');
@@ -28,6 +41,12 @@ Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
     Route::put('roles/{role}', [RoleController::class, 'update'])->name('roles.update');
     Route::delete('roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+});
+
+// Activity log routes
+Route::middleware(['auth', 'verified'])->group(function (): void {
+    Route::get('activities', [ActivityLogController::class, 'index'])->name('activities.index');
+    Route::get('activities/{activity}', [ActivityLogController::class, 'show'])->name('activities.show');
 });
 
 Route::middleware('auth')->group(function (): void {

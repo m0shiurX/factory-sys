@@ -56,13 +56,7 @@ export function useAdminNavigation() {
         },
     ];
 
-    const footerNavItems: NavItem[] = [
-        {
-            title: 'View Website',
-            href: '/',
-            icon: ExternalLink,
-        },
-    ];
+    const footerNavItems: NavItem[] = [];
 
     return {
         navSections,

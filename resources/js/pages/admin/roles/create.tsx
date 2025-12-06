@@ -1,28 +1,8 @@
-import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import InputError from '@/components/common/input-error';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Roles',
-        href: '/roles',
-    },
-    {
-        title: 'Create Role',
-        href: '/roles/create',
-    },
-];
+import { ArrowLeft, Plus } from 'lucide-react';
+import { FormEventHandler } from 'react';
 
 type Permissions = Record<string, Record<string, string[]>>;
 
@@ -34,18 +14,18 @@ type Permission = {
     updated_at: string;
 };
 
-type PageProps = {
+type Props = {
     permissions: Permissions;
     allPermissions: Permission[];
 };
 
-export default function CreateRole({ permissions, allPermissions }: PageProps) {
-    const { data, setData, post, errors, processing } = useForm({
+export default function RoleCreate({ permissions, allPermissions }: Props) {
+    const { data, setData, post, processing, errors } = useForm({
         name: '',
         permissions: [] as number[],
     });
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
         post('/roles');
     };
@@ -109,7 +89,9 @@ export default function CreateRole({ permissions, allPermissions }: PageProps) {
             const permission = allPermissions.find(
                 (p) => p.name === permissionName,
             );
-            return permission ? data.permissions.includes(permission.id) : false;
+            return permission
+                ? data.permissions.includes(permission.id)
+                : false;
         });
     };
 
@@ -118,159 +100,172 @@ export default function CreateRole({ permissions, allPermissions }: PageProps) {
     );
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout>
             <Head title="Create Role" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Role Name Card */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Role Details</CardTitle>
-                            <CardDescription>
-                                Enter the name for this role
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="max-w-md space-y-2">
-                                <Label htmlFor="role-name">Role Name</Label>
-                                <Input
-                                    id="role-name"
+            <div className="min-h-screen bg-background p-6">
+                <div className="mx-auto max-w-4xl">
+                    {/* Header */}
+                    <div className="mb-6 flex items-center gap-4">
+                        <Link
+                            href="/roles"
+                            className="rounded-lg p-2 text-muted-foreground transition hover:bg-card hover:text-muted-foreground"
+                        >
+                            <ArrowLeft className="h-5 w-5" />
+                        </Link>
+                        <div>
+                            <h1 className="text-2xl font-semibold text-foreground">
+                                Add Role
+                            </h1>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                Create a new role with permissions
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Form */}
+                    <form onSubmit={handleSubmit}>
+                        <div className="space-y-6 rounded-xl border border-border bg-card p-6">
+                            {/* Name */}
+                            <div>
+                                <label
+                                    htmlFor="name"
+                                    className="mb-2 block text-sm font-medium text-foreground"
+                                >
+                                    Role Name *
+                                </label>
+                                <input
+                                    type="text"
+                                    id="name"
                                     value={data.name}
                                     onChange={(e) =>
                                         setData('name', e.target.value)
                                     }
+                                    className="w-full max-w-md rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     placeholder="e.g. Admin, Manager, Editor"
-                                    aria-invalid={!!errors.name}
                                 />
-                                {errors.name && (
-                                    <p className="text-sm text-destructive">
-                                        {errors.name}
-                                    </p>
-                                )}
+                                <InputError message={errors.name} />
                             </div>
-                        </CardContent>
-                    </Card>
 
-                    {/* Permissions Card */}
-                    <Card>
-                        <CardHeader className="flex-row items-center justify-between">
+                            {/* Permissions */}
                             <div>
-                                <CardTitle>Permissions</CardTitle>
-                                <CardDescription>
-                                    Select the permissions for this role
-                                </CardDescription>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Checkbox
-                                    id="select-all"
-                                    checked={isAllSelected}
-                                    onCheckedChange={handleAllPermissionsToggle}
-                                />
-                                <Label
-                                    htmlFor="select-all"
-                                    className="cursor-pointer text-sm font-medium text-primary"
-                                >
-                                    Select All
-                                </Label>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            {Object.entries(permissions).map(
-                                ([category, modules]) => (
-                                    <div
-                                        key={category}
-                                        className="overflow-hidden rounded-lg border"
-                                    >
-                                        {/* Category Header */}
-                                        <div className="border-b bg-muted px-4 py-3">
-                                            <h3 className="text-lg font-semibold capitalize">
-                                                {category}
-                                            </h3>
-                                        </div>
+                                <div className="mb-4 flex items-center justify-between">
+                                    <label className="block text-sm font-medium text-foreground">
+                                        Permissions
+                                    </label>
+                                    <label className="flex cursor-pointer items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            checked={isAllSelected}
+                                            onChange={handleAllPermissionsToggle}
+                                            className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                                        />
+                                        <span className="text-sm font-medium text-primary">
+                                            Select All
+                                        </span>
+                                    </label>
+                                </div>
 
-                                        {Object.entries(modules).map(
-                                            ([module, perms]) => (
-                                                <div
-                                                    key={module}
-                                                    className="border-b last:border-b-0"
-                                                >
-                                                    {/* Module Header */}
-                                                    <div className="flex items-center gap-3 bg-muted/50 px-4 py-3">
-                                                        <Checkbox
-                                                            id={`module-${module}`}
-                                                            checked={isModuleSelected(
-                                                                perms,
-                                                            )}
-                                                            onCheckedChange={() =>
-                                                                handleModuleToggle(
-                                                                    perms,
-                                                                )
-                                                            }
-                                                        />
-                                                        <Label
-                                                            htmlFor={`module-${module}`}
-                                                            className="cursor-pointer text-base font-medium capitalize text-primary"
-                                                        >
-                                                            {module}
-                                                        </Label>
-                                                    </div>
-
-                                                    {/* Permissions Grid */}
-                                                    <div className="flex flex-wrap gap-4 p-4">
-                                                        {perms.map(
-                                                            (permission) => (
-                                                                <div
-                                                                    key={
-                                                                        permission
-                                                                    }
-                                                                    className="flex items-center gap-2"
-                                                                >
-                                                                    <Checkbox
-                                                                        id={
-                                                                            permission
-                                                                        }
-                                                                        checked={isPermissionSelected(
-                                                                            permission,
-                                                                        )}
-                                                                        onCheckedChange={() =>
-                                                                            togglePermission(
-                                                                                permission,
-                                                                            )
-                                                                        }
-                                                                    />
-                                                                    <Label
-                                                                        htmlFor={
-                                                                            permission
-                                                                        }
-                                                                        className="cursor-pointer rounded bg-secondary px-2 py-1 text-sm"
-                                                                    >
-                                                                        {
-                                                                            permission
-                                                                        }
-                                                                    </Label>
-                                                                </div>
-                                                            ),
-                                                        )}
-                                                    </div>
+                                <div className="space-y-4">
+                                    {Object.entries(permissions).map(
+                                        ([category, modules]) => (
+                                            <div
+                                                key={category}
+                                                className="overflow-hidden rounded-lg border border-border"
+                                            >
+                                                {/* Category Header */}
+                                                <div className="border-b border-border bg-muted px-4 py-3">
+                                                    <h3 className="text-base font-semibold capitalize text-foreground">
+                                                        {category}
+                                                    </h3>
                                                 </div>
-                                            ),
-                                        )}
-                                    </div>
-                                ),
-                            )}
-                        </CardContent>
-                    </Card>
 
-                    {/* Action Buttons */}
-                    <div className="flex justify-end gap-3">
-                        <Button variant="outline" asChild>
-                            <Link href="/roles">Cancel</Link>
-                        </Button>
-                        <Button type="submit" disabled={processing}>
-                            {processing ? 'Creating...' : 'Create Role'}
-                        </Button>
-                    </div>
-                </form>
+                                                {Object.entries(modules).map(
+                                                    ([module, perms]) => (
+                                                        <div
+                                                            key={module}
+                                                            className="border-b border-border last:border-b-0"
+                                                        >
+                                                            {/* Module Header */}
+                                                            <div className="flex items-center gap-3 bg-muted/50 px-4 py-3">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={isModuleSelected(
+                                                                        perms,
+                                                                    )}
+                                                                    onChange={() =>
+                                                                        handleModuleToggle(
+                                                                            perms,
+                                                                        )
+                                                                    }
+                                                                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                                                                />
+                                                                <span className="text-sm font-medium capitalize text-primary">
+                                                                    {module}
+                                                                </span>
+                                                            </div>
+
+                                                            {/* Permissions Grid */}
+                                                            <div className="flex flex-wrap gap-4 p-4">
+                                                                {perms.map(
+                                                                    (
+                                                                        permission,
+                                                                    ) => (
+                                                                        <label
+                                                                            key={
+                                                                                permission
+                                                                            }
+                                                                            className="flex cursor-pointer items-center gap-2"
+                                                                        >
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                checked={isPermissionSelected(
+                                                                                    permission,
+                                                                                )}
+                                                                                onChange={() =>
+                                                                                    togglePermission(
+                                                                                        permission,
+                                                                                    )
+                                                                                }
+                                                                                className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                                                                            />
+                                                                            <span className="rounded bg-muted px-2 py-1 text-sm text-foreground">
+                                                                                {
+                                                                                    permission
+                                                                                }
+                                                                            </span>
+                                                                        </label>
+                                                                    ),
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ),
+                                                )}
+                                            </div>
+                                        ),
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex items-center justify-end gap-3 border-t border-border pt-6">
+                                <Link
+                                    href="/roles"
+                                    className="rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-background"
+                                >
+                                    Cancel
+                                </Link>
+                                <button
+                                    type="submit"
+                                    disabled={processing}
+                                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-primary/90 disabled:opacity-50"
+                                >
+                                    <Plus className="h-4 w-4" />
+                                    {processing ? 'Creating...' : 'Create Role'}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
         </AppLayout>
     );

@@ -9,7 +9,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
-final class UpdateUserRequest extends FormRequest
+final class StoreUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -21,9 +21,6 @@ final class UpdateUserRequest extends FormRequest
      */
     public function rules(): array
     {
-        /** @var User $targetUser */
-        $targetUser = $this->route('user');
-
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => [
@@ -32,9 +29,9 @@ final class UpdateUserRequest extends FormRequest
                 'lowercase',
                 'email',
                 'max:255',
-                Rule::unique(User::class)->ignore($targetUser->id),
+                Rule::unique(User::class),
             ],
-            'password' => ['nullable', 'string', 'confirmed', Password::defaults()],
+            'password' => ['required', 'string', 'confirmed', Password::defaults()],
             'roles' => ['nullable', 'array'],
             'roles.*' => ['integer', 'exists:roles,id'],
         ];

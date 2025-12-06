@@ -1,23 +1,8 @@
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
-import { AlertTriangle, Pencil, Plus, Shield, Trash2 } from 'lucide-react';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Roles',
-        href: '/roles',
-    },
-];
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Edit, Plus, Shield, Trash2 } from 'lucide-react';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 type Permission = {
     id: number;
@@ -30,11 +15,24 @@ type Role = {
     permissions: Permission[];
 };
 
-type PageProps = {
+type Props = {
     roles: Role[];
 };
 
-export default function RolesIndex({ roles }: PageProps) {
+export default function RolesIndex({ roles }: Props) {
+    const { props } = usePage<{
+        flash?: { success?: string; error?: string };
+    }>();
+
+    useEffect(() => {
+        if (props.flash?.success) {
+            toast.success(props.flash.success);
+        }
+        if (props.flash?.error) {
+            toast.error(props.flash.error);
+        }
+    }, [props.flash?.success, props.flash?.error]);
+
     const handleDelete = (roleId: number) => {
         if (
             confirm(
@@ -62,83 +60,92 @@ export default function RolesIndex({ roles }: PageProps) {
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout>
             <Head title="Roles" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <Card>
-                    <CardHeader className="flex-row items-center justify-between border-b">
+            <div className="min-h-screen bg-background p-6">
+                <div className="mx-auto max-w-7xl">
+                    {/* Header */}
+                    <div className="mb-6 flex items-center justify-between">
                         <div>
-                            <CardTitle>Roles</CardTitle>
-                            <CardDescription>
+                            <h1 className="text-2xl font-semibold text-foreground">
+                                Roles
+                            </h1>
+                            <p className="mt-1 text-sm text-muted-foreground">
                                 Manage roles and their permissions
-                            </CardDescription>
+                            </p>
                         </div>
-                        <Button asChild>
-                            <Link href="/roles/create">
-                                <Plus className="size-4" />
-                                Create Role
-                            </Link>
-                        </Button>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="border-b bg-muted/50">
-                                        <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
-                                            #
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
-                                            Name
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
-                                            Permissions
-                                        </th>
-                                        <th className="px-6 py-3 text-right text-xs font-medium tracking-wider text-muted-foreground uppercase">
-                                            Actions
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y">
-                                    {roles.length === 0 ? (
-                                        <tr>
-                                            <td
-                                                colSpan={4}
-                                                className="px-6 py-12 text-center"
-                                            >
-                                                <div className="flex flex-col items-center">
-                                                    <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
-                                                        <AlertTriangle className="size-6 text-muted-foreground" />
-                                                    </div>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        No roles found
-                                                    </p>
-                                                    <Button
-                                                        variant="link"
-                                                        asChild
-                                                        className="mt-2"
-                                                    >
-                                                        <Link href="/roles/create">
-                                                            Create your first
-                                                            role
-                                                        </Link>
-                                                    </Button>
-                                                </div>
-                                            </td>
+                        <Link
+                            href="/roles/create"
+                            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
+                        >
+                            <Plus className="h-4 w-4" />
+                            Add Role
+                        </Link>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-3">
+                        <div className="rounded-xl border border-border bg-card p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-xs font-medium text-muted-foreground">
+                                        Total Roles
+                                    </p>
+                                    <p className="mt-1 text-2xl font-semibold text-card-foreground">
+                                        {roles.length}
+                                    </p>
+                                </div>
+                                <div className="rounded-lg bg-muted p-2">
+                                    <Shield className="h-5 w-5 text-muted-foreground" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Table */}
+                    <div className="overflow-hidden rounded-xl border border-border bg-card">
+                        {roles.length === 0 ? (
+                            <div className="py-16 text-center">
+                                <Shield className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
+                                <h3 className="text-sm font-medium text-foreground">
+                                    No roles found
+                                </h3>
+                                <p className="mt-1 text-sm text-muted-foreground">
+                                    Add your first role to get started
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="border-b border-border bg-muted/50">
+                                            <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+                                                #
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+                                                Role
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
+                                                Permissions
+                                            </th>
+                                            <th className="px-6 py-3 text-right text-xs font-medium tracking-wider text-muted-foreground uppercase">
+                                                Actions
+                                            </th>
                                         </tr>
-                                    ) : (
-                                        roles.map((role, index) => (
+                                    </thead>
+                                    <tbody className="divide-y divide-border">
+                                        {roles.map((role, index) => (
                                             <tr
                                                 key={role.id}
-                                                className="transition-colors hover:bg-muted/50"
+                                                className="transition hover:bg-muted/50"
                                             >
                                                 <td className="px-6 py-4 text-sm font-medium whitespace-nowrap text-foreground">
                                                     {index + 1}
                                                 </td>
                                                 <td className="px-6 py-4 text-sm whitespace-nowrap text-foreground">
                                                     <div className="flex items-center gap-3">
-                                                        <div className="flex size-8 items-center justify-center rounded-lg bg-primary/10">
-                                                            <Shield className="size-4 text-primary" />
+                                                        <div className="rounded-lg bg-primary/10 p-2">
+                                                            <Shield className="h-4 w-4 text-primary" />
                                                         </div>
                                                         <span className="font-medium capitalize">
                                                             {role.name}
@@ -146,17 +153,17 @@ export default function RolesIndex({ roles }: PageProps) {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-sm text-muted-foreground">
-                                                    <div className="max-w-xs space-y-1">
-                                                        <Badge variant="secondary">
+                                                    <div className="max-w-xs">
+                                                        <span className="inline-flex rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
                                                             {role.permissions
                                                                 ?.length || 0}{' '}
                                                             permissions
-                                                        </Badge>
+                                                        </span>
                                                         {role.permissions &&
                                                             role.permissions
                                                                 .length > 0 && (
                                                                 <p
-                                                                    className="truncate text-xs text-muted-foreground"
+                                                                    className="mt-1 truncate text-xs text-muted-foreground"
                                                                     title={role.permissions
                                                                         .map(
                                                                             (
@@ -176,42 +183,33 @@ export default function RolesIndex({ roles }: PageProps) {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
-                                                    <div className="flex items-center justify-end gap-2">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            asChild
+                                                    <div className="flex items-center justify-end gap-1">
+                                                        <Link
+                                                            href={`/roles/${role.id}/edit`}
+                                                            className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
                                                         >
-                                                            <Link
-                                                                href={`/roles/${role.id}/edit`}
-                                                            >
-                                                                <Pencil className="size-4" />
-                                                                Edit
-                                                            </Link>
-                                                        </Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
+                                                            <Edit className="h-4 w-4" />
+                                                        </Link>
+                                                        <button
                                                             onClick={() =>
                                                                 handleDelete(
                                                                     role.id,
                                                                 )
                                                             }
-                                                            className="text-destructive hover:text-destructive"
+                                                            className="rounded-lg p-2 text-muted-foreground transition hover:bg-red-500/10 hover:text-red-600"
                                                         >
-                                                            <Trash2 className="size-4" />
-                                                            Delete
-                                                        </Button>
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </button>
                                                     </div>
                                                 </td>
                                             </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </CardContent>
-                </Card>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
         </AppLayout>
     );
