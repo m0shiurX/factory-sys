@@ -1,3 +1,14 @@
+import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
@@ -93,184 +104,171 @@ export default function CreateRole({ permissions, allPermissions }: PageProps) {
         setData('permissions', allSelected ? [] : allPermissionIds);
     };
 
+    const isModuleSelected = (perms: string[]) => {
+        return perms.every((permissionName) => {
+            const permission = allPermissions.find(
+                (p) => p.name === permissionName,
+            );
+            return permission ? data.permissions.includes(permission.id) : false;
+        });
+    };
+
+    const isAllSelected = allPermissions.every((permission) =>
+        data.permissions.includes(permission.id),
+    );
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Create Role" />
-            <div className="flex h-full flex-1 flex-col gap-6 rounded-lg bg-background p-4 dark:bg-background">
-                <form onSubmit={handleSubmit} className="space-y-8">
-                    {/* Role Name Field */}
-                    <div className="flex items-center gap-4">
-                        <div className="w-full max-w-md">
-                            <label
-                                className="mb-2 block text-sm font-medium text-foreground dark:text-muted-foreground"
-                                htmlFor="role-name"
-                            >
-                                Role Name
-                            </label>
-                            <input
-                                onChange={(e) =>
-                                    setData('name', e.target.value)
-                                }
-                                className="w-full rounded-md border border-border bg-card px-4 py-2 text-foreground shadow-sm transition-colors focus:border-ring focus:ring-2 focus:ring-ring dark:border-border dark:bg-card dark:text-foreground"
-                                id="role-name"
-                                type="text"
-                                placeholder="e.g. Admin"
-                            />
-                            {errors.name && (
-                                <p className="mt-2 text-sm text-destructive dark:text-destructive">
-                                    {errors.name}
-                                </p>
-                            )}
-                        </div>
-                        <div className="mt-7 space-x-3">
-                            <button
-                                type="submit"
-                                disabled={processing}
-                                className="inline-flex cursor-pointer items-center rounded-md bg-primary px-4 py-[11px] text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary/100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                {processing ? 'Creating...' : 'Create Role'}
-                            </button>
-                            <Link
-                                href="/roles"
-                                className="inline-flex items-center rounded-md border border-border bg-card px-4 py-[11px] text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-background dark:border-border dark:bg-card dark:text-muted-foreground dark:hover:bg-muted"
-                            >
-                                Cancel
-                            </Link>
-                        </div>
-                    </div>
-
-                    {/* Permissions Section */}
-                    <div className="space-y-6">
-                        <div className="flex items-center justify-between">
-                            <label className="block text-lg font-medium text-foreground dark:text-foreground">
-                                Permissions
-                            </label>
-                            <div className="flex items-center gap-3">
-                                <input
-                                    type="checkbox"
-                                    checked={allPermissions.every(
-                                        (permission) =>
-                                            data.permissions.includes(
-                                                permission.id,
-                                            ),
-                                    )}
-                                    onChange={() =>
-                                        handleAllPermissionsToggle()
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Role Name Card */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Role Details</CardTitle>
+                            <CardDescription>
+                                Enter the name for this role
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="max-w-md space-y-2">
+                                <Label htmlFor="role-name">Role Name</Label>
+                                <Input
+                                    id="role-name"
+                                    value={data.name}
+                                    onChange={(e) =>
+                                        setData('name', e.target.value)
                                     }
-                                    className="h-4 w-4 rounded border-border bg-card text-primary focus:ring-2 focus:ring-ring dark:border-border dark:bg-card dark:text-primary dark:focus:ring-ring"
+                                    placeholder="e.g. Admin, Manager, Editor"
+                                    aria-invalid={!!errors.name}
                                 />
-                                <h4 className="text-sm font-semibold text-green-600 dark:text-green-400">
-                                    All Permissions
-                                </h4>
+                                {errors.name && (
+                                    <p className="text-sm text-destructive">
+                                        {errors.name}
+                                    </p>
+                                )}
                             </div>
-                        </div>
+                        </CardContent>
+                    </Card>
 
-                        {Object.entries(permissions).map(
-                            ([category, modules]) => (
-                                <div
-                                    key={category}
-                                    className="overflow-hidden rounded-lg border border-border shadow-sm dark:border-border"
+                    {/* Permissions Card */}
+                    <Card>
+                        <CardHeader className="flex-row items-center justify-between">
+                            <div>
+                                <CardTitle>Permissions</CardTitle>
+                                <CardDescription>
+                                    Select the permissions for this role
+                                </CardDescription>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Checkbox
+                                    id="select-all"
+                                    checked={isAllSelected}
+                                    onCheckedChange={handleAllPermissionsToggle}
+                                />
+                                <Label
+                                    htmlFor="select-all"
+                                    className="cursor-pointer text-sm font-medium text-primary"
                                 >
-                                    {/* Category Header */}
-                                    <h3 className="border-b border-border bg-muted px-4 py-3 text-xl font-semibold text-foreground capitalize dark:border-border dark:bg-card dark:text-muted-foreground">
-                                        {category}
-                                    </h3>
+                                    Select All
+                                </Label>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            {Object.entries(permissions).map(
+                                ([category, modules]) => (
+                                    <div
+                                        key={category}
+                                        className="overflow-hidden rounded-lg border"
+                                    >
+                                        {/* Category Header */}
+                                        <div className="border-b bg-muted px-4 py-3">
+                                            <h3 className="text-lg font-semibold capitalize">
+                                                {category}
+                                            </h3>
+                                        </div>
 
-                                    {Object.entries(modules).map(
-                                        ([module, perms]) => (
-                                            <div
-                                                key={module}
-                                                className="bg-card dark:bg-background"
-                                            >
-                                                {/* Module Row */}
-                                                <div className="flex items-center gap-3 border-b border-gray-100 bg-muted px-4 py-3 transition-colors dark:border-border dark:bg-card/80">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={perms.every(
-                                                            (
-                                                                permissionName,
-                                                            ) => {
-                                                                const permission =
-                                                                    allPermissions.find(
-                                                                        (p) =>
-                                                                            p.name ===
-                                                                            permissionName,
-                                                                    );
-                                                                return permission
-                                                                    ? data.permissions.includes(
-                                                                          permission.id,
-                                                                      )
-                                                                    : false;
-                                                            },
-                                                        )}
-                                                        onChange={() =>
-                                                            handleModuleToggle(
+                                        {Object.entries(modules).map(
+                                            ([module, perms]) => (
+                                                <div
+                                                    key={module}
+                                                    className="border-b last:border-b-0"
+                                                >
+                                                    {/* Module Header */}
+                                                    <div className="flex items-center gap-3 bg-muted/50 px-4 py-3">
+                                                        <Checkbox
+                                                            id={`module-${module}`}
+                                                            checked={isModuleSelected(
                                                                 perms,
-                                                            )
-                                                        }
-                                                        className="h-4 w-4 rounded border-border bg-card text-primary focus:ring-2 focus:ring-ring dark:border-border dark:bg-card dark:text-primary dark:focus:ring-ring"
-                                                    />
-                                                    <h4 className="text-lg font-semibold text-green-600 capitalize dark:text-green-400">
-                                                        {module}
-                                                    </h4>
-                                                </div>
-
-                                                {/* Permissions Grid */}
-                                                <div className="flex flex-wrap gap-4 p-4">
-                                                    {perms.map((permission) => (
-                                                        <div
-                                                            key={permission}
-                                                            className="flex items-center"
+                                                            )}
+                                                            onCheckedChange={() =>
+                                                                handleModuleToggle(
+                                                                    perms,
+                                                                )
+                                                            }
+                                                        />
+                                                        <Label
+                                                            htmlFor={`module-${module}`}
+                                                            className="cursor-pointer text-base font-medium capitalize text-primary"
                                                         >
-                                                            <input
-                                                                type="checkbox"
-                                                                id={permission}
-                                                                checked={isPermissionSelected(
-                                                                    permission,
-                                                                )}
-                                                                onChange={() =>
-                                                                    togglePermission(
-                                                                        permission,
-                                                                    )
-                                                                }
-                                                                className="h-4 w-4 rounded border-border bg-card text-primary focus:ring-2 focus:ring-ring dark:border-border dark:bg-card dark:text-primary dark:focus:ring-ring"
-                                                            />
-                                                            <label
-                                                                htmlFor={
-                                                                    permission
-                                                                }
-                                                                className="ml-3 cursor-pointer rounded bg-blue-100/50 px-3 py-1 text-sm font-medium text-foreground transition-colors hover:bg-blue-200/50 dark:bg-muted dark:text-foreground dark:hover:bg-muted"
-                                                            >
-                                                                {permission}
-                                                            </label>
-                                                        </div>
-                                                    ))}
+                                                            {module}
+                                                        </Label>
+                                                    </div>
+
+                                                    {/* Permissions Grid */}
+                                                    <div className="flex flex-wrap gap-4 p-4">
+                                                        {perms.map(
+                                                            (permission) => (
+                                                                <div
+                                                                    key={
+                                                                        permission
+                                                                    }
+                                                                    className="flex items-center gap-2"
+                                                                >
+                                                                    <Checkbox
+                                                                        id={
+                                                                            permission
+                                                                        }
+                                                                        checked={isPermissionSelected(
+                                                                            permission,
+                                                                        )}
+                                                                        onCheckedChange={() =>
+                                                                            togglePermission(
+                                                                                permission,
+                                                                            )
+                                                                        }
+                                                                    />
+                                                                    <Label
+                                                                        htmlFor={
+                                                                            permission
+                                                                        }
+                                                                        className="cursor-pointer rounded bg-secondary px-2 py-1 text-sm"
+                                                                    >
+                                                                        {
+                                                                            permission
+                                                                        }
+                                                                    </Label>
+                                                                </div>
+                                                            ),
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ),
-                                    )}
-                                </div>
-                            ),
-                        )}
-                    </div>
+                                            ),
+                                        )}
+                                    </div>
+                                ),
+                            )}
+                        </CardContent>
+                    </Card>
 
                     {/* Action Buttons */}
-                    <div className="flex justify-end gap-4 border-t border-border pt-6 dark:border-border">
-                        <Link
-                            href="/roles"
-                            className="inline-flex items-center rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-background dark:border-border dark:bg-card dark:text-muted-foreground dark:hover:bg-muted"
-                        >
-                            Cancel
-                        </Link>
-                        <div>
-                            <button
-                                type="submit"
-                                disabled={processing}
-                                className="inline-flex cursor-pointer items-center rounded-md bg-primary px-4 py-[11px] text-sm font-medium text-white shadow-sm transition-colors hover:bg-primary/100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                {processing ? 'Creating...' : 'Create Role'}
-                            </button>
-                        </div>
+                    <div className="flex justify-end gap-3">
+                        <Button variant="outline" asChild>
+                            <Link href="/roles">Cancel</Link>
+                        </Button>
+                        <Button type="submit" disabled={processing}>
+                            {processing ? 'Creating...' : 'Create Role'}
+                        </Button>
                     </div>
                 </form>
             </div>

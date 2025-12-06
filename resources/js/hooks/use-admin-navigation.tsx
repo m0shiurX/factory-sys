@@ -1,13 +1,9 @@
 import { type NavItem, type NavSection } from '@/types';
 import {
-    CreditCard,
     ExternalLink,
     FileText,
-    Headphones,
     LayoutGrid,
     Shield,
-    ShoppingCart,
-    UserCheck,
     Users,
 } from 'lucide-react';
 
@@ -50,43 +46,9 @@ export function useAdminNavigation() {
         },
     ];
 
-    const supportSection: NavItem[] = [
-        {
-            title: 'Support',
-            href: '/dashboard/support',
-            icon: Headphones,
-        },
-    ];
-
-    const salesSection: NavItem[] = [
-        {
-            title: 'Customers',
-            href: '/dashboard/customers',
-            icon: UserCheck,
-        },
-        {
-            title: 'Orders',
-            href: '/dashboard/orders',
-            icon: ShoppingCart,
-        },
-        {
-            title: 'Payments',
-            href: '/dashboard/payments',
-            icon: CreditCard,
-        },
-    ];
-
     const navSections: NavSection[] = [
         {
             items: mainNavItems,
-        },
-        {
-            title: 'Sales',
-            items: salesSection,
-        },
-        {
-            title: 'Support',
-            items: supportSection,
         },
         {
             title: 'Management',

@@ -2,10 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
-use App\Http\Controllers\Admin\OrderController as AdminOrderController;
-use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
-use App\Http\Controllers\Admin\SupportTicketController as AdminSupportTicketController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\UserController;
@@ -22,38 +18,6 @@ Route::get('/', fn() => redirect()->route('login'))->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', fn() => Inertia::render('admin/dashboard'))->name('dashboard');
-    Route::prefix('dashboard')->group(function (): void {
-        // Support tickets management
-        Route::get('support', new AdminSupportTicketController()->index(...))->name('admin.support.index');
-        Route::get('support/{ticket}', new AdminSupportTicketController()->show(...))->name('admin.support.show');
-        Route::put('support/{ticket}', new AdminSupportTicketController()->update(...))->name('admin.support.update');
-        Route::delete('support/{ticket}', new AdminSupportTicketController()->destroy(...))->name('admin.support.destroy');
-
-        // Orders management
-        Route::get('orders', new AdminOrderController()->index(...))->name('admin.orders.index');
-        Route::get('orders/create', new AdminOrderController()->create(...))->name('admin.orders.create');
-        Route::post('orders', new AdminOrderController()->store(...))->name('admin.orders.store');
-        Route::get('orders/{orderNumber}', new AdminOrderController()->show(...))->name('admin.orders.show');
-        Route::get('orders/{orderNumber}/edit', new AdminOrderController()->edit(...))->name('admin.orders.edit');
-        Route::put('orders/{orderNumber}', new AdminOrderController()->update(...))->name('admin.orders.update');
-        Route::delete('orders/{orderNumber}', new AdminOrderController()->destroy(...))->name('admin.orders.destroy');
-
-        // Payments management
-        Route::get('payments', new AdminPaymentController()->index(...))->name('admin.payments.index');
-        Route::get('payments/{payment}', new AdminPaymentController()->show(...))->name('admin.payments.show');
-        Route::get('payments/{payment}/edit', new AdminPaymentController()->edit(...))->name('admin.payments.edit');
-        Route::put('payments/{payment}', new AdminPaymentController()->update(...))->name('admin.payments.update');
-        Route::post('payments/{payment}/verify', new AdminPaymentController()->verify(...))->name('admin.payments.verify');
-
-        // Customers management
-        Route::get('customers', new AdminCustomerController()->index(...))->name('admin.customers.index');
-        Route::get('customers/create', new AdminCustomerController()->create(...))->name('admin.customers.create');
-        Route::post('customers', new AdminCustomerController()->store(...))->name('admin.customers.store');
-        Route::get('customers/{customer}', new AdminCustomerController()->show(...))->name('admin.customers.show');
-        Route::get('customers/{customer}/edit', new AdminCustomerController()->edit(...))->name('admin.customers.edit');
-        Route::put('customers/{customer}', new AdminCustomerController()->update(...))->name('admin.customers.update');
-        Route::delete('customers/{customer}', new AdminCustomerController()->destroy(...))->name('admin.customers.destroy');
-    });
 });
 
 // Role management routes
