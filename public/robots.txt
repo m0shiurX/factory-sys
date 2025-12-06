@@ -1,0 +1,34 @@
+# robots.txt for Lavloss - Business Management Software
+User-agent: *
+
+# Allow public pages
+Allow: /
+Allow: /features
+Allow: /pricing
+Allow: /faq
+Allow: /contact
+
+# Disallow authenticated/admin areas
+Disallow: /dashboard
+Disallow: /dashboard/*
+Disallow: /settings
+Disallow: /settings/*
+Disallow: /roles
+Disallow: /roles/*
+
+# Disallow authentication pages
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+
+# Disallow checkout (privacy/security)
+Disallow: /checkout
+Disallow: /checkout/*
+
+# Allow build assets
+Allow: /build/
+
+# Sitemap location
+# Sitemap: https://lavloss.com/sitemap.xml
