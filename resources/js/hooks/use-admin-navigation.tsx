@@ -1,5 +1,5 @@
 import { type NavItem, type NavSection } from '@/types';
-import { FileText, LayoutGrid, Shield, Users } from 'lucide-react';
+import { Box, FileText, LayoutGrid, Shield, Users, UserRound } from 'lucide-react';
 
 /**
 childRoutes: [
@@ -19,6 +19,19 @@ export function useAdminNavigation() {
             title: 'Dashboard',
             href: '/dashboard',
             icon: LayoutGrid,
+        },
+    ];
+
+    const businessItems: NavItem[] = [
+        {
+            title: 'Products',
+            href: '/dashboard/products',
+            icon: Box,
+        },
+        {
+            title: 'Customers',
+            href: '/dashboard/customers',
+            icon: UserRound,
         },
     ];
 
@@ -43,6 +56,10 @@ export function useAdminNavigation() {
     const navSections: NavSection[] = [
         {
             items: mainNavItems,
+        },
+        {
+            title: 'Business',
+            items: businessItems,
         },
         {
             title: 'Management',
