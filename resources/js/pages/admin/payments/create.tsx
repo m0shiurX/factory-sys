@@ -229,20 +229,22 @@ export default function PaymentCreate({
                                     </div>
                                 ) : (
                                     <div className="relative">
-                                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                         <input
                                             ref={customerSearchRef}
                                             type="text"
                                             placeholder="Search customer by name or phone..."
                                             value={customerSearch}
                                             onChange={(e) => {
-                                                setCustomerSearch(e.target.value);
+                                                setCustomerSearch(
+                                                    e.target.value,
+                                                );
                                                 setShowCustomerDropdown(true);
                                             }}
                                             onFocus={() =>
                                                 setShowCustomerDropdown(true)
                                             }
-                                            className="w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                            className="w-full rounded-lg border border-border bg-background py-2.5 pr-4 pl-10 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                         />
                                         {showCustomerDropdown &&
                                             filteredCustomers.length > 0 && (
@@ -250,7 +252,9 @@ export default function PaymentCreate({
                                                     {filteredCustomers.map(
                                                         (customer) => (
                                                             <button
-                                                                key={customer.id}
+                                                                key={
+                                                                    customer.id
+                                                                }
                                                                 type="button"
                                                                 onClick={() =>
                                                                     handleSelectCustomer(
@@ -294,18 +298,22 @@ export default function PaymentCreate({
                                         Link to Invoice (Optional)
                                     </h2>
                                     <p className="mb-3 text-sm text-muted-foreground">
-                                        Select an invoice to apply this payment to,
-                                        or leave blank for a general payment.
+                                        Select an invoice to apply this payment
+                                        to, or leave blank for a general
+                                        payment.
                                     </p>
 
                                     <div className="space-y-2">
                                         <button
                                             type="button"
-                                            onClick={() => handleSelectSale(null)}
-                                            className={`w-full rounded-lg border p-3 text-left transition ${data.sale_id === null
+                                            onClick={() =>
+                                                handleSelectSale(null)
+                                            }
+                                            className={`w-full rounded-lg border p-3 text-left transition ${
+                                                data.sale_id === null
                                                     ? 'border-primary bg-primary/5'
                                                     : 'border-border hover:border-muted-foreground'
-                                                }`}
+                                            }`}
                                         >
                                             <p className="font-medium text-foreground">
                                                 General Payment
@@ -322,10 +330,11 @@ export default function PaymentCreate({
                                                 onClick={() =>
                                                     handleSelectSale(sale.id)
                                                 }
-                                                className={`w-full rounded-lg border p-3 text-left transition ${data.sale_id === sale.id
+                                                className={`w-full rounded-lg border p-3 text-left transition ${
+                                                    data.sale_id === sale.id
                                                         ? 'border-primary bg-primary/5'
                                                         : 'border-border hover:border-muted-foreground'
-                                                    }`}
+                                                }`}
                                             >
                                                 <div className="flex items-center justify-between">
                                                     <div>
@@ -366,10 +375,13 @@ export default function PaymentCreate({
                                     {/* Amount */}
                                     <div>
                                         <label className="mb-1.5 block text-sm font-medium text-foreground">
-                                            Amount <span className="text-red-500">*</span>
+                                            Amount{' '}
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
                                         </label>
                                         <div className="relative">
-                                            <Banknote className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                            <Banknote className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                             <input
                                                 type="number"
                                                 step="0.01"
@@ -383,7 +395,7 @@ export default function PaymentCreate({
                                                         ) || 0,
                                                     )
                                                 }
-                                                className="w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                                className="w-full rounded-lg border border-border bg-background py-2.5 pr-4 pl-10 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                                 placeholder="0.00"
                                             />
                                         </div>
@@ -394,7 +406,9 @@ export default function PaymentCreate({
                                     <div>
                                         <label className="mb-1.5 block text-sm font-medium text-foreground">
                                             Payment Date{' '}
-                                            <span className="text-red-500">*</span>
+                                            <span className="text-red-500">
+                                                *
+                                            </span>
                                         </label>
                                         <input
                                             type="date"
@@ -405,9 +419,11 @@ export default function PaymentCreate({
                                                     e.target.value,
                                                 )
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                            className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                         />
-                                        <InputError message={errors.payment_date} />
+                                        <InputError
+                                            message={errors.payment_date}
+                                        />
                                     </div>
 
                                     {/* Payment Type */}
@@ -421,20 +437,29 @@ export default function PaymentCreate({
                                                 setData(
                                                     'payment_type_id',
                                                     e.target.value
-                                                        ? parseInt(e.target.value)
+                                                        ? parseInt(
+                                                              e.target.value,
+                                                          )
                                                         : null,
                                                 )
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                            className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                         >
-                                            <option value="">Select method</option>
+                                            <option value="">
+                                                Select method
+                                            </option>
                                             {payment_types.map((pt) => (
-                                                <option key={pt.id} value={pt.id}>
+                                                <option
+                                                    key={pt.id}
+                                                    value={pt.id}
+                                                >
                                                     {pt.name}
                                                 </option>
                                             ))}
                                         </select>
-                                        <InputError message={errors.payment_type_id} />
+                                        <InputError
+                                            message={errors.payment_type_id}
+                                        />
                                     </div>
 
                                     {/* Reference */}
@@ -446,12 +471,17 @@ export default function PaymentCreate({
                                             type="text"
                                             value={data.payment_ref}
                                             onChange={(e) =>
-                                                setData('payment_ref', e.target.value)
+                                                setData(
+                                                    'payment_ref',
+                                                    e.target.value,
+                                                )
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                            className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                             placeholder="e.g., TXN123456"
                                         />
-                                        <InputError message={errors.payment_ref} />
+                                        <InputError
+                                            message={errors.payment_ref}
+                                        />
                                     </div>
                                 </div>
 
@@ -466,7 +496,7 @@ export default function PaymentCreate({
                                             setData('note', e.target.value)
                                         }
                                         rows={2}
-                                        className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                        className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                         placeholder="Optional note..."
                                     />
                                     <InputError message={errors.note} />

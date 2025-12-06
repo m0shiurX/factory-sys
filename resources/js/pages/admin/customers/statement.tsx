@@ -131,8 +131,10 @@ export default function CustomerStatement({
                                 <input
                                     type="date"
                                     value={fromDate}
-                                    onChange={(e) => setFromDate(e.target.value)}
-                                    className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                    onChange={(e) =>
+                                        setFromDate(e.target.value)
+                                    }
+                                    className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                 />
                             </div>
                             <div>
@@ -143,7 +145,7 @@ export default function CustomerStatement({
                                     type="date"
                                     value={toDate}
                                     onChange={(e) => setToDate(e.target.value)}
-                                    className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                    className="rounded-lg border border-border bg-background px-4 py-2 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                 />
                             </div>
                             <button
@@ -173,7 +175,9 @@ export default function CustomerStatement({
                                     </p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-sm text-blue-100">Customer</p>
+                                    <p className="text-sm text-blue-100">
+                                        Customer
+                                    </p>
                                     <p className="text-lg font-semibold text-white">
                                         {customer.name}
                                     </p>
@@ -194,12 +198,13 @@ export default function CustomerStatement({
                                     {formatDate(statement.from_date)})
                                 </span>
                                 <span
-                                    className={`text-lg font-semibold ${statement.opening_balance > 0
+                                    className={`text-lg font-semibold ${
+                                        statement.opening_balance > 0
                                             ? 'text-red-600'
                                             : statement.opening_balance < 0
-                                                ? 'text-emerald-600'
-                                                : 'text-foreground'
-                                        }`}
+                                              ? 'text-emerald-600'
+                                              : 'text-foreground'
+                                    }`}
                                 >
                                     {formatCurrency(statement.opening_balance)}
                                 </span>
@@ -211,19 +216,19 @@ export default function CustomerStatement({
                             <table className="w-full">
                                 <thead>
                                     <tr className="border-b border-border bg-muted/50">
-                                        <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                                             Date
                                         </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                                             Description
                                         </th>
-                                        <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">
+                                        <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">
                                             Debit
                                         </th>
-                                        <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">
+                                        <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">
                                             Credit
                                         </th>
-                                        <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">
+                                        <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">
                                             Balance
                                         </th>
                                     </tr>
@@ -239,55 +244,69 @@ export default function CustomerStatement({
                                             </td>
                                         </tr>
                                     ) : (
-                                        transactionsWithBalance.map((txn, index) => (
-                                            <tr
-                                                key={`${txn.type}-${txn.id}`}
-                                                className={`border-b border-border ${index % 2 === 0
-                                                        ? 'bg-background'
-                                                        : 'bg-muted/20'
+                                        transactionsWithBalance.map(
+                                            (txn, index) => (
+                                                <tr
+                                                    key={`${txn.type}-${txn.id}`}
+                                                    className={`border-b border-border ${
+                                                        index % 2 === 0
+                                                            ? 'bg-background'
+                                                            : 'bg-muted/20'
                                                     }`}
-                                            >
-                                                <td className="whitespace-nowrap px-4 py-3 text-sm text-foreground">
-                                                    {formatDate(txn.date)}
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <div className="flex items-center gap-2">
-                                                        {txn.type === 'sale' ? (
-                                                            <TrendingUp className="h-4 w-4 text-red-500" />
-                                                        ) : (
-                                                            <TrendingDown className="h-4 w-4 text-emerald-500" />
-                                                        )}
-                                                        <div>
-                                                            <p className="text-sm font-medium text-foreground">
-                                                                {txn.description}
-                                                            </p>
-                                                            {txn.reference && (
-                                                                <p className="text-xs text-muted-foreground">
-                                                                    {txn.reference}
-                                                                </p>
+                                                >
+                                                    <td className="px-4 py-3 text-sm whitespace-nowrap text-foreground">
+                                                        {formatDate(txn.date)}
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <div className="flex items-center gap-2">
+                                                            {txn.type ===
+                                                            'sale' ? (
+                                                                <TrendingUp className="h-4 w-4 text-red-500" />
+                                                            ) : (
+                                                                <TrendingDown className="h-4 w-4 text-emerald-500" />
                                                             )}
+                                                            <div>
+                                                                <p className="text-sm font-medium text-foreground">
+                                                                    {
+                                                                        txn.description
+                                                                    }
+                                                                </p>
+                                                                {txn.reference && (
+                                                                    <p className="text-xs text-muted-foreground">
+                                                                        {
+                                                                            txn.reference
+                                                                        }
+                                                                    </p>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                </td>
-                                                <td className="whitespace-nowrap px-4 py-3 text-right text-sm">
-                                                    {txn.debit > 0 && (
-                                                        <span className="text-red-600">
-                                                            {formatCurrency(txn.debit)}
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="whitespace-nowrap px-4 py-3 text-right text-sm">
-                                                    {txn.credit > 0 && (
-                                                        <span className="text-emerald-600">
-                                                            {formatCurrency(txn.credit)}
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-medium text-foreground">
-                                                    {formatCurrency(txn.balance)}
-                                                </td>
-                                            </tr>
-                                        ))
+                                                    </td>
+                                                    <td className="px-4 py-3 text-right text-sm whitespace-nowrap">
+                                                        {txn.debit > 0 && (
+                                                            <span className="text-red-600">
+                                                                {formatCurrency(
+                                                                    txn.debit,
+                                                                )}
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-right text-sm whitespace-nowrap">
+                                                        {txn.credit > 0 && (
+                                                            <span className="text-emerald-600">
+                                                                {formatCurrency(
+                                                                    txn.credit,
+                                                                )}
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-right text-sm font-medium whitespace-nowrap text-foreground">
+                                                        {formatCurrency(
+                                                            txn.balance,
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ),
+                                        )
                                     )}
                                 </tbody>
                                 <tfoot>
@@ -300,12 +319,16 @@ export default function CustomerStatement({
                                         </td>
                                         <td className="px-4 py-3 text-right text-sm font-semibold text-red-600">
                                             {statement.total_debit > 0
-                                                ? formatCurrency(statement.total_debit)
+                                                ? formatCurrency(
+                                                      statement.total_debit,
+                                                  )
                                                 : '-'}
                                         </td>
                                         <td className="px-4 py-3 text-right text-sm font-semibold text-emerald-600">
                                             {statement.total_credit > 0
-                                                ? formatCurrency(statement.total_credit)
+                                                ? formatCurrency(
+                                                      statement.total_credit,
+                                                  )
                                                 : '-'}
                                         </td>
                                         <td className="px-4 py-3"></td>
@@ -323,18 +346,24 @@ export default function CustomerStatement({
                                         {formatDate(statement.to_date)})
                                     </span>
                                     <p className="mt-1 text-sm text-muted-foreground">
-                                        Opening {formatCurrency(statement.opening_balance)}{' '}
-                                        + Debit {formatCurrency(statement.total_debit)}{' '}
-                                        - Credit {formatCurrency(statement.total_credit)}
+                                        Opening{' '}
+                                        {formatCurrency(
+                                            statement.opening_balance,
+                                        )}{' '}
+                                        + Debit{' '}
+                                        {formatCurrency(statement.total_debit)}{' '}
+                                        - Credit{' '}
+                                        {formatCurrency(statement.total_credit)}
                                     </p>
                                 </div>
                                 <span
-                                    className={`text-2xl font-bold ${statement.closing_balance > 0
+                                    className={`text-2xl font-bold ${
+                                        statement.closing_balance > 0
                                             ? 'text-red-600'
                                             : statement.closing_balance < 0
-                                                ? 'text-emerald-600'
-                                                : 'text-foreground'
-                                        }`}
+                                              ? 'text-emerald-600'
+                                              : 'text-foreground'
+                                    }`}
                                 >
                                     {formatCurrency(statement.closing_balance)}
                                 </span>

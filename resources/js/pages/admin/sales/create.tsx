@@ -1,16 +1,7 @@
 import InputError from '@/components/common/input-error';
 import AppLayout from '@/layouts/app-layout';
 import { Link, useForm } from '@inertiajs/react';
-import {
-    ArrowLeft,
-    Minus,
-    Package,
-    Plus,
-    Search,
-    Trash2,
-    User,
-    Weight,
-} from 'lucide-react';
+import { ArrowLeft, Package, Search, Trash2, User } from 'lucide-react';
 import { FormEventHandler, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -64,7 +55,9 @@ export default function SaleCreate({
     products,
     payment_types,
 }: Props) {
-    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+        null,
+    );
     const [productSearch, setProductSearch] = useState('');
     const [showProductDropdown, setShowProductDropdown] = useState(false);
     const [customerSearch, setCustomerSearch] = useState('');
@@ -72,7 +65,7 @@ export default function SaleCreate({
     const productSearchRef = useRef<HTMLInputElement>(null);
     const customerSearchRef = useRef<HTMLInputElement>(null);
 
-    const { data, setData, post, processing, errors, reset } = useForm<{
+    const { data, setData, post, processing, errors } = useForm<{
         bill_no: string;
         customer_id: number | null;
         sale_date: string;
@@ -130,12 +123,18 @@ export default function SaleCreate({
 
     // Calculate totals when items change
     useEffect(() => {
-        const totalPieces = data.items.reduce((sum, item) => sum + item.total_pieces, 0);
+        const totalPieces = data.items.reduce(
+            (sum, item) => sum + item.total_pieces,
+            0,
+        );
         const totalWeight = data.items.reduce(
             (sum, item) => sum + Number(item.weight_kg),
             0,
         );
-        const totalAmount = data.items.reduce((sum, item) => sum + item.amount, 0);
+        const totalAmount = data.items.reduce(
+            (sum, item) => sum + item.amount,
+            0,
+        );
         const netAmount = totalAmount - (data.discount || 0);
         const dueAmount = netAmount - (data.paid_amount || 0);
 
@@ -147,6 +146,7 @@ export default function SaleCreate({
             net_amount: Number(netAmount.toFixed(2)),
             due_amount: Number(dueAmount.toFixed(2)),
         }));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data.items, data.discount, data.paid_amount]);
 
     // Select customer
@@ -316,11 +316,16 @@ export default function SaleCreate({
                                             type="date"
                                             value={data.sale_date}
                                             onChange={(e) =>
-                                                setData('sale_date', e.target.value)
+                                                setData(
+                                                    'sale_date',
+                                                    e.target.value,
+                                                )
                                             }
-                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                         />
-                                        <InputError message={errors.sale_date} />
+                                        <InputError
+                                            message={errors.sale_date}
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -331,7 +336,7 @@ export default function SaleCreate({
                                     Customer *
                                 </label>
                                 <div className="relative">
-                                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                    <User className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                     <input
                                         ref={customerSearchRef}
                                         type="text"
@@ -345,37 +350,47 @@ export default function SaleCreate({
                                                 setData('customer_id', null);
                                             }
                                         }}
-                                        onFocus={() => setShowCustomerDropdown(true)}
-                                        className="w-full rounded-lg border border-border bg-background py-2 pl-10 pr-4 text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                        onFocus={() =>
+                                            setShowCustomerDropdown(true)
+                                        }
+                                        className="w-full rounded-lg border border-border bg-background py-2 pr-4 pl-10 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     />
                                     {showCustomerDropdown &&
                                         filteredCustomers.length > 0 && (
                                             <div className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-card shadow-lg">
-                                                {filteredCustomers.map((customer) => (
-                                                    <button
-                                                        key={customer.id}
-                                                        type="button"
-                                                        onClick={() =>
-                                                            handleSelectCustomer(customer)
-                                                        }
-                                                        className="flex w-full items-center justify-between px-4 py-2 text-left text-sm hover:bg-muted"
-                                                    >
-                                                        <div>
-                                                            <p className="font-medium">
-                                                                {customer.name}
-                                                            </p>
-                                                            <p className="text-xs text-muted-foreground">
-                                                                {customer.phone}
-                                                            </p>
-                                                        </div>
-                                                        <span className="text-xs text-muted-foreground">
-                                                            Due:{' '}
-                                                            {formatCurrency(
-                                                                customer.total_due,
-                                                            )}
-                                                        </span>
-                                                    </button>
-                                                ))}
+                                                {filteredCustomers.map(
+                                                    (customer) => (
+                                                        <button
+                                                            key={customer.id}
+                                                            type="button"
+                                                            onClick={() =>
+                                                                handleSelectCustomer(
+                                                                    customer,
+                                                                )
+                                                            }
+                                                            className="flex w-full items-center justify-between px-4 py-2 text-left text-sm hover:bg-muted"
+                                                        >
+                                                            <div>
+                                                                <p className="font-medium">
+                                                                    {
+                                                                        customer.name
+                                                                    }
+                                                                </p>
+                                                                <p className="text-xs text-muted-foreground">
+                                                                    {
+                                                                        customer.phone
+                                                                    }
+                                                                </p>
+                                                            </div>
+                                                            <span className="text-xs text-muted-foreground">
+                                                                Due:{' '}
+                                                                {formatCurrency(
+                                                                    customer.total_due,
+                                                                )}
+                                                            </span>
+                                                        </button>
+                                                    ),
+                                                )}
                                             </div>
                                         )}
                                 </div>
@@ -419,7 +434,7 @@ export default function SaleCreate({
                         {/* Product Search */}
                         <div className="mb-4">
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                 <input
                                     ref={productSearchRef}
                                     type="text"
@@ -430,7 +445,7 @@ export default function SaleCreate({
                                         setShowProductDropdown(true);
                                     }}
                                     onFocus={() => setShowProductDropdown(true)}
-                                    className="w-full rounded-lg border border-border bg-card py-3 pl-10 pr-4 text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                    className="w-full rounded-lg border border-border bg-card py-3 pr-4 pl-10 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                 />
                                 {showProductDropdown &&
                                     filteredProducts.length > 0 && (
@@ -440,7 +455,9 @@ export default function SaleCreate({
                                                     key={product.id}
                                                     type="button"
                                                     onClick={() =>
-                                                        handleAddProduct(product)
+                                                        handleAddProduct(
+                                                            product,
+                                                        )
                                                     }
                                                     className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted"
                                                 >
@@ -451,7 +468,11 @@ export default function SaleCreate({
                                                                 {product.name}{' '}
                                                                 {product.size && (
                                                                     <span className="text-muted-foreground">
-                                                                        ({product.size})
+                                                                        (
+                                                                        {
+                                                                            product.size
+                                                                        }
+                                                                        )
                                                                     </span>
                                                                 )}
                                                             </p>
@@ -460,7 +481,9 @@ export default function SaleCreate({
                                                                     product.rate_per_kg,
                                                                 )}
                                                                 /kg •{' '}
-                                                                {product.pieces_per_bundle}{' '}
+                                                                {
+                                                                    product.pieces_per_bundle
+                                                                }{' '}
                                                                 pcs/bundle
                                                             </p>
                                                         </div>
@@ -485,28 +508,28 @@ export default function SaleCreate({
                             <table className="w-full">
                                 <thead>
                                     <tr className="border-b border-border bg-muted/50">
-                                        <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                                             #
                                         </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium uppercase text-muted-foreground">
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                                             Product
                                         </th>
-                                        <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">
+                                        <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
                                             Bundles
                                         </th>
-                                        <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">
+                                        <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
                                             +Pcs
                                         </th>
-                                        <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">
+                                        <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
                                             Weight (kg)
                                         </th>
-                                        <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">
+                                        <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
                                             Rate/kg
                                         </th>
-                                        <th className="px-4 py-3 text-right text-xs font-medium uppercase text-muted-foreground">
+                                        <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">
                                             Amount
                                         </th>
-                                        <th className="px-4 py-3 text-center text-xs font-medium uppercase text-muted-foreground">
+                                        <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
                                             <Trash2 className="mx-auto h-4 w-4" />
                                         </th>
                                     </tr>
@@ -518,8 +541,8 @@ export default function SaleCreate({
                                                 colSpan={8}
                                                 className="px-4 py-8 text-center text-muted-foreground"
                                             >
-                                                No products added. Search above to add
-                                                products.
+                                                No products added. Search above
+                                                to add products.
                                             </td>
                                         </tr>
                                     ) : (
@@ -549,27 +572,33 @@ export default function SaleCreate({
                                                             updateItem(
                                                                 index,
                                                                 'bundles',
-                                                                parseInt(e.target.value) ||
-                                                                0,
+                                                                parseInt(
+                                                                    e.target
+                                                                        .value,
+                                                                ) || 0,
                                                             )
                                                         }
-                                                        className="w-20 rounded-lg border border-border bg-background px-2 py-1.5 text-center text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                                        className="w-20 rounded-lg border border-border bg-background px-2 py-1.5 text-center text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                                     />
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <input
                                                         type="number"
                                                         min={0}
-                                                        value={item.extra_pieces}
+                                                        value={
+                                                            item.extra_pieces
+                                                        }
                                                         onChange={(e) =>
                                                             updateItem(
                                                                 index,
                                                                 'extra_pieces',
-                                                                parseInt(e.target.value) ||
-                                                                0,
+                                                                parseInt(
+                                                                    e.target
+                                                                        .value,
+                                                                ) || 0,
                                                             )
                                                         }
-                                                        className="w-20 rounded-lg border border-border bg-background px-2 py-1.5 text-center text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                                        className="w-20 rounded-lg border border-border bg-background px-2 py-1.5 text-center text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                                     />
                                                 </td>
                                                 <td className="px-4 py-3">
@@ -578,18 +607,22 @@ export default function SaleCreate({
                                                             type="number"
                                                             min={0}
                                                             step={0.01}
-                                                            value={item.weight_kg || ''}
+                                                            value={
+                                                                item.weight_kg ||
+                                                                ''
+                                                            }
                                                             onChange={(e) =>
                                                                 updateItem(
                                                                     index,
                                                                     'weight_kg',
                                                                     parseFloat(
-                                                                        e.target.value,
+                                                                        e.target
+                                                                            .value,
                                                                     ) || 0,
                                                                 )
                                                             }
                                                             placeholder="0.00"
-                                                            className="w-24 rounded-lg border border-amber-400 bg-amber-50 px-2 py-1.5 text-center text-sm font-medium focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 dark:bg-amber-950/30"
+                                                            className="w-24 rounded-lg border border-amber-400 bg-amber-50 px-2 py-1.5 text-center text-sm font-medium focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none dark:bg-amber-950/30"
                                                         />
                                                     </div>
                                                 </td>
@@ -604,20 +637,25 @@ export default function SaleCreate({
                                                                 index,
                                                                 'rate_per_kg',
                                                                 parseFloat(
-                                                                    e.target.value,
+                                                                    e.target
+                                                                        .value,
                                                                 ) || 0,
                                                             )
                                                         }
-                                                        className="w-20 rounded-lg border border-border bg-background px-2 py-1.5 text-center text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                                        className="w-20 rounded-lg border border-border bg-background px-2 py-1.5 text-center text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                                     />
                                                 </td>
                                                 <td className="px-4 py-3 text-right font-medium text-foreground">
-                                                    {formatCurrency(item.amount)}
+                                                    {formatCurrency(
+                                                        item.amount,
+                                                    )}
                                                 </td>
                                                 <td className="px-4 py-3 text-center">
                                                     <button
                                                         type="button"
-                                                        onClick={() => removeItem(index)}
+                                                        onClick={() =>
+                                                            removeItem(index)
+                                                        }
                                                         className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-red-500/10 hover:text-red-600"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
@@ -640,10 +678,12 @@ export default function SaleCreate({
                                     </label>
                                     <textarea
                                         value={data.notes}
-                                        onChange={(e) => setData('notes', e.target.value)}
+                                        onChange={(e) =>
+                                            setData('notes', e.target.value)
+                                        }
                                         rows={3}
                                         placeholder="Additional notes..."
-                                        className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                        className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     />
                                 </div>
                                 {data.paid_amount > 0 && (
@@ -657,15 +697,22 @@ export default function SaleCreate({
                                                 setData(
                                                     'payment_type_id',
                                                     e.target.value
-                                                        ? parseInt(e.target.value)
+                                                        ? parseInt(
+                                                              e.target.value,
+                                                          )
                                                         : null,
                                                 )
                                             }
-                                            className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                            className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                         >
-                                            <option value="">Select payment method</option>
+                                            <option value="">
+                                                Select payment method
+                                            </option>
                                             {payment_types.map((type) => (
-                                                <option key={type.id} value={type.id}>
+                                                <option
+                                                    key={type.id}
+                                                    value={type.id}
+                                                >
                                                     {type.name}
                                                 </option>
                                             ))}
@@ -712,11 +759,13 @@ export default function SaleCreate({
                                             onChange={(e) =>
                                                 setData(
                                                     'discount',
-                                                    parseFloat(e.target.value) || 0,
+                                                    parseFloat(
+                                                        e.target.value,
+                                                    ) || 0,
                                                 )
                                             }
                                             placeholder="0"
-                                            className="w-28 rounded-lg border border-border bg-background px-2 py-1 text-right text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                            className="w-28 rounded-lg border border-border bg-background px-2 py-1 text-right text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                         />
                                     </div>
                                     <div className="flex items-center justify-between border-t border-border pt-3">
@@ -738,11 +787,13 @@ export default function SaleCreate({
                                             onChange={(e) =>
                                                 setData(
                                                     'paid_amount',
-                                                    parseFloat(e.target.value) || 0,
+                                                    parseFloat(
+                                                        e.target.value,
+                                                    ) || 0,
                                                 )
                                             }
                                             placeholder="0"
-                                            className="w-28 rounded-lg border border-border bg-background px-2 py-1 text-right text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                            className="w-28 rounded-lg border border-border bg-background px-2 py-1 text-right text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                         />
                                     </div>
                                     <div className="flex items-center justify-between border-t border-border pt-3">

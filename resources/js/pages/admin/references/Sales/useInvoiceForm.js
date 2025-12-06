@@ -1,4 +1,4 @@
-import { onMounted, onBeforeUnmount, nextTick, computed, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, watch } from 'vue';
 
 /**
  * Focus an element and scroll it into view
@@ -34,7 +34,7 @@ export function navigateTo(index, field, itemsLength) {
  * @returns {Object} - Navigation functions and event handlers
  */
 export function useKeyboardNavigation(options = {}) {
-    const { onSave = () => { }, itemsLength = () => 0 } = options;
+    const { onSave = () => {}, itemsLength = () => 0 } = options;
 
     const handleKeydown = (event) => {
         // Ctrl+Enter to save
@@ -54,12 +54,15 @@ export function useKeyboardNavigation(options = {}) {
     };
 
     const navigateToCell = (index, field) => {
-        const length = typeof itemsLength === 'function' ? itemsLength() : itemsLength;
+        const length =
+            typeof itemsLength === 'function' ? itemsLength() : itemsLength;
         navigateTo(index, field, length);
     };
 
     const goToProductArea = (currentLength) => {
-        nextTick(() => focusElement(`#input-${currentLength - 1}-quantity input`));
+        nextTick(() =>
+            focusElement(`#input-${currentLength - 1}-quantity input`),
+        );
     };
 
     const setupListeners = () => {
@@ -92,9 +95,15 @@ export function useItemCalculations(form, itemsKey, options = {}) {
     const { hasPayment = true } = options;
 
     const updateSubtotals = () => {
-        form[itemsKey].forEach(item => {
-            const discount = isNaN(item.discount) ? 0 : parseFloat(item.discount) / 100;
-            item.sub_total = (item.unit_price * item.quantity * (1 - discount)).toFixed(2);
+        form[itemsKey].forEach((item) => {
+            const discount = isNaN(item.discount)
+                ? 0
+                : parseFloat(item.discount) / 100;
+            item.sub_total = (
+                item.unit_price *
+                item.quantity *
+                (1 - discount)
+            ).toFixed(2);
         });
     };
 
@@ -103,17 +112,25 @@ export function useItemCalculations(form, itemsKey, options = {}) {
 
     // Setup computed totals
     form.sub_total = computed(() =>
-        form[itemsKey].reduce((acc, item) => acc + parseFloat(item.sub_total || 0), 0).toFixed(2)
+        form[itemsKey]
+            .reduce((acc, item) => acc + parseFloat(item.sub_total || 0), 0)
+            .toFixed(2),
     );
 
     form.grand_total = computed(() => {
         const { sub_total, discount, extra_fees } = form;
-        return (parseFloat(sub_total) + parseFloat(extra_fees || 0) - parseFloat(discount || 0)).toFixed(2);
+        return (
+            parseFloat(sub_total) +
+            parseFloat(extra_fees || 0) -
+            parseFloat(discount || 0)
+        ).toFixed(2);
     });
 
     if (hasPayment) {
         form.due_amount = computed(() =>
-            (parseFloat(form.grand_total) - parseFloat(form.paid_amount || 0)).toFixed(2)
+            (
+                parseFloat(form.grand_total) - parseFloat(form.paid_amount || 0)
+            ).toFixed(2),
         );
     }
 
@@ -155,7 +172,7 @@ export function useInvoiceForm(form, options = {}) {
     const {
         itemsKey = 'items',
         hasPayment = true,
-        onSave = () => { },
+        onSave = () => {},
         priceField = 'sales_price',
     } = options;
 
@@ -183,7 +200,9 @@ export function useInvoiceForm(form, options = {}) {
     // Lifecycle hooks
     onMounted(() => {
         // Focus the customer/supplier combobox on mount
-        const initialFocus = document.querySelector('#customer-select') || document.querySelector('#supplier-select');
+        const initialFocus =
+            document.querySelector('#customer-select') ||
+            document.querySelector('#supplier-select');
         if (initialFocus) {
             initialFocus.focus();
         }

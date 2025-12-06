@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sales', function (Blueprint $table) {
+        Schema::create('sales', function (Blueprint $table): void {
             $table->id();
             $table->string('bill_no')->unique();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();

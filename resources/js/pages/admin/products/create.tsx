@@ -60,7 +60,7 @@ export default function ProductCreate() {
                                     onChange={(e) =>
                                         setData('name', e.target.value)
                                     }
-                                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     placeholder="e.g., Iron Pan"
                                 />
                                 <InputError message={errors.name} />
@@ -81,7 +81,7 @@ export default function ProductCreate() {
                                     onChange={(e) =>
                                         setData('size', e.target.value)
                                     }
-                                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     placeholder="e.g., 12-inch"
                                 />
                                 <InputError message={errors.size} />
@@ -107,7 +107,7 @@ export default function ProductCreate() {
                                             )
                                         }
                                         min="1"
-                                        className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                        className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     />
                                     <InputError
                                         message={errors.pieces_per_bundle}
@@ -134,7 +134,7 @@ export default function ProductCreate() {
                                         }
                                         min="0"
                                         step="0.01"
-                                        className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                        className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     />
                                     <InputError message={errors.rate_per_kg} />
                                 </div>
@@ -160,7 +160,7 @@ export default function ProductCreate() {
                                             )
                                         }
                                         min="0"
-                                        className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                        className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     />
                                     <InputError message={errors.stock_pieces} />
                                 </div>
@@ -184,7 +184,7 @@ export default function ProductCreate() {
                                             )
                                         }
                                         min="0"
-                                        className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                        className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     />
                                     <InputError
                                         message={errors.min_stock_alert}

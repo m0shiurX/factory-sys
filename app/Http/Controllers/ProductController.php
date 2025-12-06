@@ -21,7 +21,7 @@ final class ProductController
 
         // Search filter
         if ($search = $request->input('search')) {
-            $query->where(function ($q) use ($search) {
+            $query->where(function ($q) use ($search): void {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('size', 'like', "%{$search}%");
             });
@@ -39,9 +39,9 @@ final class ProductController
 
         // Calculate stats
         $stats = [
-            'total' => Product::count(),
-            'active' => Product::where('is_active', true)->count(),
-            'low_stock' => Product::whereColumn('stock_pieces', '<=', 'min_stock_alert')
+            'total' => Product::query()->count(),
+            'active' => Product::query()->where('is_active', true)->count(),
+            'low_stock' => Product::query()->whereColumn('stock_pieces', '<=', 'min_stock_alert')
                 ->where('min_stock_alert', '>', 0)
                 ->count(),
         ];
@@ -76,10 +76,10 @@ final class ProductController
             'is_active' => ['boolean'],
         ]);
 
-        $validated['is_active'] = $validated['is_active'] ?? true;
-        $validated['min_stock_alert'] = $validated['min_stock_alert'] ?? 0;
+        $validated['is_active'] ??= true;
+        $validated['min_stock_alert'] ??= 0;
 
-        Product::create($validated);
+        Product::query()->create($validated);
 
         return to_route('products.index')
             ->with('success', 'Product created successfully.');

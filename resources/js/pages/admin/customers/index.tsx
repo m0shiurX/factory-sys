@@ -187,13 +187,13 @@ export default function CustomersIndex({ customers, stats, filters }: Props) {
                     {/* Search */}
                     <div className="mb-6">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <input
                                 type="text"
                                 placeholder="Search by name, phone, or address..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="w-full rounded-lg border border-border bg-card py-2.5 pl-10 pr-4 text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                className="w-full rounded-lg border border-border bg-card py-2.5 pr-4 pl-10 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                             />
                         </div>
                     </div>
@@ -203,22 +203,22 @@ export default function CustomersIndex({ customers, stats, filters }: Props) {
                         <table className="w-full">
                             <thead>
                                 <tr className="border-b border-border bg-muted/50">
-                                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                                    <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                                         Customer
                                     </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                                    <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-muted-foreground uppercase">
                                         Phone
                                     </th>
-                                    <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                                    <th className="px-4 py-3 text-right text-xs font-medium tracking-wider text-muted-foreground uppercase">
                                         Balance Due
                                     </th>
-                                    <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                                    <th className="px-4 py-3 text-right text-xs font-medium tracking-wider text-muted-foreground uppercase">
                                         Credit Limit
                                     </th>
-                                    <th className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                                    <th className="px-4 py-3 text-center text-xs font-medium tracking-wider text-muted-foreground uppercase">
                                         Status
                                     </th>
-                                    <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                                    <th className="px-4 py-3 text-right text-xs font-medium tracking-wider text-muted-foreground uppercase">
                                         Actions
                                     </th>
                                 </tr>
@@ -246,12 +246,13 @@ export default function CustomersIndex({ customers, stats, filters }: Props) {
                                         </td>
                                         <td className="px-4 py-3 text-right">
                                             <span
-                                                className={`font-mono text-sm font-medium ${isOverLimit(customer)
+                                                className={`font-mono text-sm font-medium ${
+                                                    isOverLimit(customer)
                                                         ? 'text-red-600'
                                                         : customer.total_due > 0
-                                                            ? 'text-amber-600'
-                                                            : 'text-foreground'
-                                                    }`}
+                                                          ? 'text-amber-600'
+                                                          : 'text-foreground'
+                                                }`}
                                             >
                                                 {formatCurrency(
                                                     customer.total_due,
@@ -261,16 +262,17 @@ export default function CustomersIndex({ customers, stats, filters }: Props) {
                                         <td className="px-4 py-3 text-right font-mono text-sm text-muted-foreground">
                                             {customer.credit_limit > 0
                                                 ? formatCurrency(
-                                                    customer.credit_limit,
-                                                )
+                                                      customer.credit_limit,
+                                                  )
                                                 : '-'}
                                         </td>
                                         <td className="px-4 py-3 text-center">
                                             <span
-                                                className={`inline-flex rounded-full border px-2 py-1 text-xs font-medium ${customer.is_active
+                                                className={`inline-flex rounded-full border px-2 py-1 text-xs font-medium ${
+                                                    customer.is_active
                                                         ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600'
                                                         : 'border-border bg-muted text-muted-foreground'
-                                                    }`}
+                                                }`}
                                             >
                                                 {customer.is_active
                                                     ? 'Active'

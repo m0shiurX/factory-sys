@@ -24,7 +24,7 @@ final class CustomerController
 
         // Search filter
         if ($search = $request->input('search')) {
-            $query->where(function ($q) use ($search) {
+            $query->where(function ($q) use ($search): void {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('phone', 'like', "%{$search}%")
                     ->orWhere('address', 'like', "%{$search}%");
@@ -47,10 +47,10 @@ final class CustomerController
 
         // Calculate stats
         $stats = [
-            'total' => Customer::count(),
-            'active' => Customer::where('is_active', true)->count(),
-            'with_due' => Customer::where('total_due', '>', 0)->count(),
-            'total_due' => Customer::sum('total_due'),
+            'total' => Customer::query()->count(),
+            'active' => Customer::query()->where('is_active', true)->count(),
+            'with_due' => Customer::query()->where('total_due', '>', 0)->count(),
+            'total_due' => Customer::query()->sum('total_due'),
         ];
 
         return Inertia::render('admin/customers/index', [
@@ -83,13 +83,13 @@ final class CustomerController
             'is_active' => ['boolean'],
         ]);
 
-        $validated['is_active'] = $validated['is_active'] ?? true;
-        $validated['opening_balance'] = $validated['opening_balance'] ?? 0;
-        $validated['opening_date'] = $validated['opening_date'] ?? now()->toDateString();
+        $validated['is_active'] ??= true;
+        $validated['opening_balance'] ??= 0;
+        $validated['opening_date'] ??= now()->toDateString();
         $validated['total_due'] = $validated['opening_balance'];
-        $validated['credit_limit'] = $validated['credit_limit'] ?? 0;
+        $validated['credit_limit'] ??= 0;
 
-        Customer::create($validated);
+        Customer::query()->create($validated);
 
         return to_route('customers.index')
             ->with('success', 'Customer created successfully.');
@@ -160,23 +160,23 @@ final class CustomerController
     {
         // Default to current month if no dates provided
         $fromDate = $request->filled('from_date')
-            ? Carbon::parse($request->string('from_date')->value())
-            : Carbon::now()->startOfMonth();
+            ? \Illuminate\Support\Facades\Date::parse($request->string('from_date')->value())
+            : \Illuminate\Support\Facades\Date::now()->startOfMonth();
         $toDate = $request->filled('to_date')
-            ? Carbon::parse($request->string('to_date')->value())
-            : Carbon::now()->endOfMonth();
+            ? \Illuminate\Support\Facades\Date::parse($request->string('to_date')->value())
+            : \Illuminate\Support\Facades\Date::now()->endOfMonth();
 
         // Calculate opening balance
         $openingBalance = $this->calculateOpeningBalance($customer, $fromDate);
 
         // Get transactions within the period
-        $sales = Sale::where('customer_id', $customer->id)
+        $sales = Sale::query()->where('customer_id', $customer->id)
             ->whereBetween('sale_date', [$fromDate, $toDate])
             ->select(['id', 'bill_no', 'sale_date', 'net_amount', 'paid_amount', 'due_amount'])
-            ->orderBy('sale_date')
+            ->oldest('sale_date')
             ->orderBy('id')
             ->get()
-            ->map(fn($sale) => [
+            ->map(fn ($sale): array => [
                 'id' => $sale->id,
                 'date' => $sale->sale_date->format('Y-m-d'),
                 'type' => 'sale',
@@ -186,18 +186,18 @@ final class CustomerController
                 'credit' => 0,
             ]);
 
-        $payments = Payment::where('customer_id', $customer->id)
+        $payments = Payment::query()->where('customer_id', $customer->id)
             ->whereBetween('payment_date', [$fromDate, $toDate])
             ->with('paymentType:id,name')
             ->select(['id', 'payment_date', 'amount', 'payment_ref', 'payment_type_id'])
             ->orderBy('payment_date')
             ->orderBy('id')
             ->get()
-            ->map(fn($payment) => [
+            ->map(fn ($payment): array => [
                 'id' => $payment->id,
                 'date' => $payment->payment_date->format('Y-m-d'),
                 'type' => 'payment',
-                'description' => 'Payment' . ($payment->paymentType ? " ({$payment->paymentType->name})" : ''),
+                'description' => 'Payment'.($payment->paymentType ? " ({$payment->paymentType->name})" : ''),
                 'reference' => $payment->payment_ref,
                 'debit' => 0,
                 'credit' => (float) $payment->amount,
@@ -240,17 +240,17 @@ final class CustomerController
         $openingBalance = 0.0;
 
         // Include customer's initial opening balance if applicable
-        if ($customer->opening_date && Carbon::parse($customer->opening_date)->lt($startDate)) {
+        if ($customer->opening_date && \Illuminate\Support\Facades\Date::parse($customer->opening_date)->lt($startDate)) {
             $openingBalance = (float) $customer->opening_balance;
         }
 
         // Add all sales dues before the period
-        $openingBalance += (float) Sale::where('customer_id', $customer->id)
+        $openingBalance += (float) Sale::query()->where('customer_id', $customer->id)
             ->where('sale_date', '<', $startDate)
             ->sum('due_amount');
 
         // Subtract all payments before the period
-        $openingBalance -= (float) Payment::where('customer_id', $customer->id)
+        $openingBalance -= (float) Payment::query()->where('customer_id', $customer->id)
             ->where('payment_date', '<', $startDate)
             ->sum('amount');
 

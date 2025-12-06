@@ -34,18 +34,6 @@ final class Customer extends Model
     }
 
     /**
-     * Get available credit.
-     */
-    public function getAvailableCreditAttribute(): float
-    {
-        if ($this->credit_limit <= 0) {
-            return 0;
-        }
-
-        return max(0, $this->credit_limit - $this->total_due);
-    }
-
-    /**
      * @return array<string, string>
      */
     public function casts(): array
@@ -57,5 +45,17 @@ final class Customer extends Model
             'credit_limit' => 'decimal:2',
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * Get available credit.
+     */
+    protected function getAvailableCreditAttribute(): float
+    {
+        if ($this->credit_limit <= 0) {
+            return 0;
+        }
+
+        return max(0, $this->credit_limit - $this->total_due);
     }
 }

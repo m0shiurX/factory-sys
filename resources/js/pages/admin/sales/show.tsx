@@ -125,7 +125,7 @@ export default function SaleShow({ sale }: Props) {
                                     <p className="text-3xl font-bold text-white">
                                         {formatCurrency(sale.net_amount)}
                                     </p>
-                                    <p className="text-xs uppercase tracking-wide text-emerald-100">
+                                    <p className="text-xs tracking-wide text-emerald-100 uppercase">
                                         Grand Total
                                     </p>
                                 </div>
@@ -152,16 +152,19 @@ export default function SaleShow({ sale }: Props) {
                                     </div>
                                 </div>
                                 <div className="text-left sm:text-right">
-                                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                                    <p className="text-xs tracking-wide text-muted-foreground uppercase">
                                         Total Due
                                     </p>
                                     <p
-                                        className={`text-2xl font-bold ${sale.customer.total_due > 0
+                                        className={`text-2xl font-bold ${
+                                            sale.customer.total_due > 0
                                                 ? 'text-red-600'
                                                 : 'text-emerald-600'
-                                            }`}
+                                        }`}
                                     >
-                                        {formatCurrency(sale.customer.total_due)}
+                                        {formatCurrency(
+                                            sale.customer.total_due,
+                                        )}
                                     </p>
                                     <p className="text-xs text-muted-foreground">
                                         Overall balance
@@ -176,22 +179,22 @@ export default function SaleShow({ sale }: Props) {
                                 <table className="w-full">
                                     <thead>
                                         <tr className="bg-muted/50">
-                                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                            <th className="px-4 py-3 text-left text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                                 #
                                             </th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                            <th className="px-4 py-3 text-left text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                                 Product
                                             </th>
-                                            <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                            <th className="px-4 py-3 text-center text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                                 Qty
                                             </th>
-                                            <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                            <th className="px-4 py-3 text-right text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                                 Weight
                                             </th>
-                                            <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                            <th className="px-4 py-3 text-right text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                                 Rate
                                             </th>
-                                            <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                            <th className="px-4 py-3 text-right text-xs font-semibold tracking-wider text-muted-foreground uppercase">
                                                 Amount
                                             </th>
                                         </tr>
@@ -217,21 +220,28 @@ export default function SaleShow({ sale }: Props) {
                                                     <span className="font-medium text-foreground">
                                                         {item.bundles > 0 &&
                                                             `${item.bundles} bdl`}
-                                                        {item.extra_pieces > 0 &&
+                                                        {item.extra_pieces >
+                                                            0 &&
                                                             ` + ${item.extra_pieces} pcs`}
                                                     </span>
                                                     <p className="text-xs text-muted-foreground">
-                                                        ({item.total_pieces} pcs)
+                                                        ({item.total_pieces}{' '}
+                                                        pcs)
                                                     </p>
                                                 </td>
                                                 <td className="px-4 py-3 text-right text-sm text-foreground">
                                                     {item.weight_kg} kg
                                                 </td>
                                                 <td className="px-4 py-3 text-right text-sm text-muted-foreground">
-                                                    {formatCurrency(item.rate_per_kg)}/kg
+                                                    {formatCurrency(
+                                                        item.rate_per_kg,
+                                                    )}
+                                                    /kg
                                                 </td>
                                                 <td className="px-4 py-3 text-right font-semibold text-foreground">
-                                                    {formatCurrency(item.amount)}
+                                                    {formatCurrency(
+                                                        item.amount,
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))}
@@ -246,7 +256,7 @@ export default function SaleShow({ sale }: Props) {
                                 {/* Notes */}
                                 {sale.notes && (
                                     <div className="flex-1">
-                                        <p className="text-xs font-medium uppercase text-muted-foreground">
+                                        <p className="text-xs font-medium text-muted-foreground uppercase">
                                             Note
                                         </p>
                                         <p className="mt-1 text-sm text-foreground">
@@ -305,7 +315,9 @@ export default function SaleShow({ sale }: Props) {
                                                 Due
                                             </span>
                                             <span className="text-lg font-bold text-red-600">
-                                                {formatCurrency(sale.due_amount)}
+                                                {formatCurrency(
+                                                    sale.due_amount,
+                                                )}
                                             </span>
                                         </div>
                                     )}

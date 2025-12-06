@@ -60,7 +60,7 @@ export default function CustomerCreate() {
                                     onChange={(e) =>
                                         setData('name', e.target.value)
                                     }
-                                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     placeholder="Enter customer name"
                                 />
                                 <InputError message={errors.name} />
@@ -81,7 +81,7 @@ export default function CustomerCreate() {
                                     onChange={(e) =>
                                         setData('phone', e.target.value)
                                     }
-                                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 font-mono text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 font-mono text-sm text-foreground focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     placeholder="01XXXXXXXXX"
                                 />
                                 <InputError message={errors.phone} />
@@ -102,7 +102,7 @@ export default function CustomerCreate() {
                                         setData('address', e.target.value)
                                     }
                                     rows={2}
-                                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     placeholder="Customer address"
                                 />
                                 <InputError message={errors.address} />
@@ -129,7 +129,7 @@ export default function CustomerCreate() {
                                         }
                                         min="0"
                                         step="0.01"
-                                        className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                        className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     />
                                     <InputError
                                         message={errors.opening_balance}
@@ -158,7 +158,7 @@ export default function CustomerCreate() {
                                                 e.target.value,
                                             )
                                         }
-                                        className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                        className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     />
                                     <InputError message={errors.opening_date} />
                                 </div>
@@ -184,7 +184,7 @@ export default function CustomerCreate() {
                                     }
                                     min="0"
                                     step="0.01"
-                                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                 />
                                 <InputError message={errors.credit_limit} />
                                 <p className="mt-1 text-xs text-muted-foreground">
@@ -226,9 +226,7 @@ export default function CustomerCreate() {
                                 className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
                             >
                                 <UserPlus className="h-4 w-4" />
-                                {processing
-                                    ? 'Creating...'
-                                    : 'Create Customer'}
+                                {processing ? 'Creating...' : 'Create Customer'}
                             </button>
                         </div>
                     </form>

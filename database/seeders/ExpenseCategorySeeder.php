@@ -26,10 +26,7 @@ final class ExpenseCategorySeeder extends Seeder
         ];
 
         foreach ($categories as $category) {
-            ExpenseCategory::firstOrCreate(
-                ['name' => $category['name']],
-                ['is_active' => $category['is_active']]
-            );
+            ExpenseCategory::query()->firstOrCreate(['name' => $category['name']], ['is_active' => $category['is_active']]);
         }
     }
 }

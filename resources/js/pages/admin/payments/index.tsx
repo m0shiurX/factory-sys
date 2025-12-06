@@ -210,13 +210,13 @@ export default function PaymentsIndex({ payments, stats, filters }: Props) {
                     {/* Search */}
                     <div className="mb-6">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <input
                                 type="text"
                                 placeholder="Search by customer name, reference, or bill no..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="w-full rounded-lg border border-border bg-card py-2.5 pl-10 pr-4 text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                className="w-full rounded-lg border border-border bg-card py-2.5 pr-4 pl-10 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                             />
                         </div>
                     </div>
@@ -256,10 +256,13 @@ export default function PaymentsIndex({ payments, stats, filters }: Props) {
                                                 {formatCurrency(payment.amount)}
                                             </h3>
                                             <p className="text-sm text-muted-foreground">
-                                                {formatDate(payment.payment_date)}
+                                                {formatDate(
+                                                    payment.payment_date,
+                                                )}
                                                 {payment.payment_ref && (
                                                     <span className="ml-2">
-                                                        • Ref: {payment.payment_ref}
+                                                        • Ref:{' '}
+                                                        {payment.payment_ref}
                                                     </span>
                                                 )}
                                             </p>
@@ -294,7 +297,9 @@ export default function PaymentsIndex({ payments, stats, filters }: Props) {
                                             <Eye className="h-4 w-4" />
                                         </Link>
                                         <button
-                                            onClick={() => handleDelete(payment.id)}
+                                            onClick={() =>
+                                                handleDelete(payment.id)
+                                            }
                                             className="rounded-lg p-2 text-muted-foreground transition hover:bg-red-500/10 hover:text-red-600"
                                         >
                                             <Trash2 className="h-4 w-4" />

@@ -220,10 +220,11 @@ export default function ProductShow({ product }: Props) {
                                     Status
                                 </h2>
                                 <span
-                                    className={`inline-flex rounded-full border px-3 py-1.5 text-sm font-medium ${product.is_active
+                                    className={`inline-flex rounded-full border px-3 py-1.5 text-sm font-medium ${
+                                        product.is_active
                                             ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600'
                                             : 'border-border bg-muted text-muted-foreground'
-                                        }`}
+                                    }`}
                                 >
                                     {product.is_active ? 'Active' : 'Inactive'}
                                 </span>

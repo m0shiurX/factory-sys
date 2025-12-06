@@ -1,6 +1,13 @@
 import AppLayout from '@/layouts/app-layout';
 import { Link } from '@inertiajs/react';
-import { ArrowLeft, Banknote, FileText, Printer, User, Wallet } from 'lucide-react';
+import {
+    ArrowLeft,
+    Banknote,
+    FileText,
+    Printer,
+    User,
+    Wallet,
+} from 'lucide-react';
 
 type Customer = {
     id: number;
@@ -80,7 +87,9 @@ export default function PaymentShow({ payment }: Props) {
                             className="inline-flex items-center gap-2 text-muted-foreground transition hover:text-foreground"
                         >
                             <ArrowLeft className="h-5 w-5" />
-                            <span className="font-medium">Back to Payments</span>
+                            <span className="font-medium">
+                                Back to Payments
+                            </span>
                         </Link>
                         <button
                             onClick={handlePrint}
@@ -111,7 +120,7 @@ export default function PaymentShow({ payment }: Props) {
                                     <p className="text-3xl font-bold text-white">
                                         {formatCurrency(payment.amount)}
                                     </p>
-                                    <p className="text-xs uppercase tracking-wide text-emerald-100">
+                                    <p className="text-xs tracking-wide text-emerald-100 uppercase">
                                         Amount Paid
                                     </p>
                                 </div>
@@ -206,16 +215,22 @@ export default function PaymentShow({ payment }: Props) {
                                                 {payment.sale.bill_no}
                                             </p>
                                             <p className="text-sm text-muted-foreground">
-                                                {formatDate(payment.sale.sale_date)}
+                                                {formatDate(
+                                                    payment.sale.sale_date,
+                                                )}
                                             </p>
                                         </div>
                                         <div className="text-right">
                                             <p className="font-medium text-foreground">
-                                                {formatCurrency(payment.sale.net_amount)}
+                                                {formatCurrency(
+                                                    payment.sale.net_amount,
+                                                )}
                                             </p>
                                             <p className="text-sm text-muted-foreground">
                                                 Due:{' '}
-                                                {formatCurrency(payment.sale.due_amount)}
+                                                {formatCurrency(
+                                                    payment.sale.due_amount,
+                                                )}
                                             </p>
                                         </div>
                                     </div>
@@ -229,7 +244,9 @@ export default function PaymentShow({ payment }: Props) {
                                 <h3 className="mb-2 text-sm font-medium text-muted-foreground">
                                     Note
                                 </h3>
-                                <p className="text-foreground">{payment.note}</p>
+                                <p className="text-foreground">
+                                    {payment.note}
+                                </p>
                             </div>
                         )}
 
@@ -254,9 +271,9 @@ export default function PaymentShow({ payment }: Props) {
                                 </span>
                                 <span>
                                     Created:{' '}
-                                    {new Date(payment.created_at).toLocaleString(
-                                        'en-BD',
-                                    )}
+                                    {new Date(
+                                        payment.created_at,
+                                    ).toLocaleString('en-BD')}
                                 </span>
                             </div>
                         </div>

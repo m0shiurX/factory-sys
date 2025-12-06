@@ -84,7 +84,7 @@ export default function CustomerEdit({ customer }: Props) {
                                     onChange={(e) =>
                                         setData('name', e.target.value)
                                     }
-                                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     placeholder="Enter customer name"
                                 />
                                 <InputError message={errors.name} />
@@ -105,7 +105,7 @@ export default function CustomerEdit({ customer }: Props) {
                                     onChange={(e) =>
                                         setData('phone', e.target.value)
                                     }
-                                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 font-mono text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 font-mono text-sm text-foreground focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     placeholder="01XXXXXXXXX"
                                 />
                                 <InputError message={errors.phone} />
@@ -126,7 +126,7 @@ export default function CustomerEdit({ customer }: Props) {
                                         setData('address', e.target.value)
                                     }
                                     rows={2}
-                                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     placeholder="Customer address"
                                 />
                                 <InputError message={errors.address} />
@@ -153,7 +153,7 @@ export default function CustomerEdit({ customer }: Props) {
                                         }
                                         min="0"
                                         step="0.01"
-                                        className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                        className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     />
                                     <InputError
                                         message={errors.opening_balance}
@@ -178,7 +178,7 @@ export default function CustomerEdit({ customer }: Props) {
                                                 e.target.value,
                                             )
                                         }
-                                        className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                        className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     />
                                     <InputError message={errors.opening_date} />
                                 </div>
@@ -223,7 +223,7 @@ export default function CustomerEdit({ customer }: Props) {
                                     }
                                     min="0"
                                     step="0.01"
-                                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                    className="w-full rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                 />
                                 <InputError message={errors.credit_limit} />
                                 <p className="mt-1 text-xs text-muted-foreground">

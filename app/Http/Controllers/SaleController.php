@@ -25,7 +25,7 @@ final class SaleController
     {
         $query = Sale::query()
             ->with(['customer:id,name,phone,address,total_due', 'paymentType:id,name'])
-            ->orderBy('sale_date', 'desc')
+            ->latest('sale_date')
             ->orderBy('id', 'desc');
 
         if ($request->filled('search')) {
@@ -48,10 +48,10 @@ final class SaleController
 
         // Stats
         $stats = [
-            'total_sales' => Sale::count(),
-            'today_sales' => Sale::whereDate('sale_date', today())->count(),
-            'total_amount' => (float) Sale::sum('net_amount'),
-            'total_due' => (float) Sale::sum('due_amount'),
+            'total_sales' => Sale::query()->count(),
+            'today_sales' => Sale::query()->whereDate('sale_date', today())->count(),
+            'total_amount' => (float) Sale::query()->sum('net_amount'),
+            'total_due' => (float) Sale::query()->sum('due_amount'),
         ];
 
         return Inertia::render('admin/sales/index', [
@@ -94,7 +94,7 @@ final class SaleController
 
         DB::transaction(function () use ($validated): void {
             // Create the sale
-            $sale = Sale::create([
+            $sale = Sale::query()->create([
                 'bill_no' => $validated['bill_no'],
                 'customer_id' => $validated['customer_id'],
                 'sale_date' => $validated['sale_date'],
@@ -123,12 +123,12 @@ final class SaleController
                 ]);
 
                 // Deduct stock
-                Product::where('id', $item['product_id'])
+                Product::query()->where('id', $item['product_id'])
                     ->decrement('stock_pieces', $item['total_pieces']);
             }
 
             // Update customer total_due
-            Customer::where('id', $validated['customer_id'])
+            Customer::query()->where('id', $validated['customer_id'])
                 ->increment('total_due', $validated['due_amount']);
         });
 
@@ -189,10 +189,10 @@ final class SaleController
         DB::transaction(function () use ($validated, $sale): void {
             // Restore old stock and customer due
             foreach ($sale->items as $oldItem) {
-                Product::where('id', $oldItem->product_id)
+                Product::query()->where('id', $oldItem->product_id)
                     ->increment('stock_pieces', $oldItem->total_pieces);
             }
-            Customer::where('id', $sale->customer_id)
+            Customer::query()->where('id', $sale->customer_id)
                 ->decrement('total_due', $sale->due_amount);
 
             // Update sale
@@ -225,12 +225,12 @@ final class SaleController
                 ]);
 
                 // Deduct new stock
-                Product::where('id', $item['product_id'])
+                Product::query()->where('id', $item['product_id'])
                     ->decrement('stock_pieces', $item['total_pieces']);
             }
 
             // Update customer total_due with new amount
-            Customer::where('id', $validated['customer_id'])
+            Customer::query()->where('id', $validated['customer_id'])
                 ->increment('total_due', $validated['due_amount']);
         });
 
@@ -246,12 +246,12 @@ final class SaleController
         DB::transaction(function () use ($sale): void {
             // Restore stock
             foreach ($sale->items as $item) {
-                Product::where('id', $item->product_id)
+                Product::query()->where('id', $item->product_id)
                     ->increment('stock_pieces', $item->total_pieces);
             }
 
             // Reduce customer due
-            Customer::where('id', $sale->customer_id)
+            Customer::query()->where('id', $sale->customer_id)
                 ->decrement('total_due', $sale->due_amount);
 
             // Delete items and sale

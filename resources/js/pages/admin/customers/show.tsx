@@ -57,8 +57,7 @@ export default function CustomerShow({ customer }: Props) {
     };
 
     const isOverLimit =
-        customer.credit_limit > 0 &&
-        customer.total_due > customer.credit_limit;
+        customer.credit_limit > 0 && customer.total_due > customer.credit_limit;
 
     const availableCredit =
         customer.credit_limit > 0
@@ -153,12 +152,13 @@ export default function CustomerShow({ customer }: Props) {
                                             </p>
                                         </div>
                                         <p
-                                            className={`mt-1 text-2xl font-semibold ${isOverLimit
-                                                ? 'text-red-600'
-                                                : customer.total_due > 0
-                                                    ? 'text-amber-600'
-                                                    : 'text-foreground'
-                                                }`}
+                                            className={`mt-1 text-2xl font-semibold ${
+                                                isOverLimit
+                                                    ? 'text-red-600'
+                                                    : customer.total_due > 0
+                                                      ? 'text-amber-600'
+                                                      : 'text-foreground'
+                                            }`}
                                         >
                                             {formatCurrency(customer.total_due)}
                                         </p>
@@ -170,8 +170,8 @@ export default function CustomerShow({ customer }: Props) {
                                         <p className="mt-1 text-2xl font-semibold text-foreground">
                                             {customer.credit_limit > 0
                                                 ? formatCurrency(
-                                                    customer.credit_limit,
-                                                )
+                                                      customer.credit_limit,
+                                                  )
                                                 : 'No Limit'}
                                         </p>
                                     </div>
@@ -181,12 +181,15 @@ export default function CustomerShow({ customer }: Props) {
                                                 Available Credit
                                             </p>
                                             <p
-                                                className={`mt-1 text-2xl font-semibold ${availableCredit === 0
-                                                    ? 'text-red-600'
-                                                    : 'text-emerald-600'
-                                                    }`}
+                                                className={`mt-1 text-2xl font-semibold ${
+                                                    availableCredit === 0
+                                                        ? 'text-red-600'
+                                                        : 'text-emerald-600'
+                                                }`}
                                             >
-                                                {formatCurrency(availableCredit)}
+                                                {formatCurrency(
+                                                    availableCredit,
+                                                )}
                                             </p>
                                         </div>
                                     )}
@@ -200,7 +203,8 @@ export default function CustomerShow({ customer }: Props) {
                                             )}
                                         </p>
                                         <p className="mt-1 text-xs text-muted-foreground">
-                                            as of {formatDate(customer.opening_date)}
+                                            as of{' '}
+                                            {formatDate(customer.opening_date)}
                                         </p>
                                     </div>
                                 </div>
@@ -215,10 +219,11 @@ export default function CustomerShow({ customer }: Props) {
                                     Status
                                 </h2>
                                 <span
-                                    className={`inline-flex rounded-full border px-3 py-1.5 text-sm font-medium ${customer.is_active
-                                        ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600'
-                                        : 'border-border bg-muted text-muted-foreground'
-                                        }`}
+                                    className={`inline-flex rounded-full border px-3 py-1.5 text-sm font-medium ${
+                                        customer.is_active
+                                            ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600'
+                                            : 'border-border bg-muted text-muted-foreground'
+                                    }`}
                                 >
                                     {customer.is_active ? 'Active' : 'Inactive'}
                                 </span>
@@ -262,7 +267,9 @@ export default function CustomerShow({ customer }: Props) {
                                                 Created
                                             </p>
                                             <p className="text-sm font-medium text-foreground">
-                                                {formatDate(customer.created_at)}
+                                                {formatDate(
+                                                    customer.created_at,
+                                                )}
                                             </p>
                                         </div>
                                     </div>
@@ -275,7 +282,9 @@ export default function CustomerShow({ customer }: Props) {
                                                 Last Updated
                                             </p>
                                             <p className="text-sm font-medium text-foreground">
-                                                {formatDate(customer.updated_at)}
+                                                {formatDate(
+                                                    customer.updated_at,
+                                                )}
                                             </p>
                                         </div>
                                     </div>

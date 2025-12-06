@@ -25,15 +25,15 @@ final class PaymentController
     {
         $query = Payment::query()
             ->with(['customer:id,name,phone', 'paymentType:id,name', 'sale:id,bill_no'])
-            ->orderBy('payment_date', 'desc')
+            ->latest('payment_date')
             ->orderBy('id', 'desc');
 
         if ($request->filled('search')) {
             $search = $request->string('search')->trim()->value();
             $query->where(function ($q) use ($search): void {
                 $q->where('payment_ref', 'like', "%{$search}%")
-                    ->orWhereHas('customer', fn($cq) => $cq->where('name', 'like', "%{$search}%"))
-                    ->orWhereHas('sale', fn($sq) => $sq->where('bill_no', 'like', "%{$search}%"));
+                    ->orWhereHas('customer', fn ($cq) => $cq->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('sale', fn ($sq) => $sq->where('bill_no', 'like', "%{$search}%"));
             });
         }
 
@@ -53,10 +53,10 @@ final class PaymentController
 
         // Stats
         $stats = [
-            'total_payments' => Payment::count(),
-            'today_payments' => Payment::whereDate('payment_date', today())->count(),
-            'total_amount' => (float) Payment::sum('amount'),
-            'today_amount' => (float) Payment::whereDate('payment_date', today())->sum('amount'),
+            'total_payments' => Payment::query()->count(),
+            'today_payments' => Payment::query()->whereDate('payment_date', today())->count(),
+            'total_amount' => (float) Payment::query()->sum('amount'),
+            'today_amount' => (float) Payment::query()->whereDate('payment_date', today())->sum('amount'),
         ];
 
         return Inertia::render('admin/payments/index', [
@@ -84,7 +84,7 @@ final class PaymentController
                 ->where('customer_id', $request->integer('customer_id'))
                 ->where('due_amount', '>', 0)
                 ->select(['id', 'bill_no', 'sale_date', 'net_amount', 'paid_amount', 'due_amount'])
-                ->orderBy('sale_date', 'desc')
+                ->latest('sale_date')
                 ->get();
         }
 
@@ -108,7 +108,7 @@ final class PaymentController
 
         DB::transaction(function () use ($validated): void {
             // Create the payment
-            Payment::create([
+            Payment::query()->create([
                 'customer_id' => $validated['customer_id'],
                 'sale_id' => $validated['sale_id'] ?? null,
                 'amount' => $validated['amount'],
@@ -120,12 +120,12 @@ final class PaymentController
             ]);
 
             // Reduce customer total_due
-            Customer::where('id', $validated['customer_id'])
+            Customer::query()->where('id', $validated['customer_id'])
                 ->decrement('total_due', $validated['amount']);
 
             // If linked to a sale, update the sale's paid_amount and due_amount
             if (! empty($validated['sale_id'])) {
-                $sale = Sale::find($validated['sale_id']);
+                $sale = Sale::query()->find($validated['sale_id']);
                 if ($sale) {
                     $newPaid = (float) $sale->paid_amount + (float) $validated['amount'];
                     $newDue = (float) $sale->net_amount - $newPaid;
@@ -174,7 +174,7 @@ final class PaymentController
         $sales = Sale::query()
             ->where('customer_id', $payment->customer_id)
             ->select(['id', 'bill_no', 'sale_date', 'net_amount', 'paid_amount', 'due_amount'])
-            ->orderBy('sale_date', 'desc')
+            ->latest('sale_date')
             ->get();
 
         return Inertia::render('admin/payments/edit', [
@@ -201,14 +201,14 @@ final class PaymentController
             $amountDiff = $newAmount - $oldAmount;
 
             // Restore old customer due then apply new
-            Customer::where('id', $payment->customer_id)
+            Customer::query()->where('id', $payment->customer_id)
                 ->increment('total_due', $oldAmount);
-            Customer::where('id', $validated['customer_id'])
+            Customer::query()->where('id', $validated['customer_id'])
                 ->decrement('total_due', $newAmount);
 
             // If old sale was linked, restore its due
             if ($payment->sale_id) {
-                $oldSale = Sale::find($payment->sale_id);
+                $oldSale = Sale::query()->find($payment->sale_id);
                 if ($oldSale) {
                     $oldSale->update([
                         'paid_amount' => (float) $oldSale->paid_amount - $oldAmount,
@@ -230,7 +230,7 @@ final class PaymentController
 
             // If new sale is linked, update its paid/due
             if (! empty($validated['sale_id'])) {
-                $newSale = Sale::find($validated['sale_id']);
+                $newSale = Sale::query()->find($validated['sale_id']);
                 if ($newSale) {
                     $newSale->update([
                         'paid_amount' => (float) $newSale->paid_amount + $newAmount,
@@ -251,12 +251,12 @@ final class PaymentController
     {
         DB::transaction(function () use ($payment): void {
             // Restore customer due
-            Customer::where('id', $payment->customer_id)
+            Customer::query()->where('id', $payment->customer_id)
                 ->increment('total_due', $payment->amount);
 
             // Restore sale due if linked
             if ($payment->sale_id) {
-                $sale = Sale::find($payment->sale_id);
+                $sale = Sale::query()->find($payment->sale_id);
                 if ($sale) {
                     $sale->update([
                         'paid_amount' => (float) $sale->paid_amount - (float) $payment->amount,

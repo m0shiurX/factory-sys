@@ -206,13 +206,13 @@ export default function SalesIndex({ sales, stats, filters }: Props) {
                     {/* Search */}
                     <div className="mb-6">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             <input
                                 type="text"
                                 placeholder="Search by bill no or customer..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="w-full rounded-lg border border-border bg-card py-2.5 pl-10 pr-4 text-sm focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring"
+                                className="w-full rounded-lg border border-border bg-card py-2.5 pr-4 pl-10 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                             />
                         </div>
                     </div>
@@ -271,11 +271,16 @@ export default function SalesIndex({ sales, stats, filters }: Props) {
                                     <div className="flex items-center gap-6">
                                         <div className="text-right">
                                             <p className="font-semibold text-foreground">
-                                                {formatCurrency(sale.net_amount)}
+                                                {formatCurrency(
+                                                    sale.net_amount,
+                                                )}
                                             </p>
                                             {sale.due_amount > 0 && (
                                                 <p className="text-sm text-red-600">
-                                                    Due: {formatCurrency(sale.due_amount)}
+                                                    Due:{' '}
+                                                    {formatCurrency(
+                                                        sale.due_amount,
+                                                    )}
                                                 </p>
                                             )}
                                             {sale.due_amount === 0 && (
@@ -294,7 +299,9 @@ export default function SalesIndex({ sales, stats, filters }: Props) {
                                                 <Eye className="h-4 w-4" />
                                             </Link>
                                             <button
-                                                onClick={() => handleDelete(sale.id)}
+                                                onClick={() =>
+                                                    handleDelete(sale.id)
+                                                }
                                                 className="rounded-lg p-2 text-muted-foreground transition hover:bg-red-500/10 hover:text-red-600"
                                             >
                                                 <Trash2 className="h-4 w-4" />

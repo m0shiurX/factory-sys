@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExpenseCategoryController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\SalesReturnController;
 use App\Http\Controllers\SessionController;
+use App\Http\Controllers\StockReportController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserEmailResetNotification;
 use App\Http\Controllers\UserEmailVerification;
@@ -20,10 +26,10 @@ use App\Http\Controllers\UserTwoFactorAuthenticationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', fn() => to_route('login'))->name('home');
+Route::get('/', fn () => to_route('login'))->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
-    Route::get('dashboard', fn() => Inertia::render('admin/dashboard'))->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 });
 
 // User management routes
@@ -98,6 +104,50 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->group(function ():
     Route::delete('payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
 });
 
+// Production routes
+Route::middleware(['auth', 'verified'])->prefix('dashboard')->group(function (): void {
+    Route::get('productions', [ProductionController::class, 'index'])->name('productions.index');
+    Route::get('productions/create', [ProductionController::class, 'create'])->name('productions.create');
+    Route::post('productions', [ProductionController::class, 'store'])->name('productions.store');
+    Route::get('productions/{production}', [ProductionController::class, 'show'])->name('productions.show');
+    Route::get('productions/{production}/edit', [ProductionController::class, 'edit'])->name('productions.edit');
+    Route::put('productions/{production}', [ProductionController::class, 'update'])->name('productions.update');
+    Route::delete('productions/{production}', [ProductionController::class, 'destroy'])->name('productions.destroy');
+});
+
+// Stock Report routes
+Route::middleware(['auth', 'verified'])->prefix('dashboard')->group(function (): void {
+    Route::get('stock', [StockReportController::class, 'index'])->name('stock.index');
+});
+
+// Expense routes
+Route::middleware(['auth', 'verified'])->prefix('dashboard')->group(function (): void {
+    Route::get('expenses', [ExpenseController::class, 'index'])->name('expenses.index');
+    Route::get('expenses/create', [ExpenseController::class, 'create'])->name('expenses.create');
+    Route::post('expenses', [ExpenseController::class, 'store'])->name('expenses.store');
+    Route::get('expenses/{expense}', [ExpenseController::class, 'show'])->name('expenses.show');
+    Route::get('expenses/{expense}/edit', [ExpenseController::class, 'edit'])->name('expenses.edit');
+    Route::put('expenses/{expense}', [ExpenseController::class, 'update'])->name('expenses.update');
+    Route::delete('expenses/{expense}', [ExpenseController::class, 'destroy'])->name('expenses.destroy');
+
+    // Expense Categories
+    Route::get('expense-categories', [ExpenseCategoryController::class, 'index'])->name('expense-categories.index');
+    Route::post('expense-categories', [ExpenseCategoryController::class, 'store'])->name('expense-categories.store');
+    Route::put('expense-categories/{category}', [ExpenseCategoryController::class, 'update'])->name('expense-categories.update');
+    Route::delete('expense-categories/{category}', [ExpenseCategoryController::class, 'destroy'])->name('expense-categories.destroy');
+});
+
+// Sales Returns routes
+Route::middleware(['auth', 'verified'])->prefix('dashboard')->group(function (): void {
+    Route::get('sales-returns', [SalesReturnController::class, 'index'])->name('sales-returns.index');
+    Route::get('sales-returns/create', [SalesReturnController::class, 'create'])->name('sales-returns.create');
+    Route::post('sales-returns', [SalesReturnController::class, 'store'])->name('sales-returns.store');
+    Route::get('sales-returns/{salesReturn}', [SalesReturnController::class, 'show'])->name('sales-returns.show');
+    Route::get('sales-returns/{salesReturn}/edit', [SalesReturnController::class, 'edit'])->name('sales-returns.edit');
+    Route::put('sales-returns/{salesReturn}', [SalesReturnController::class, 'update'])->name('sales-returns.update');
+    Route::delete('sales-returns/{salesReturn}', [SalesReturnController::class, 'destroy'])->name('sales-returns.destroy');
+});
+
 Route::middleware('auth')->group(function (): void {
     // User...
     Route::delete('user', [UserController::class, 'destroy'])->name('user.destroy');
@@ -114,7 +164,7 @@ Route::middleware('auth')->group(function (): void {
         ->name('password.update');
 
     // Appearance...
-    Route::get('settings/appearance', fn() => Inertia::render('admin/settings/appearance'))->name('appearance.edit');
+    Route::get('settings/appearance', fn () => Inertia::render('admin/settings/appearance'))->name('appearance.edit');
 
     // User Two-Factor Authentication...
     Route::get('settings/two-factor', [UserTwoFactorAuthenticationController::class, 'show'])

@@ -24,10 +24,7 @@ final class PaymentTypeSeeder extends Seeder
         ];
 
         foreach ($paymentTypes as $type) {
-            PaymentType::firstOrCreate(
-                ['name' => $type['name']],
-                ['is_active' => $type['is_active']]
-            );
+            PaymentType::query()->firstOrCreate(['name' => $type['name']], ['is_active' => $type['is_active']]);
         }
     }
 }

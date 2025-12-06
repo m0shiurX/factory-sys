@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 final class ExpenseCategory extends Model
 {
@@ -27,5 +28,13 @@ final class ExpenseCategory extends Model
         return [
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * @return HasMany<Expense, $this>
+     */
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(Expense::class);
     }
 }

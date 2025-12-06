@@ -38,12 +38,12 @@ final class Sale extends Model
     public static function generateBillNo(): string
     {
         $year = date('Y');
-        $lastSale = self::whereYear('created_at', $year)
+        $lastSale = self::query()->whereYear('created_at', $year)
             ->orderBy('id', 'desc')
             ->first();
 
         $nextNumber = $lastSale
-            ? (int) mb_substr($lastSale->bill_no, -4) + 1
+            ? (int) mb_substr((string) $lastSale->bill_no, -4) + 1
             : 1;
 
         return sprintf('FS-%s-%04d', $year, $nextNumber);

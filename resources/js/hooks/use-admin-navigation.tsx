@@ -1,5 +1,18 @@
 import { type NavItem, type NavSection } from '@/types';
-import { Box, FileText, LayoutGrid, Receipt, Shield, Users, UserRound, Wallet } from 'lucide-react';
+import {
+    BarChart3,
+    Box,
+    Coins,
+    Factory,
+    FileText,
+    LayoutGrid,
+    Receipt,
+    RotateCcw,
+    Shield,
+    UserRound,
+    Users,
+    Wallet,
+} from 'lucide-react';
 
 /**
 childRoutes: [
@@ -29,9 +42,29 @@ export function useAdminNavigation() {
             icon: Receipt,
         },
         {
+            title: 'Sales Returns',
+            href: '/dashboard/sales-returns',
+            icon: RotateCcw,
+        },
+        {
             title: 'Payments',
             href: '/dashboard/payments',
             icon: Wallet,
+        },
+        {
+            title: 'Expenses',
+            href: '/dashboard/expenses',
+            icon: Coins,
+        },
+        {
+            title: 'Production',
+            href: '/dashboard/productions',
+            icon: Factory,
+        },
+        {
+            title: 'Stock Report',
+            href: '/dashboard/stock',
+            icon: BarChart3,
         },
         {
             title: 'Products',

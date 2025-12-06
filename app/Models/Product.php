@@ -25,29 +25,6 @@ final class Product extends Model
     ];
 
     /**
-     * Get the display name with size.
-     */
-    public function getDisplayNameAttribute(): string
-    {
-        return $this->size ? "{$this->name} ({$this->size})" : $this->name;
-    }
-
-    /**
-     * Format stock as bundles + pieces.
-     */
-    public function getFormattedStockAttribute(): string
-    {
-        $bundles = (int) floor($this->stock_pieces / $this->pieces_per_bundle);
-        $remaining = $this->stock_pieces % $this->pieces_per_bundle;
-
-        if ($remaining > 0) {
-            return "{$bundles} bundles + {$remaining} pcs";
-        }
-
-        return "{$bundles} bundles";
-    }
-
-    /**
      * Check if stock is below minimum alert level.
      */
     public function isLowStock(): bool
@@ -67,5 +44,28 @@ final class Product extends Model
             'min_stock_alert' => 'integer',
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * Get the display name with size.
+     */
+    protected function getDisplayNameAttribute(): string
+    {
+        return $this->size ? "{$this->name} ({$this->size})" : $this->name;
+    }
+
+    /**
+     * Format stock as bundles + pieces.
+     */
+    protected function getFormattedStockAttribute(): string
+    {
+        $bundles = (int) floor($this->stock_pieces / $this->pieces_per_bundle);
+        $remaining = $this->stock_pieces % $this->pieces_per_bundle;
+
+        if ($remaining > 0) {
+            return "{$bundles} bundles + {$remaining} pcs";
+        }
+
+        return "{$bundles} bundles";
     }
 }

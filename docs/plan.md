@@ -701,14 +701,14 @@ These components can be directly copied from hardware-shop with minimal changes:
 - [x] Payments CRUD (link to customer/sale, update dues)
 - [x] Customer statement report (period-based, opening balance calculation)
 
-### Phase 5: Production & Stock
-- [ ] Production entry
-- [ ] Stock report
+### Phase 5: Production & Stock ✅
+- [x] Production entry (CRUD with stock increase/decrease)
+- [x] Stock report (with low stock/out of stock filtering)
 
-### Phase 6: Additional Features
-- [ ] Sales Returns
-- [ ] Expenses CRUD
-- [ ] Dashboard with summary stats
+### Phase 6: Additional Features ✅
+- [x] Sales Returns
+- [x] Expenses CRUD
+- [x] Dashboard with summary stats
 
 ### Phase 7: Polish
 - [ ] PDF export for invoices/statements

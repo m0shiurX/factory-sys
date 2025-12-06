@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('expenses', function (Blueprint $table) {
+        Schema::create('expenses', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('expense_category_id')->constrained()->cascadeOnDelete();
             $table->decimal('amount', 10, 2)->default(0);
