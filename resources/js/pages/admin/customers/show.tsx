@@ -154,10 +154,10 @@ export default function CustomerShow({ customer }: Props) {
                                         </div>
                                         <p
                                             className={`mt-1 text-2xl font-semibold ${isOverLimit
-                                                    ? 'text-red-600'
-                                                    : customer.total_due > 0
-                                                        ? 'text-amber-600'
-                                                        : 'text-foreground'
+                                                ? 'text-red-600'
+                                                : customer.total_due > 0
+                                                    ? 'text-amber-600'
+                                                    : 'text-foreground'
                                                 }`}
                                         >
                                             {formatCurrency(customer.total_due)}
@@ -182,8 +182,8 @@ export default function CustomerShow({ customer }: Props) {
                                             </p>
                                             <p
                                                 className={`mt-1 text-2xl font-semibold ${availableCredit === 0
-                                                        ? 'text-red-600'
-                                                        : 'text-emerald-600'
+                                                    ? 'text-red-600'
+                                                    : 'text-emerald-600'
                                                     }`}
                                             >
                                                 {formatCurrency(availableCredit)}
@@ -216,8 +216,8 @@ export default function CustomerShow({ customer }: Props) {
                                 </h2>
                                 <span
                                     className={`inline-flex rounded-full border px-3 py-1.5 text-sm font-medium ${customer.is_active
-                                            ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600'
-                                            : 'border-border bg-muted text-muted-foreground'
+                                        ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-600'
+                                        : 'border-border bg-muted text-muted-foreground'
                                         }`}
                                 >
                                     {customer.is_active ? 'Active' : 'Inactive'}
@@ -230,24 +230,21 @@ export default function CustomerShow({ customer }: Props) {
                                     Quick Actions
                                 </h2>
                                 <div className="space-y-2">
-                                    <button
-                                        disabled
-                                        className="flex w-full items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+                                    <Link
+                                        href={`/dashboard/payments/create?customer_id=${customer.id}`}
+                                        className="flex w-full items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-muted"
                                     >
                                         <Banknote className="h-4 w-4" />
                                         Record Payment
-                                    </button>
-                                    <button
-                                        disabled
-                                        className="flex w-full items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+                                    </Link>
+                                    <Link
+                                        href={`/dashboard/customers/${customer.id}/statement`}
+                                        className="flex w-full items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-muted"
                                     >
                                         <Calendar className="h-4 w-4" />
                                         View Statement
-                                    </button>
+                                    </Link>
                                 </div>
-                                <p className="mt-3 text-xs text-muted-foreground">
-                                    Coming soon in next phase
-                                </p>
                             </div>
 
                             {/* Timestamps */}

@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\Payment;
+use App\Models\Sale;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -148,5 +151,109 @@ final class CustomerController
 
         return to_route('customers.index')
             ->with('success', 'Customer deleted successfully.');
+    }
+
+    /**
+     * Display the customer statement.
+     */
+    public function statement(Request $request, Customer $customer): Response
+    {
+        // Default to current month if no dates provided
+        $fromDate = $request->filled('from_date')
+            ? Carbon::parse($request->string('from_date')->value())
+            : Carbon::now()->startOfMonth();
+        $toDate = $request->filled('to_date')
+            ? Carbon::parse($request->string('to_date')->value())
+            : Carbon::now()->endOfMonth();
+
+        // Calculate opening balance
+        $openingBalance = $this->calculateOpeningBalance($customer, $fromDate);
+
+        // Get transactions within the period
+        $sales = Sale::where('customer_id', $customer->id)
+            ->whereBetween('sale_date', [$fromDate, $toDate])
+            ->select(['id', 'bill_no', 'sale_date', 'net_amount', 'paid_amount', 'due_amount'])
+            ->orderBy('sale_date')
+            ->orderBy('id')
+            ->get()
+            ->map(fn($sale) => [
+                'id' => $sale->id,
+                'date' => $sale->sale_date->format('Y-m-d'),
+                'type' => 'sale',
+                'description' => "Sale #{$sale->bill_no}",
+                'reference' => $sale->bill_no,
+                'debit' => (float) $sale->due_amount,
+                'credit' => 0,
+            ]);
+
+        $payments = Payment::where('customer_id', $customer->id)
+            ->whereBetween('payment_date', [$fromDate, $toDate])
+            ->with('paymentType:id,name')
+            ->select(['id', 'payment_date', 'amount', 'payment_ref', 'payment_type_id'])
+            ->orderBy('payment_date')
+            ->orderBy('id')
+            ->get()
+            ->map(fn($payment) => [
+                'id' => $payment->id,
+                'date' => $payment->payment_date->format('Y-m-d'),
+                'type' => 'payment',
+                'description' => 'Payment' . ($payment->paymentType ? " ({$payment->paymentType->name})" : ''),
+                'reference' => $payment->payment_ref,
+                'debit' => 0,
+                'credit' => (float) $payment->amount,
+            ]);
+
+        // Merge and sort transactions by date
+        $transactions = $sales->concat($payments)
+            ->sortBy('date')
+            ->values()
+            ->all();
+
+        // Calculate totals
+        $totalDebit = array_sum(array_column($transactions, 'debit'));
+        $totalCredit = array_sum(array_column($transactions, 'credit'));
+        $closingBalance = $openingBalance + $totalDebit - $totalCredit;
+
+        return Inertia::render('admin/customers/statement', [
+            'customer' => $customer,
+            'statement' => [
+                'from_date' => $fromDate->format('Y-m-d'),
+                'to_date' => $toDate->format('Y-m-d'),
+                'opening_balance' => $openingBalance,
+                'transactions' => $transactions,
+                'total_debit' => $totalDebit,
+                'total_credit' => $totalCredit,
+                'closing_balance' => $closingBalance,
+            ],
+            'filters' => [
+                'from_date' => $fromDate->format('Y-m-d'),
+                'to_date' => $toDate->format('Y-m-d'),
+            ],
+        ]);
+    }
+
+    /**
+     * Calculate opening balance for a customer as of a specific date.
+     */
+    private function calculateOpeningBalance(Customer $customer, Carbon $startDate): float
+    {
+        $openingBalance = 0.0;
+
+        // Include customer's initial opening balance if applicable
+        if ($customer->opening_date && Carbon::parse($customer->opening_date)->lt($startDate)) {
+            $openingBalance = (float) $customer->opening_balance;
+        }
+
+        // Add all sales dues before the period
+        $openingBalance += (float) Sale::where('customer_id', $customer->id)
+            ->where('sale_date', '<', $startDate)
+            ->sum('due_amount');
+
+        // Subtract all payments before the period
+        $openingBalance -= (float) Payment::where('customer_id', $customer->id)
+            ->where('payment_date', '<', $startDate)
+            ->sum('amount');
+
+        return $openingBalance;
     }
 }
