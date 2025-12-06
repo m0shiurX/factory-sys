@@ -680,43 +680,38 @@ These components can be directly copied from hardware-shop with minimal changes:
 
 ## Development Phases
 
-### Phase 1: Foundation (Day 1-2)
-- [ ] Create new Laravel project with Inertia + React
-- [ ] Set up SQLite database
-- [ ] Copy and adapt shared components from hardware-shop
-- [ ] Implement authentication (single user for MVP)
-- [ ] Create database migrations
+### Phase 1: Foundation ✅
+- [x] Laravel 12 project with Inertia + React + Tailwind v4
+- [x] Authentication with Fortify (multi-user)
+- [x] Role-based permissions (Spatie)
+- [x] Database migrations
 
-### Phase 2: Core Entities (Day 2-3)
-- [ ] Products CRUD
-- [ ] Customers CRUD
-- [ ] Payment Types seed data
+### Phase 2: Core Entities ✅
+- [x] Products CRUD (with stock tracking in pieces, display as bundles)
+- [x] Customers CRUD (with opening balance, credit limit)
+- [x] Payment Types seeder
 
-### Phase 3: Sales (Day 3-4)
-- [ ] Sales Create page (adapt from hardware-shop)
-- [ ] Sales List page
-- [ ] Sales Show page (invoice view)
-- [ ] Print invoice
+### Phase 3: Sales ✅
+- [x] Sales Create (weight-based pricing, product search, auto-calculations)
+- [x] Sales List with stats
+- [x] Sales Show (invoice view with print)
+- [x] Stock deduction on sale/update/delete
 
-### Phase 4: Financial (Day 4-5)
-- [ ] Payments CRUD
-- [ ] Customer statement report
-- [ ] Stock deduction on sale
+### Phase 4: Financial ✅
+- [x] Payments CRUD (link to customer/sale, update dues)
+- [x] Customer statement report (period-based, opening balance calculation)
 
-### Phase 5: Production & Stock (Day 5-6)
+### Phase 5: Production & Stock
 - [ ] Production entry
 - [ ] Stock report
-- [ ] Low stock alerts
 
-### Phase 6: Additional Features (Day 6-7)
+### Phase 6: Additional Features
 - [ ] Sales Returns
-- [ ] Expenses
-- [ ] Additional reports
-- [ ] Multi-user with roles
+- [ ] Expenses CRUD
+- [ ] Dashboard with summary stats
 
-### Phase 7: Polish & Licensing (Day 7+)
-- [ ] License key system
-- [ ] NativePHP packaging
+### Phase 7: Polish
+- [ ] PDF export for invoices/statements
 - [ ] Testing and bug fixes
 
 ---
