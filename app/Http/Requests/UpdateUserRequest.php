@@ -21,8 +21,9 @@ final class UpdateUserRequest extends FormRequest
      */
     public function rules(): array
     {
+        // Get user from route param (admin management) or fall back to authenticated user (profile update)
         /** @var User $targetUser */
-        $targetUser = $this->route('user');
+        $targetUser = $this->route('user') ?? $this->user();
 
         return [
             'name' => ['required', 'string', 'max:255'],
