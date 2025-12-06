@@ -19,7 +19,7 @@ it('may create a new user password', function (): void {
 
     $token = Password::createToken($user);
 
-    $action = app(CreateUserPassword::class);
+    $action = resolve(CreateUserPassword::class);
 
     $status = $action->handle(
         AuthData::from(
@@ -43,7 +43,7 @@ it('returns invalid token status for incorrect token', function (): void {
         'email' => 'test@example.com',
     ]);
 
-    $action = app(CreateUserPassword::class);
+    $action = resolve(CreateUserPassword::class);
 
     $status = $action->handle(AuthData::from(
         [
@@ -58,7 +58,7 @@ it('returns invalid token status for incorrect token', function (): void {
 });
 
 it('returns invalid user status for non-existent email', function (): void {
-    $action = app(CreateUserPassword::class);
+    $action = resolve(CreateUserPassword::class);
 
     $status = $action->handle(AuthData::from(
         [
@@ -80,7 +80,7 @@ it('updates remember token when resetting password', function (): void {
 
     $token = Password::createToken($user);
 
-    $action = app(CreateUserPassword::class);
+    $action = resolve(CreateUserPassword::class);
 
     $action->handle(AuthData::from(
         [

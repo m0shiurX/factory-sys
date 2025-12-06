@@ -1,12 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link } from '@inertiajs/react';
-import {
-    Activity,
-    ArrowLeft,
-    Calendar,
-    FileText,
-    User,
-} from 'lucide-react';
+import { Activity, ArrowLeft, Calendar, FileText, User } from 'lucide-react';
 
 type Causer = {
     id: number;
@@ -240,7 +234,7 @@ export default function ActivityShow({ activity }: Props) {
                                                             <span className="font-mono text-xs text-primary">
                                                                 {key}:
                                                             </span>
-                                                            <span className="font-mono text-xs text-foreground break-all">
+                                                            <span className="font-mono text-xs break-all text-foreground">
                                                                 {renderPropertyValue(
                                                                     value,
                                                                 )}
@@ -270,7 +264,7 @@ export default function ActivityShow({ activity }: Props) {
                                                             <span className="font-mono text-xs text-muted-foreground">
                                                                 {key}:
                                                             </span>
-                                                            <span className="font-mono text-xs text-muted-foreground line-through break-all">
+                                                            <span className="font-mono text-xs break-all text-muted-foreground line-through">
                                                                 {renderPropertyValue(
                                                                     value,
                                                                 )}

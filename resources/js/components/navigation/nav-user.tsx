@@ -42,8 +42,8 @@ export function NavUser({ showInfo = true }: { showInfo?: boolean } = {}) {
                             isMobile
                                 ? 'bottom'
                                 : state === 'collapsed'
-                                    ? 'left'
-                                    : 'bottom'
+                                  ? 'left'
+                                  : 'bottom'
                         }
                     >
                         <UserMenuContent user={auth.user} />

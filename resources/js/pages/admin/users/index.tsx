@@ -269,12 +269,13 @@ export default function UsersIndex({ users }: Props) {
                                             key={index}
                                             href={link.url || '#'}
                                             preserveScroll
-                                            className={`rounded-lg px-3 py-1.5 text-sm transition ${link.active
+                                            className={`rounded-lg px-3 py-1.5 text-sm transition ${
+                                                link.active
                                                     ? 'bg-primary text-primary-foreground'
                                                     : link.url
-                                                        ? 'text-muted-foreground hover:bg-muted'
-                                                        : 'cursor-not-allowed text-muted-foreground/50'
-                                                }`}
+                                                      ? 'text-muted-foreground hover:bg-muted'
+                                                      : 'cursor-not-allowed text-muted-foreground/50'
+                                            }`}
                                             dangerouslySetInnerHTML={{
                                                 __html: link.label,
                                             }}

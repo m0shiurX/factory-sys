@@ -67,10 +67,10 @@ final class HandleInertiaRequests extends Middleware
             return $files;
         }
 
-        $cdnUrl = rtrim($cdnUrl, '/');
+        $cdnUrl = mb_rtrim((string) $cdnUrl, '/');
 
         return array_map(
-            fn(string $path): string => $cdnUrl . '/' . ltrim($path, '/'),
+            fn (string $path): string => $cdnUrl.'/'.mb_ltrim($path, '/'),
             $files
         );
     }

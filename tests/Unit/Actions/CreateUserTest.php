@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Event;
 it('may create a user', function (): void {
     Event::fake([Registered::class]);
 
-    $action = app(CreateUser::class);
+    $action = resolve(CreateUser::class);
 
     $user = $action->handle(UserData::from([
         'name' => 'Test User',

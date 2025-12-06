@@ -12,7 +12,7 @@ it('updates a user with non-null values', function (): void {
         'email' => 'old@email.com',
     ]);
 
-    app(UpdateUser::class)->handle($user, UserData::from([
+    resolve(UpdateUser::class)->handle($user, UserData::from([
         'name' => 'New Name',
     ]));
 
@@ -26,7 +26,7 @@ it('resets email verification when email changes', function (): void {
         'email_verified_at' => now(),
     ]);
 
-    app(UpdateUser::class)->handle($user, UserData::from([
+    resolve(UpdateUser::class)->handle($user, UserData::from([
         'email' => 'new@email.com',
     ]));
 
@@ -42,7 +42,7 @@ it('keeps email verification when email stays the same', function (): void {
         'email_verified_at' => $verifiedAt,
     ]);
 
-    app(UpdateUser::class)->handle($user, UserData::from([
+    resolve(UpdateUser::class)->handle($user, UserData::from([
         'email' => 'same@email.com',
         'name' => 'Updated Name',
     ]));
@@ -57,7 +57,7 @@ it('does not update when all data is null', function (): void {
         'email' => 'original@email.com',
     ]);
 
-    app(UpdateUser::class)->handle($user, UserData::from([
+    resolve(UpdateUser::class)->handle($user, UserData::from([
         'name' => null,
         'email' => null,
     ]));
@@ -72,7 +72,7 @@ it('does not reset email verification when email is empty string', function (): 
         'email_verified_at' => now(),
     ]);
 
-    app(UpdateUser::class)->handle($user, UserData::from([
+    resolve(UpdateUser::class)->handle($user, UserData::from([
         'email' => '',
     ]));
 

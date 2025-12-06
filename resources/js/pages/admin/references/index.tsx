@@ -51,7 +51,8 @@ type Props = {
 
 const statusStyles: Record<string, string> = {
     lead: 'bg-amber-500/10 text-amber-600 border-amber-500/20 dark:bg-amber-500/20 dark:text-amber-400',
-    pending: 'bg-blue-500/10 text-blue-600 border-blue-500/20 dark:bg-blue-500/20 dark:text-blue-400',
+    pending:
+        'bg-blue-500/10 text-blue-600 border-blue-500/20 dark:bg-blue-500/20 dark:text-blue-400',
     active: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:bg-emerald-500/20 dark:text-emerald-400',
     expired: 'bg-muted text-muted-foreground border-border',
 };
@@ -305,7 +306,7 @@ export default function CustomersIndex({
                                                     >
                                                         {
                                                             statuses[
-                                                            customer.status
+                                                                customer.status
                                                             ]
                                                         }
                                                     </span>
@@ -359,12 +360,13 @@ export default function CustomersIndex({
                                     key={index}
                                     href={link.url || '#'}
                                     preserveState
-                                    className={`rounded-lg px-3 py-2 text-sm ${link.active
-                                        ? 'bg-primary text-primary-foreground'
-                                        : link.url
-                                            ? 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                                            : 'cursor-not-allowed text-muted-foreground/50'
-                                        }`}
+                                    className={`rounded-lg px-3 py-2 text-sm ${
+                                        link.active
+                                            ? 'bg-primary text-primary-foreground'
+                                            : link.url
+                                              ? 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                                              : 'cursor-not-allowed text-muted-foreground/50'
+                                    }`}
                                     dangerouslySetInnerHTML={{
                                         __html: link.label,
                                     }}

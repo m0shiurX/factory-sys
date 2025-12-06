@@ -156,7 +156,9 @@ export default function RoleCreate({ permissions, allPermissions }: Props) {
                                         <input
                                             type="checkbox"
                                             checked={isAllSelected}
-                                            onChange={handleAllPermissionsToggle}
+                                            onChange={
+                                                handleAllPermissionsToggle
+                                            }
                                             className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
                                         />
                                         <span className="text-sm font-medium text-primary">
@@ -174,7 +176,7 @@ export default function RoleCreate({ permissions, allPermissions }: Props) {
                                             >
                                                 {/* Category Header */}
                                                 <div className="border-b border-border bg-muted px-4 py-3">
-                                                    <h3 className="text-base font-semibold capitalize text-foreground">
+                                                    <h3 className="text-base font-semibold text-foreground capitalize">
                                                         {category}
                                                     </h3>
                                                 </div>
@@ -199,7 +201,7 @@ export default function RoleCreate({ permissions, allPermissions }: Props) {
                                                                     }
                                                                     className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
                                                                 />
-                                                                <span className="text-sm font-medium capitalize text-primary">
+                                                                <span className="text-sm font-medium text-primary capitalize">
                                                                     {module}
                                                                 </span>
                                                             </div>

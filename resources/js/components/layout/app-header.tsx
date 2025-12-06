@@ -1,7 +1,7 @@
-import AppLogo from '@/components/shared/app-logo';
 import { UserMenuContent } from '@/components/admin/user/user-menu-content';
 import { Icon } from '@/components/common/icon';
 import { Breadcrumbs } from '@/components/layout/breadcrumbs';
+import AppLogo from '@/components/shared/app-logo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -119,7 +119,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                     key={item.title}
                                                     href={
                                                         typeof item.href ===
-                                                            'string'
+                                                        'string'
                                                             ? item.href
                                                             : item.href.url
                                                     }
@@ -165,11 +165,11 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                             className={cn(
                                                 navigationMenuTriggerStyle(),
                                                 page.url ===
-                                                (typeof item.href ===
+                                                    (typeof item.href ===
                                                     'string'
-                                                    ? item.href
-                                                    : item.href.url) &&
-                                                activeItemStyles,
+                                                        ? item.href
+                                                        : item.href.url) &&
+                                                    activeItemStyles,
                                                 'h-9 cursor-pointer px-3',
                                             )}
                                         >
@@ -210,7 +210,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                 <a
                                                     href={
                                                         typeof item.href ===
-                                                            'string'
+                                                        'string'
                                                             ? item.href
                                                             : item.href.url
                                                     }

@@ -168,10 +168,11 @@ export default function UserCreate({ roles }: Props) {
                                                 onClick={() =>
                                                     toggleRole(role.id)
                                                 }
-                                                className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition ${data.roles.includes(role.id)
+                                                className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
+                                                    data.roles.includes(role.id)
                                                         ? 'border-primary bg-primary text-primary-foreground'
                                                         : 'border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground'
-                                                    }`}
+                                                }`}
                                             >
                                                 {role.name}
                                             </button>

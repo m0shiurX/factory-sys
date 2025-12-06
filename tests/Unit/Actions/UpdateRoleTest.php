@@ -11,7 +11,7 @@ it('updates a role name', function (): void {
 
     $data = ['name' => 'New Name'];
 
-    $updatedRole = app(UpdateRole::class)->handle($role, $data);
+    $updatedRole = resolve(UpdateRole::class)->handle($role, $data);
 
     expect($updatedRole->name)->toBe('New Name');
 });
@@ -27,7 +27,7 @@ it('updates a role with permissions', function (): void {
         'permissions' => [$permission1->id, $permission2->id],
     ];
 
-    $updatedRole = app(UpdateRole::class)->handle($role, $data);
+    $updatedRole = resolve(UpdateRole::class)->handle($role, $data);
 
     expect($updatedRole->name)->toBe('Senior Reporter')
         ->and($updatedRole->permissions)->toHaveCount(2)
@@ -47,7 +47,7 @@ it('replaces existing permissions when updating', function (): void {
         'permissions' => [$permission2->id],
     ];
 
-    $updatedRole = app(UpdateRole::class)->handle($role, $data);
+    $updatedRole = resolve(UpdateRole::class)->handle($role, $data);
 
     expect($updatedRole->permissions)->toHaveCount(1)
         ->and($updatedRole->hasPermissionTo('new-permission'))->toBeTrue()
@@ -61,7 +61,7 @@ it('updates role without changing permissions when not provided', function (): v
 
     $data = ['name' => 'Updated'];
 
-    $updatedRole = app(UpdateRole::class)->handle($role, $data);
+    $updatedRole = resolve(UpdateRole::class)->handle($role, $data);
 
     expect($updatedRole->name)->toBe('Updated')
         ->and($updatedRole->permissions)->toHaveCount(1)

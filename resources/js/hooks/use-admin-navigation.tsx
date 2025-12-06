@@ -1,11 +1,5 @@
 import { type NavItem, type NavSection } from '@/types';
-import {
-    ExternalLink,
-    FileText,
-    LayoutGrid,
-    Shield,
-    Users,
-} from 'lucide-react';
+import { FileText, LayoutGrid, Shield, Users } from 'lucide-react';
 
 /**
 childRoutes: [

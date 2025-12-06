@@ -8,7 +8,7 @@ use Spatie\Permission\Models\Role;
 it('deletes a role', function (): void {
     $role = Role::create(['name' => 'To Delete']);
 
-    $result = app(DeleteRole::class)->handle($role);
+    $result = resolve(DeleteRole::class)->handle($role);
 
     expect($result)->toBeTrue()
         ->and(Role::query()->where('name', 'To Delete')->exists())->toBeFalse();
@@ -17,7 +17,7 @@ it('deletes a role', function (): void {
 it('returns true when role is deleted successfully', function (): void {
     $role = Role::create(['name' => 'Another Role']);
 
-    $result = app(DeleteRole::class)->handle($role);
+    $result = resolve(DeleteRole::class)->handle($role);
 
     expect($result)->toBeTrue();
 });

@@ -32,7 +32,7 @@ final class ActivityLogController
         // Filter by causer (user)
         if ($request->filled('causer_id')) {
             $query->where('causer_id', $request->input('causer_id'))
-                ->where('causer_type', 'App\\Models\\User');
+                ->where('causer_type', \App\Models\User::class);
         }
 
         // Filter by subject type

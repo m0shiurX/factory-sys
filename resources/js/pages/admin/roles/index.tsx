@@ -156,7 +156,8 @@ export default function RolesIndex({ roles }: Props) {
                                                     <div className="max-w-xs">
                                                         <span className="inline-flex rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
                                                             {role.permissions
-                                                                ?.length || 0}{' '}
+                                                                ?.length ||
+                                                                0}{' '}
                                                             permissions
                                                         </span>
                                                         {role.permissions &&

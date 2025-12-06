@@ -9,7 +9,7 @@ use Spatie\Permission\Models\Role;
 it('creates a role with name only', function (): void {
     $data = ['name' => 'Test Role'];
 
-    $role = app(CreateRole::class)->handle($data);
+    $role = resolve(CreateRole::class)->handle($data);
 
     expect($role)->toBeInstanceOf(Role::class)
         ->and($role->name)->toBe('Test Role')
@@ -25,7 +25,7 @@ it('creates a role with permissions', function (): void {
         'permissions' => [$permission1->id, $permission2->id],
     ];
 
-    $role = app(CreateRole::class)->handle($data);
+    $role = resolve(CreateRole::class)->handle($data);
 
     expect($role->name)->toBe('Editor')
         ->and($role->permissions)->toHaveCount(2)
@@ -41,7 +41,7 @@ it('creates a role and syncs permissions correctly', function (): void {
         'permissions' => [$permission->id],
     ];
 
-    $role = app(CreateRole::class)->handle($data);
+    $role = resolve(CreateRole::class)->handle($data);
 
     expect($role->permissions)->toHaveCount(1)
         ->and($role->hasPermissionTo('delete-posts'))->toBeTrue();

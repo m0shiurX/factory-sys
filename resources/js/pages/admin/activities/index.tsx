@@ -224,10 +224,10 @@ export default function ActivitiesIndex({
                             {/* Search */}
                             <form
                                 onSubmit={handleSearch}
-                                className="flex-1 min-w-[200px]"
+                                className="min-w-[200px] flex-1"
                             >
                                 <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                    <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                     <input
                                         type="text"
                                         value={search}
@@ -235,7 +235,7 @@ export default function ActivitiesIndex({
                                             setSearch(e.target.value)
                                         }
                                         placeholder="Search description..."
-                                        className="w-full rounded-lg border border-border bg-background py-2 pl-10 pr-4 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
+                                        className="w-full rounded-lg border border-border bg-background py-2 pr-4 pl-10 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     />
                                 </div>
                             </form>
@@ -247,10 +247,11 @@ export default function ActivitiesIndex({
                                     onChange={(e) => {
                                         setSelectedLogName(e.target.value);
                                         applyFilters({
-                                            log_name: e.target.value || undefined,
+                                            log_name:
+                                                e.target.value || undefined,
                                         });
                                     }}
-                                    className="appearance-none rounded-lg border border-border bg-background py-2 pl-4 pr-10 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
+                                    className="appearance-none rounded-lg border border-border bg-background py-2 pr-10 pl-4 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                 >
                                     <option value="">All Log Types</option>
                                     {logNames.map((name) => (
@@ -259,7 +260,7 @@ export default function ActivitiesIndex({
                                         </option>
                                     ))}
                                 </select>
-                                <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                                <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             </div>
 
                             {/* Event Filter */}
@@ -272,7 +273,7 @@ export default function ActivitiesIndex({
                                             event: e.target.value || undefined,
                                         });
                                     }}
-                                    className="appearance-none rounded-lg border border-border bg-background py-2 pl-4 pr-10 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
+                                    className="appearance-none rounded-lg border border-border bg-background py-2 pr-10 pl-4 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                 >
                                     <option value="">All Events</option>
                                     {eventTypes.map((event) => (
@@ -281,7 +282,7 @@ export default function ActivitiesIndex({
                                         </option>
                                     ))}
                                 </select>
-                                <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                                <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                             </div>
 
                             {/* Clear Filters */}
@@ -336,11 +337,15 @@ export default function ActivitiesIndex({
                                                     </div>
                                                     <div>
                                                         <p className="font-medium text-foreground">
-                                                            {activity.description}
+                                                            {
+                                                                activity.description
+                                                            }
                                                         </p>
                                                         {activity.log_name && (
                                                             <p className="text-xs text-muted-foreground">
-                                                                {activity.log_name}
+                                                                {
+                                                                    activity.log_name
+                                                                }
                                                             </p>
                                                         )}
                                                     </div>
@@ -371,12 +376,14 @@ export default function ActivitiesIndex({
                                                 {activity.causer?.name || '—'}
                                             </td>
                                             <td className="px-6 py-4 text-sm text-muted-foreground">
-                                                {formatDate(activity.created_at)}
+                                                {formatDate(
+                                                    activity.created_at,
+                                                )}
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <Link
                                                     href={`/activities/${activity.id}`}
-                                                    className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground inline-flex"
+                                                    className="inline-flex rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
                                                     title="View details"
                                                 >
                                                     <Eye className="h-4 w-4" />
