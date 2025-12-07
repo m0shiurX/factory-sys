@@ -1,13 +1,17 @@
 import AppLayout from '@/layouts/app-layout';
+import { dashboard } from '@/routes';
+import { index as customersIndex } from '@/routes/customers';
 import {
-    customers,
-    dashboard,
-    expenses,
-    payments,
-    productions,
-    sales,
-    stock,
-} from '@/routes';
+    index as expensesIndex,
+    show as expensesShow,
+} from '@/routes/expenses';
+import {
+    index as paymentsIndex,
+    show as paymentsShow,
+} from '@/routes/payments';
+import { index as productionsIndex } from '@/routes/productions';
+import { index as salesIndex, show as salesShow } from '@/routes/sales';
+import { index as stockIndex } from '@/routes/stock';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import {
@@ -159,7 +163,7 @@ export default function Dashboard({
                             </p>
                         </div>
                         <Link
-                            href={sales.index().url}
+                            href={salesIndex().url}
                             className="mt-4 flex items-center gap-1 text-sm font-medium text-primary hover:underline"
                         >
                             View sales <ArrowRight className="h-3 w-3" />
@@ -187,7 +191,7 @@ export default function Dashboard({
                             </p>
                         </div>
                         <Link
-                            href={payments.index().url}
+                            href={paymentsIndex().url}
                             className="mt-4 flex items-center gap-1 text-sm font-medium text-primary hover:underline"
                         >
                             View payments <ArrowRight className="h-3 w-3" />
@@ -215,7 +219,7 @@ export default function Dashboard({
                             </p>
                         </div>
                         <Link
-                            href={expenses.index().url}
+                            href={expensesIndex().url}
                             className="mt-4 flex items-center gap-1 text-sm font-medium text-primary hover:underline"
                         >
                             View expenses <ArrowRight className="h-3 w-3" />
@@ -243,7 +247,7 @@ export default function Dashboard({
                             </p>
                         </div>
                         <Link
-                            href={productions.index().url}
+                            href={productionsIndex().url}
                             className="mt-4 flex items-center gap-1 text-sm font-medium text-primary hover:underline"
                         >
                             View production <ArrowRight className="h-3 w-3" />
@@ -350,7 +354,7 @@ export default function Dashboard({
                             </div>
                         </div>
                         <Link
-                            href={stock.index().url}
+                            href={stockIndex().url}
                             className="mt-4 flex items-center gap-1 text-sm font-medium text-primary hover:underline"
                         >
                             View stock report <ArrowRight className="h-3 w-3" />
@@ -394,7 +398,7 @@ export default function Dashboard({
                             </div>
                         </div>
                         <Link
-                            href={customers.index().url}
+                            href={customersIndex().url}
                             className="mt-4 flex items-center gap-1 text-sm font-medium text-primary hover:underline"
                         >
                             View customers <ArrowRight className="h-3 w-3" />
@@ -416,7 +420,7 @@ export default function Dashboard({
                                 recentSales.map((sale) => (
                                     <Link
                                         key={sale.id}
-                                        href={sales.show(sale.id).url}
+                                        href={salesShow(sale.id).url}
                                         className="flex items-center justify-between px-6 py-3 hover:bg-muted/50"
                                     >
                                         <div>
@@ -452,7 +456,7 @@ export default function Dashboard({
                                 recentPayments.map((payment) => (
                                     <Link
                                         key={payment.id}
-                                        href={payments.show(payment.id).url}
+                                        href={paymentsShow(payment.id).url}
                                         className="flex items-center justify-between px-6 py-3 hover:bg-muted/50"
                                     >
                                         <div>
@@ -491,7 +495,7 @@ export default function Dashboard({
                                 recentExpenses.map((expense) => (
                                     <Link
                                         key={expense.id}
-                                        href={expenses.show(expense.id).url}
+                                        href={expensesShow(expense.id).url}
                                         className="flex items-center justify-between px-6 py-3 hover:bg-muted/50"
                                     >
                                         <div>

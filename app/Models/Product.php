@@ -49,7 +49,7 @@ final class Product extends Model
     /**
      * Get the display name with size.
      */
-    public function getDisplayNameAttribute(): string
+    protected function getDisplayNameAttribute(): string
     {
         return $this->size ? "{$this->name} ({$this->size})" : $this->name;
     }
@@ -57,7 +57,7 @@ final class Product extends Model
     /**
      * Format stock as bundles + pieces.
      */
-    public function getFormattedStockAttribute(): string
+    protected function getFormattedStockAttribute(): string
     {
         $bundles = (int) floor($this->stock_pieces / $this->pieces_per_bundle);
         $remaining = $this->stock_pieces % $this->pieces_per_bundle;
