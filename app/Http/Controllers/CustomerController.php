@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\Sale;
 use Carbon\Carbon;
+use DateTimeInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -176,7 +177,7 @@ final class CustomerController
             ->oldest('sale_date')
             ->orderBy('id')
             ->get()
-            ->map(fn ($sale): array => [
+            ->map(fn($sale): array => [
                 'id' => $sale->id,
                 'date' => $sale->sale_date->format('Y-m-d'),
                 'type' => 'sale',
@@ -193,11 +194,11 @@ final class CustomerController
             ->orderBy('payment_date')
             ->orderBy('id')
             ->get()
-            ->map(fn ($payment): array => [
+            ->map(fn($payment): array => [
                 'id' => $payment->id,
                 'date' => $payment->payment_date->format('Y-m-d'),
                 'type' => 'payment',
-                'description' => 'Payment'.($payment->paymentType ? " ({$payment->paymentType->name})" : ''),
+                'description' => 'Payment' . ($payment->paymentType ? " ({$payment->paymentType->name})" : ''),
                 'reference' => $payment->payment_ref,
                 'debit' => 0,
                 'credit' => (float) $payment->amount,
@@ -235,7 +236,7 @@ final class CustomerController
     /**
      * Calculate opening balance for a customer as of a specific date.
      */
-    private function calculateOpeningBalance(Customer $customer, Carbon $startDate): float
+    private function calculateOpeningBalance(Customer $customer, DateTimeInterface $startDate): float
     {
         $openingBalance = 0.0;
 
