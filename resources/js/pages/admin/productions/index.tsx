@@ -336,7 +336,7 @@ export default function ProductionsIndex({
                     {/* Pagination */}
                     {productions.links.length > 3 && (
                         <div className="mt-6">
-                            <Paginator links={productions.links} />
+                            <Paginator pagination={productions.links} />
                         </div>
                     )}
                 </div>

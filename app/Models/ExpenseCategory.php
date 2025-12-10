@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 final class ExpenseCategory extends Model
 {
+    /**
+     * @use HasFactory<\Database\Factories\ExpenseCategoryFactory>
+     */
     use HasFactory;
 
     /**

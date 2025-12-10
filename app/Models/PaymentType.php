@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 final class PaymentType extends Model
 {
+    /**
+     * @use HasFactory<\Database\Factories\PaymentTypeFactory>
+     */
     use HasFactory;
 
     /**

@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 final class Payment extends Model
 {
+    /**
+     * @use HasFactory<\Database\Factories\PaymentFactory>
+     */
     use HasFactory;
 
     /**

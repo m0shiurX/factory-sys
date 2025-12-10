@@ -252,13 +252,12 @@ export default function ExpensesIndex({
                             </div>
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition ${
-                                    showFilters ||
-                                    filters.category_id ||
-                                    filters.from_date
+                                className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition ${showFilters ||
+                                        filters.category_id ||
+                                        filters.from_date
                                         ? 'border-primary bg-primary/10 text-primary'
                                         : 'border-border text-foreground hover:bg-muted'
-                                }`}
+                                    }`}
                             >
                                 <Filter className="h-4 w-4" />
                                 Filters
@@ -428,7 +427,7 @@ export default function ExpensesIndex({
                     {/* Pagination */}
                     {expenses.links.length > 3 && (
                         <div className="mt-6">
-                            <Paginator links={expenses.links} />
+                            <Paginator pagination={expenses.links} />
                         </div>
                     )}
                 </div>

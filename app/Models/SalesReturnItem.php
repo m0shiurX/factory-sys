@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\SalesReturnItemFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 final class SalesReturnItem extends Model
 {
+    /**
+     * @use HasFactory<SalesReturnItemFactory>
+     */
     use HasFactory;
 
     /**

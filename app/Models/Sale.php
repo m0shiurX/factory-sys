@@ -4,13 +4,39 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\SaleFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property-read int $id
+ * @property-read string $bill_no
+ * @property-read int $customer_id
+ * @property-read \Carbon\CarbonInterface $sale_date
+ * @property-read int $total_pieces
+ * @property-read float $total_weight_kg
+ * @property-read float $total_amount
+ * @property-read float $discount
+ * @property-read float $net_amount
+ * @property-read float $paid_amount
+ * @property-read float $due_amount
+ * @property-read int|null $payment_type_id
+ * @property-read string|null $notes
+ * @property-read int $created_by
+ * @property-read \Carbon\CarbonInterface $created_at
+ * @property-read \Carbon\CarbonInterface $updated_at
+ * @property-read Customer $customer
+ * @property-read PaymentType|null $paymentType
+ * @property-read User $createdBy
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, SalesItem> $items
+ */
 final class Sale extends Model
 {
+    /**
+     * @use HasFactory<SaleFactory>
+     */
     use HasFactory;
 
     /**

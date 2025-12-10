@@ -7,7 +7,6 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\Sale;
-use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -177,7 +176,7 @@ final class CustomerController
             ->oldest('sale_date')
             ->orderBy('id')
             ->get()
-            ->map(fn($sale): array => [
+            ->map(fn ($sale): array => [
                 'id' => $sale->id,
                 'date' => $sale->sale_date->format('Y-m-d'),
                 'type' => 'sale',
@@ -194,11 +193,11 @@ final class CustomerController
             ->orderBy('payment_date')
             ->orderBy('id')
             ->get()
-            ->map(fn($payment): array => [
+            ->map(fn (Payment $payment): array => [
                 'id' => $payment->id,
-                'date' => $payment->payment_date->format('Y-m-d'),
+                'date' => \Illuminate\Support\Facades\Date::parse($payment->payment_date)->format('Y-m-d'),
                 'type' => 'payment',
-                'description' => 'Payment' . ($payment->paymentType ? " ({$payment->paymentType->name})" : ''),
+                'description' => 'Payment'.($payment->paymentType ? " ({$payment->paymentType->name})" : ''),
                 'reference' => $payment->payment_ref,
                 'debit' => 0,
                 'credit' => (float) $payment->amount,

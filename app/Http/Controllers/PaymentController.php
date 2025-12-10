@@ -125,8 +125,9 @@ final class PaymentController
 
             // If linked to a sale, update the sale's paid_amount and due_amount
             if (! empty($validated['sale_id'])) {
+                /** @var Sale|null $sale */
                 $sale = Sale::query()->find($validated['sale_id']);
-                if ($sale) {
+                if ($sale instanceof Sale) {
                     $newPaid = (float) $sale->paid_amount + (float) $validated['amount'];
                     $newDue = (float) $sale->net_amount - $newPaid;
                     $sale->update([
@@ -208,8 +209,9 @@ final class PaymentController
 
             // If old sale was linked, restore its due
             if ($payment->sale_id) {
+                /** @var Sale|null $oldSale */
                 $oldSale = Sale::query()->find($payment->sale_id);
-                if ($oldSale) {
+                if ($oldSale instanceof Sale) {
                     $oldSale->update([
                         'paid_amount' => (float) $oldSale->paid_amount - $oldAmount,
                         'due_amount' => (float) $oldSale->due_amount + $oldAmount,
@@ -230,8 +232,9 @@ final class PaymentController
 
             // If new sale is linked, update its paid/due
             if (! empty($validated['sale_id'])) {
+                /** @var Sale|null $newSale */
                 $newSale = Sale::query()->find($validated['sale_id']);
-                if ($newSale) {
+                if ($newSale instanceof Sale) {
                     $newSale->update([
                         'paid_amount' => (float) $newSale->paid_amount + $newAmount,
                         'due_amount' => max(0, (float) $newSale->due_amount - $newAmount),
@@ -256,8 +259,9 @@ final class PaymentController
 
             // Restore sale due if linked
             if ($payment->sale_id) {
+                /** @var Sale|null $sale */
                 $sale = Sale::query()->find($payment->sale_id);
-                if ($sale) {
+                if ($sale instanceof Sale) {
                     $sale->update([
                         'paid_amount' => (float) $sale->paid_amount - (float) $payment->amount,
                         'due_amount' => (float) $sale->due_amount + (float) $payment->amount,

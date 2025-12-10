@@ -181,11 +181,10 @@ export default function StockIndex({
                                     filters.filter === 'low' ? null : 'low',
                                 )
                             }
-                            className={`rounded-xl border p-4 text-left transition ${
-                                filters.filter === 'low'
+                            className={`rounded-xl border p-4 text-left transition ${filters.filter === 'low'
                                     ? 'border-amber-500 bg-amber-500/10'
                                     : 'border-border bg-card hover:border-amber-500/50'
-                            }`}
+                                }`}
                         >
                             <div className="flex items-center justify-between">
                                 <div>
@@ -207,11 +206,10 @@ export default function StockIndex({
                                     filters.filter === 'out' ? null : 'out',
                                 )
                             }
-                            className={`rounded-xl border p-4 text-left transition ${
-                                filters.filter === 'out'
+                            className={`rounded-xl border p-4 text-left transition ${filters.filter === 'out'
                                     ? 'border-red-500 bg-red-500/10'
                                     : 'border-border bg-card hover:border-red-500/50'
-                            }`}
+                                }`}
                         >
                             <div className="flex items-center justify-between">
                                 <div>
@@ -347,7 +345,7 @@ export default function StockIndex({
                             {/* Pagination */}
                             {products.links.length > 3 && (
                                 <div className="mt-4">
-                                    <Paginator links={products.links} />
+                                    <Paginator pagination={products.links} />
                                 </div>
                             )}
                         </div>

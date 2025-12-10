@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 final class Customer extends Model
 {
+    /**
+     * @use HasFactory<\Database\Factories\CustomerFactory>
+     */
     use HasFactory;
 
     /**

@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 final class Production extends Model
 {
+    /**
+     * @use HasFactory<\Database\Factories\ProductionFactory>
+     */
     use HasFactory;
 
     /**

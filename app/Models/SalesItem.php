@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 final class SalesItem extends Model
 {
+    /**
+     * @use HasFactory<\Database\Factories\SalesItemFactory>
+     */
     use HasFactory;
 
     /**
