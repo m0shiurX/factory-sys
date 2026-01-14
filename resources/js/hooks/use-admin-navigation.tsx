@@ -14,18 +14,6 @@ import {
     Wallet,
 } from 'lucide-react';
 
-/**
-childRoutes: [
-    {
-        title: 'Admins',
-        href: '/users',
-    },
-    {
-        title: 'Create User',
-        href: '/users/create',
-    },
-],
-**/
 export function useAdminNavigation() {
     const mainNavItems: NavItem[] = [
         {
@@ -35,7 +23,27 @@ export function useAdminNavigation() {
         },
     ];
 
-    const businessItems: NavItem[] = [
+    // Inventory & Production - product-related items grouped together
+    const inventoryItems: NavItem[] = [
+        {
+            title: 'Products',
+            href: '/dashboard/products',
+            icon: Box,
+        },
+        {
+            title: 'Production',
+            href: '/dashboard/productions',
+            icon: Factory,
+        },
+        {
+            title: 'Stock Report',
+            href: '/dashboard/stock',
+            icon: BarChart3,
+        },
+    ];
+
+    // Sales & Transactions - revenue-related items grouped together
+    const salesItems: NavItem[] = [
         {
             title: 'Sales',
             href: '/dashboard/sales',
@@ -56,21 +64,10 @@ export function useAdminNavigation() {
             href: '/dashboard/expenses',
             icon: Coins,
         },
-        {
-            title: 'Production',
-            href: '/dashboard/productions',
-            icon: Factory,
-        },
-        {
-            title: 'Stock Report',
-            href: '/dashboard/stock',
-            icon: BarChart3,
-        },
-        {
-            title: 'Products',
-            href: '/dashboard/products',
-            icon: Box,
-        },
+    ];
+
+    // Customers
+    const customerItems: NavItem[] = [
         {
             title: 'Customers',
             href: '/dashboard/customers',
@@ -78,6 +75,7 @@ export function useAdminNavigation() {
         },
     ];
 
+    // Administration & Access Control
     const managementItems: NavItem[] = [
         {
             title: 'User Management',
@@ -101,11 +99,19 @@ export function useAdminNavigation() {
             items: mainNavItems,
         },
         {
-            title: 'Business',
-            items: businessItems,
+            title: 'Inventory',
+            items: inventoryItems,
         },
         {
-            title: 'Management',
+            title: 'Sales & Finance',
+            items: salesItems,
+        },
+        {
+            title: 'Customers',
+            items: customerItems,
+        },
+        {
+            title: 'Administration',
             items: managementItems,
         },
     ];
