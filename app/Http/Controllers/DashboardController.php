@@ -57,11 +57,11 @@ final class DashboardController
         // Stock summary
         $stockSummary = [
             'total_products' => Product::query()->count(),
-            'low_stock_products' => Product::query()->whereColumn('stock_quantity', '<=', 'low_stock_threshold')
-                ->where('stock_quantity', '>', 0)
+            'low_stock_products' => Product::query()->whereColumn('stock_pieces', '<=', 'min_stock_alert')
+                ->where('stock_pieces', '>', 0)
                 ->count(),
-            'out_of_stock_products' => Product::query()->where('stock_quantity', 0)->count(),
-            'total_stock_quantity' => (int) Product::query()->sum('stock_quantity'),
+            'out_of_stock_products' => Product::query()->where('stock_pieces', 0)->count(),
+            'total_stock_quantity' => (int) Product::query()->sum('stock_pieces'),
         ];
 
         // Customer summary
