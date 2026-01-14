@@ -50,8 +50,8 @@ final class DashboardController
         $productionStats = [
             'total_productions' => Production::query()->count(),
             'today_productions' => Production::query()->whereDate('production_date', $today)->count(),
-            'today_quantity' => (int) Production::query()->whereDate('production_date', $today)->sum('quantity'),
-            'this_month_quantity' => (int) Production::query()->whereDate('production_date', '>=', $thisMonth)->sum('quantity'),
+            'today_quantity' => (int) Production::query()->whereDate('production_date', $today)->sum('pieces_produced'),
+            'this_month_quantity' => (int) Production::query()->whereDate('production_date', '>=', $thisMonth)->sum('pieces_produced'),
         ];
 
         // Stock summary
