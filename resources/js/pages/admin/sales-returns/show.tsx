@@ -1,3 +1,4 @@
+import PrintInvoice from '@/components/common/print-invoice';
 import AppLayout from '@/layouts/app-layout';
 import { Link, router } from '@inertiajs/react';
 import {
@@ -8,12 +9,15 @@ import {
     Trash2,
     User,
 } from 'lucide-react';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 type Customer = {
     id: number;
     name: string;
     phone: string | null;
     address: string | null;
+    total_due: number;
 };
 
 type Sale = {
@@ -64,9 +68,10 @@ type SalesReturn = {
 
 type Props = {
     salesReturn: SalesReturn;
+    auto_print?: boolean;
 };
 
-export default function SalesReturnShow({ salesReturn }: Props) {
+export default function SalesReturnShow({ salesReturn, auto_print }: Props) {
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-BD', {
             style: 'currency',
@@ -97,10 +102,21 @@ export default function SalesReturnShow({ salesReturn }: Props) {
         }
     };
 
+    // Auto print when redirected from create
+    useEffect(() => {
+        if (auto_print) {
+            toast.success('Sales return recorded successfully');
+            const timer = setTimeout(() => {
+                window.print();
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [auto_print]);
+
     return (
         <AppLayout>
-            <div className="min-h-screen bg-background p-6 print:bg-white print:p-0">
-                <div className="mx-auto max-w-4xl">
+            <div className="invoice-print-area min-h-screen bg-background p-6 print:bg-white print:p-4">
+                <div className="mx-auto max-w-4xl print:max-w-full">
                     {/* Header - Hide on print */}
                     <div className="mb-6 flex items-center justify-between print:hidden">
                         <Link
@@ -138,7 +154,7 @@ export default function SalesReturnShow({ salesReturn }: Props) {
                     {/* Return Card */}
                     <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm print:border-0 print:shadow-none">
                         {/* Return Header */}
-                        <div className="bg-gradient-to-r from-red-500 to-red-600 px-6 py-5 print:bg-red-500">
+                        <div className="bg-linear-to-r from-red-500 to-red-600 px-6 py-5 print:bg-red-500">
                             <div className="flex items-start justify-between">
                                 <div>
                                     <div className="flex items-center gap-3">
@@ -248,7 +264,7 @@ export default function SalesReturnShow({ salesReturn }: Props) {
                                                     )}
                                                     {item.bundles > 0 &&
                                                         item.extra_pieces >
-                                                            0 && (
+                                                        0 && (
                                                             <span> + </span>
                                                         )}
                                                     {item.extra_pieces > 0 && (
@@ -339,6 +355,34 @@ export default function SalesReturnShow({ salesReturn }: Props) {
                     </div>
                 </div>
             </div>
+
+            {/* Print Layout - Hidden on screen, visible only when printing */}
+            <PrintInvoice
+                type="return"
+                invoiceNo={salesReturn.return_no}
+                date={new Date(salesReturn.return_date).toLocaleDateString('en-BD', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                })}
+                soldBy={salesReturn.created_by?.name || 'Admin'}
+                customerName={salesReturn.customer.name}
+                customerContact={salesReturn.customer.phone}
+                items={salesReturn.items.map((item, index) => ({
+                    sl: index + 1,
+                    name: `${item.product.name}${item.product.size ? ` (${item.product.size})` : ''}`,
+                    rate: item.rate_per_kg,
+                    qty: `${item.weight_kg} KG`,
+                    total: item.sub_total,
+                }))}
+                subTotal={salesReturn.sub_total}
+                discount={salesReturn.discount}
+                grandTotal={salesReturn.grand_total}
+                paidTotal={0}
+                dueAmount={salesReturn.grand_total}
+                customerTotalDue={salesReturn.customer.total_due}
+                totalWeight={salesReturn.total_weight}
+            />
         </AppLayout>
     );
 }

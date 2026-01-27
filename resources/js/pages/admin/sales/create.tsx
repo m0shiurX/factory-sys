@@ -444,12 +444,14 @@ export default function SaleCreate({
                                         setProductSearch(e.target.value);
                                         setShowProductDropdown(true);
                                     }}
-                                    onFocus={() => setShowProductDropdown(true)}
                                     className="w-full rounded-lg border border-border bg-card py-3 pr-4 pl-10 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                 />
                                 {showProductDropdown &&
                                     filteredProducts.length > 0 && (
-                                        <div className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-card shadow-lg">
+                                        <div
+                                            className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-card shadow-lg"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
                                             {filteredProducts.map((product) => (
                                                 <button
                                                     key={product.id}
@@ -698,8 +700,8 @@ export default function SaleCreate({
                                                     'payment_type_id',
                                                     e.target.value
                                                         ? parseInt(
-                                                              e.target.value,
-                                                          )
+                                                            e.target.value,
+                                                        )
                                                         : null,
                                                 )
                                             }

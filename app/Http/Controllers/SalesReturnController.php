@@ -32,7 +32,7 @@ final class SalesReturnController
             $search = $request->string('search')->trim()->value();
             $query->where(function ($q) use ($search): void {
                 $q->where('return_no', 'like', "%{$search}%")
-                    ->orWhereHas('customer', fn ($cq) => $cq->where('name', 'like', "%{$search}%"));
+                    ->orWhereHas('customer', fn($cq) => $cq->where('name', 'like', "%{$search}%"));
             });
         }
 
@@ -102,7 +102,7 @@ final class SalesReturnController
     {
         $validated = $request->validated();
 
-        DB::transaction(function () use ($validated): void {
+        $salesReturn = DB::transaction(function () use ($validated): SalesReturn {
             // Create the sales return
             $return = SalesReturn::query()->create([
                 'return_no' => $validated['return_no'],
@@ -137,10 +137,13 @@ final class SalesReturnController
             // Reduce customer total_due (they owe less now)
             Customer::query()->where('id', $validated['customer_id'])
                 ->decrement('total_due', $validated['grand_total']);
+
+            return $return;
         });
 
-        return to_route('sales-returns.index')
-            ->with('success', 'Sales return recorded successfully.');
+        return to_route('sales-returns.show', $salesReturn)
+            ->with('success', 'Sales return recorded successfully.')
+            ->with('auto_print', true);
     }
 
     /**
@@ -149,7 +152,7 @@ final class SalesReturnController
     public function show(SalesReturn $salesReturn): Response
     {
         $salesReturn->load([
-            'customer:id,name,phone,address',
+            'customer:id,name,phone,address,total_due',
             'sale:id,bill_no,sale_date',
             'items.product:id,name,size,pieces_per_bundle',
             'createdBy:id,name',
@@ -157,6 +160,7 @@ final class SalesReturnController
 
         return Inertia::render('admin/sales-returns/show', [
             'salesReturn' => $salesReturn,
+            'auto_print' => session('auto_print', false),
         ]);
     }
 

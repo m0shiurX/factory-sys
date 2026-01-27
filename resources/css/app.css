@@ -178,3 +178,89 @@
     --shadow-xl: var(--shadow-xl);
     --shadow-2xl: var(--shadow-2xl);
 }
+
+/* Print Styles */
+@media print {
+
+    /* Hide everything except print invoice */
+    body * {
+        visibility: hidden;
+    }
+
+    /* Show the print invoice container */
+    .print-invoice-container,
+    .print-invoice-container * {
+        visibility: visible !important;
+    }
+
+    .print-invoice-container {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Prevent extra page */
+    .print-invoice-container>div {
+        page-break-after: avoid;
+        page-break-inside: avoid;
+    }
+
+    /* Ensure table displays correctly */
+    .print-invoice-container table {
+        display: table !important;
+        page-break-inside: avoid;
+    }
+
+    .print-invoice-container thead {
+        display: table-header-group !important;
+    }
+
+    .print-invoice-container tbody {
+        display: table-row-group !important;
+    }
+
+    .print-invoice-container tr {
+        display: table-row !important;
+        page-break-inside: avoid;
+    }
+
+    .print-invoice-container th,
+    .print-invoice-container td {
+        display: table-cell !important;
+    }
+
+    /* Flex containers in print */
+    .print-invoice-container .flex {
+        display: flex !important;
+        visibility: visible !important;
+    }
+
+    /* Reset body and html - prevent extra page */
+    html,
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+        width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Hide elements that might cause extra page */
+    html::after,
+    body::after {
+        display: none !important;
+    }
+
+    /* Page size and margins for A4 */
+    @page {
+        size: A4;
+        margin: 10mm;
+    }
+}

@@ -92,7 +92,7 @@ final class SaleController
     {
         $validated = $request->validated();
 
-        DB::transaction(function () use ($validated): void {
+        $sale = DB::transaction(function () use ($validated): Sale {
             // Create the sale
             $sale = Sale::query()->create([
                 'bill_no' => $validated['bill_no'],
@@ -130,10 +130,13 @@ final class SaleController
             // Update customer total_due
             Customer::query()->where('id', $validated['customer_id'])
                 ->increment('total_due', $validated['due_amount']);
+
+            return $sale;
         });
 
-        return to_route('sales.index')
-            ->with('success', 'Sale created successfully.');
+        return to_route('sales.show', $sale)
+            ->with('success', 'Sale created successfully.')
+            ->with('auto_print', true);
     }
 
     /**
@@ -150,6 +153,7 @@ final class SaleController
 
         return Inertia::render('admin/sales/show', [
             'sale' => $sale,
+            'auto_print' => session('auto_print', false),
         ]);
     }
 

@@ -1,6 +1,9 @@
+import PrintInvoice from '@/components/common/print-invoice';
 import AppLayout from '@/layouts/app-layout';
 import { Link } from '@inertiajs/react';
 import { ArrowLeft, Printer, Receipt, User } from 'lucide-react';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 type Customer = {
     id: number;
@@ -60,9 +63,10 @@ type Sale = {
 
 type Props = {
     sale: Sale;
+    auto_print?: boolean;
 };
 
-export default function SaleShow({ sale }: Props) {
+export default function SaleShow({ sale, auto_print }: Props) {
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-BD', {
             style: 'currency',
@@ -83,12 +87,24 @@ export default function SaleShow({ sale }: Props) {
         window.print();
     };
 
+    // Auto print when redirected from create
+    useEffect(() => {
+        if (auto_print) {
+            toast.success('Sale created successfully');
+            // Small delay to ensure page is fully rendered
+            const timer = setTimeout(() => {
+                window.print();
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [auto_print]);
+
     return (
         <AppLayout>
-            <div className="min-h-screen bg-background p-6 print:bg-white print:p-0">
-                <div className="mx-auto max-w-4xl">
+            <div className="invoice-print-area min-h-screen bg-background p-6 print:bg-white print:p-4">
+                <div className="mx-auto max-w-4xl print:max-w-full">
                     {/* Header - Hide on print */}
-                    <div className="mb-6 flex items-center justify-between print:hidden">
+                    <div className="mb-6 flex items-center justify-between print:hidden print:mb-0">
                         <Link
                             href="/dashboard/sales"
                             className="inline-flex items-center gap-2 text-muted-foreground transition hover:text-foreground"
@@ -106,9 +122,9 @@ export default function SaleShow({ sale }: Props) {
                     </div>
 
                     {/* Invoice Card */}
-                    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm print:border-0 print:shadow-none">
+                    <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm print:border print:border-gray-300 print:shadow-none print:rounded-none">
                         {/* Invoice Header */}
-                        <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 px-6 py-5 print:bg-emerald-500">
+                        <div className="bg-linear-to-r from-emerald-500 to-emerald-600 px-6 py-5 print:bg-emerald-500">
                             <div className="flex items-start justify-between">
                                 <div>
                                     <div className="flex items-center gap-3">
@@ -156,11 +172,10 @@ export default function SaleShow({ sale }: Props) {
                                         Total Due
                                     </p>
                                     <p
-                                        className={`text-2xl font-bold ${
-                                            sale.customer.total_due > 0
-                                                ? 'text-red-600'
-                                                : 'text-emerald-600'
-                                        }`}
+                                        className={`text-2xl font-bold ${sale.customer.total_due > 0
+                                            ? 'text-red-600'
+                                            : 'text-emerald-600'
+                                            }`}
                                     >
                                         {formatCurrency(
                                             sale.customer.total_due,
@@ -344,6 +359,34 @@ export default function SaleShow({ sale }: Props) {
                     </div>
                 </div>
             </div>
+
+            {/* Print Layout - Hidden on screen, visible only when printing */}
+            <PrintInvoice
+                type="sale"
+                invoiceNo={sale.bill_no}
+                date={new Date(sale.sale_date).toLocaleDateString('en-BD', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                })}
+                soldBy={sale.created_by?.name || 'Admin'}
+                customerName={sale.customer.name}
+                customerContact={sale.customer.phone}
+                items={sale.items.map((item, index) => ({
+                    sl: index + 1,
+                    name: `${item.product.name}${item.product.size ? ` (${item.product.size})` : ''}`,
+                    rate: item.rate_per_kg,
+                    qty: `${item.weight_kg} KG`,
+                    total: item.amount,
+                }))}
+                subTotal={sale.total_amount}
+                discount={sale.discount}
+                grandTotal={sale.net_amount}
+                paidTotal={sale.paid_amount}
+                dueAmount={sale.due_amount}
+                customerTotalDue={sale.customer.total_due}
+                totalWeight={sale.total_weight_kg}
+            />
         </AppLayout>
     );
 }
