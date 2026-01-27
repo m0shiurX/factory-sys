@@ -187,7 +187,7 @@ final class DashboardController
             'hsl(220 70% 50%)',
         ];
 
-        return $expenses->values()->map(fn($expense, $index) => [
+        return $expenses->values()->map(fn ($expense, $index) => [
             'name' => $expense->name,
             'value' => (float) $expense->total,
             'fill' => $colors[$index] ?? $colors[0],

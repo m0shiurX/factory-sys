@@ -182,15 +182,23 @@
 /* Print Styles */
 @media print {
 
-    /* Hide everything except print invoice */
+    /* Hide everything by default */
     body * {
         visibility: hidden;
+    }
+
+    /* Hide the screen version completely - prevents extra page */
+    .invoice-print-area {
+        display: none !important;
+        height: 0 !important;
+        overflow: hidden !important;
     }
 
     /* Show the print invoice container */
     .print-invoice-container,
     .print-invoice-container * {
         visibility: visible !important;
+        display: block;
     }
 
     .print-invoice-container {

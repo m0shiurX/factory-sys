@@ -1,3 +1,4 @@
+import PrintStatement from '@/components/common/print-statement';
 import AppLayout from '@/layouts/app-layout';
 import { Link, router } from '@inertiajs/react';
 import {
@@ -92,7 +93,7 @@ export default function CustomerStatement({
 
     return (
         <AppLayout>
-            <div className="min-h-screen bg-background p-6 print:bg-white print:p-0">
+            <div className="invoice-print-area min-h-screen bg-background p-6 print:bg-white print:p-0">
                 <div className="mx-auto max-w-5xl">
                     {/* Header - Hide on print */}
                     <div className="mb-6 flex items-center justify-between print:hidden">
@@ -198,13 +199,12 @@ export default function CustomerStatement({
                                     {formatDate(statement.from_date)})
                                 </span>
                                 <span
-                                    className={`text-lg font-semibold ${
-                                        statement.opening_balance > 0
+                                    className={`text-lg font-semibold ${statement.opening_balance > 0
                                             ? 'text-red-600'
                                             : statement.opening_balance < 0
-                                              ? 'text-emerald-600'
-                                              : 'text-foreground'
-                                    }`}
+                                                ? 'text-emerald-600'
+                                                : 'text-foreground'
+                                        }`}
                                 >
                                     {formatCurrency(statement.opening_balance)}
                                 </span>
@@ -248,11 +248,10 @@ export default function CustomerStatement({
                                             (txn, index) => (
                                                 <tr
                                                     key={`${txn.type}-${txn.id}`}
-                                                    className={`border-b border-border ${
-                                                        index % 2 === 0
+                                                    className={`border-b border-border ${index % 2 === 0
                                                             ? 'bg-background'
                                                             : 'bg-muted/20'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <td className="px-4 py-3 text-sm whitespace-nowrap text-foreground">
                                                         {formatDate(txn.date)}
@@ -260,7 +259,7 @@ export default function CustomerStatement({
                                                     <td className="px-4 py-3">
                                                         <div className="flex items-center gap-2">
                                                             {txn.type ===
-                                                            'sale' ? (
+                                                                'sale' ? (
                                                                 <TrendingUp className="h-4 w-4 text-red-500" />
                                                             ) : (
                                                                 <TrendingDown className="h-4 w-4 text-emerald-500" />
@@ -320,15 +319,15 @@ export default function CustomerStatement({
                                         <td className="px-4 py-3 text-right text-sm font-semibold text-red-600">
                                             {statement.total_debit > 0
                                                 ? formatCurrency(
-                                                      statement.total_debit,
-                                                  )
+                                                    statement.total_debit,
+                                                )
                                                 : '-'}
                                         </td>
                                         <td className="px-4 py-3 text-right text-sm font-semibold text-emerald-600">
                                             {statement.total_credit > 0
                                                 ? formatCurrency(
-                                                      statement.total_credit,
-                                                  )
+                                                    statement.total_credit,
+                                                )
                                                 : '-'}
                                         </td>
                                         <td className="px-4 py-3"></td>
@@ -357,13 +356,12 @@ export default function CustomerStatement({
                                     </p>
                                 </div>
                                 <span
-                                    className={`text-2xl font-bold ${
-                                        statement.closing_balance > 0
+                                    className={`text-2xl font-bold ${statement.closing_balance > 0
                                             ? 'text-red-600'
                                             : statement.closing_balance < 0
-                                              ? 'text-emerald-600'
-                                              : 'text-foreground'
-                                    }`}
+                                                ? 'text-emerald-600'
+                                                : 'text-foreground'
+                                        }`}
                                 >
                                     {formatCurrency(statement.closing_balance)}
                                 </span>
@@ -425,6 +423,20 @@ export default function CustomerStatement({
                     </div>
                 </div>
             </div>
+
+            {/* Print Layout */}
+            <PrintStatement
+                customerName={customer.name}
+                customerPhone={customer.phone}
+                customerAddress={customer.address}
+                fromDate={statement.from_date}
+                toDate={statement.to_date}
+                openingBalance={statement.opening_balance}
+                closingBalance={statement.closing_balance}
+                totalDebit={statement.total_debit}
+                totalCredit={statement.total_credit}
+                transactions={transactionsWithBalance}
+            />
         </AppLayout>
     );
 }

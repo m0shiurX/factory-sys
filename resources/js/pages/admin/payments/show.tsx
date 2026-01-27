@@ -1,3 +1,4 @@
+import PrintReceipt from '@/components/common/print-receipt';
 import AppLayout from '@/layouts/app-layout';
 import { Link } from '@inertiajs/react';
 import {
@@ -78,7 +79,7 @@ export default function PaymentShow({ payment }: Props) {
 
     return (
         <AppLayout>
-            <div className="min-h-screen bg-background p-6 print:bg-white print:p-0">
+            <div className="invoice-print-area min-h-screen bg-background p-6 print:bg-white print:p-0">
                 <div className="mx-auto max-w-2xl">
                     {/* Header - Hide on print */}
                     <div className="mb-6 flex items-center justify-between print:hidden">
@@ -296,6 +297,22 @@ export default function PaymentShow({ payment }: Props) {
                     </div>
                 </div>
             </div>
+
+            {/* Print Layout */}
+            <PrintReceipt
+                receiptType="payment"
+                receiptDate={payment.payment_date}
+                amount={payment.amount}
+                customerName={payment.customer.name}
+                customerPhone={payment.customer.phone}
+                customerAddress={payment.customer.address}
+                customerTotalDue={payment.customer.total_due}
+                paymentMethod={payment.payment_type?.name}
+                paymentRef={payment.payment_ref}
+                linkedInvoice={payment.sale?.bill_no}
+                note={payment.note}
+                processedBy={payment.created_by?.name}
+            />
         </AppLayout>
     );
 }

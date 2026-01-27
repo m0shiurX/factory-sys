@@ -14,6 +14,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\SalesReturnController;
 use App\Http\Controllers\SessionController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StockReportController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserEmailResetNotification;
@@ -146,6 +147,12 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->group(function ():
     Route::get('sales-returns/{salesReturn}/edit', [SalesReturnController::class, 'edit'])->name('sales-returns.edit');
     Route::put('sales-returns/{salesReturn}', [SalesReturnController::class, 'update'])->name('sales-returns.update');
     Route::delete('sales-returns/{salesReturn}', [SalesReturnController::class, 'destroy'])->name('sales-returns.destroy');
+});
+
+// Settings routes
+Route::middleware(['auth', 'verified'])->prefix('dashboard')->group(function (): void {
+    Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
 });
 
 Route::middleware('auth')->group(function (): void {

@@ -42,7 +42,7 @@ export default function PrintInvoice({
     customerTotalDue,
     totalWeight,
 }: PrintInvoiceProps) {
-    const { name } = usePage<SharedData>().props;
+    const { name, settings } = usePage<SharedData>().props;
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-BD', {
@@ -57,12 +57,14 @@ export default function PrintInvoice({
                 {/* Header */}
                 <div className="mb-4 text-center">
                     <h1 className="text-2xl font-bold tracking-wide">
-                        {name || 'Lavloss'}
+                        {settings?.company_name || name || 'Company Name'}
                     </h1>
                     <p className="text-sm text-gray-600">
-                        Uposhohor Main Road, Bogura Sadar
+                        {settings?.company_address || 'Company Address'}
                     </p>
-                    <p className="text-sm text-gray-600">+8801XXXXXXXXX</p>
+                    <p className="text-sm text-gray-600">
+                        {settings?.company_phone || 'Phone Number'}
+                    </p>
                 </div>
 
                 {/* Invoice Type Badge */}
@@ -208,11 +210,13 @@ export default function PrintInvoice({
                 {/* Footer */}
                 <div className="mt-4 text-center">
                     <p className="text-sm italic text-gray-500">
-                        Thank you for your business!
+                        {settings?.invoice_footer_message || 'Thank you for your business!'}
                     </p>
-                    <p className="mt-2 text-xs text-gray-400">
-                        Developed by lavloss.com
-                    </p>
+                    {settings?.invoice_developed_by && (
+                        <p className="mt-2 text-xs text-gray-400">
+                            {settings.invoice_developed_by}
+                        </p>
+                    )}
                 </div>
             </div>
         </div>

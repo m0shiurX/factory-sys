@@ -34,6 +34,15 @@ export interface Videos {
     [key: string]: string;
 }
 
+export interface AppSettings {
+    company_name?: string;
+    company_address?: string;
+    company_phone?: string;
+    invoice_footer_message?: string;
+    invoice_developed_by?: string;
+    [key: string]: string | undefined;
+}
+
 export interface SharedData {
     name: string;
     quote: { message: string; author: string };
@@ -44,6 +53,7 @@ export interface SharedData {
         error: string | null;
     };
     videos: Videos;
+    settings: AppSettings;
     [key: string]: unknown;
 }
 

@@ -8,6 +8,7 @@ import {
     LayoutGrid,
     Receipt,
     RotateCcw,
+    Settings,
     Shield,
     UserRound,
     Users,
@@ -91,6 +92,11 @@ export function useAdminNavigation() {
             title: 'Activity Log',
             href: '/activities',
             icon: FileText,
+        },
+        {
+            title: 'Settings',
+            href: '/dashboard/settings',
+            icon: Settings,
         },
     ];
 
