@@ -7,6 +7,7 @@ type Transaction = {
     type: 'sale' | 'payment' | 'sales_return';
     description: string;
     reference: string | null;
+    payment_info: string | null;
     debit: number;
     credit: number;
     balance: number;
@@ -132,6 +133,9 @@ export default function PrintStatement({
                                 <th className="px-2 py-2 text-left text-xs font-semibold uppercase">
                                     Description
                                 </th>
+                                <th className="px-2 py-2 text-left text-xs font-semibold uppercase">
+                                    Payment
+                                </th>
                                 <th className="px-2 py-2 text-right text-xs font-semibold uppercase">
                                     Debit
                                 </th>
@@ -146,7 +150,7 @@ export default function PrintStatement({
                         <tbody>
                             {transactions.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-2 py-4 text-center text-gray-500">
+                                    <td colSpan={6} className="px-2 py-4 text-center text-gray-500">
                                         No transactions in this period
                                     </td>
                                 </tr>
@@ -164,6 +168,9 @@ export default function PrintStatement({
                                                 </span>
                                             )}
                                         </td>
+                                        <td className="px-2 py-1.5 text-xs text-gray-500">
+                                            {txn.payment_info || '—'}
+                                        </td>
                                         <td className="px-2 py-1.5 text-right text-red-600">
                                             {txn.debit > 0 ? formatCurrency(txn.debit) : ''}
                                         </td>
@@ -179,7 +186,7 @@ export default function PrintStatement({
                         </tbody>
                         <tfoot>
                             <tr className="border-t-2 border-black bg-gray-100">
-                                <td colSpan={2} className="px-2 py-2 font-semibold">
+                                <td colSpan={3} className="px-2 py-2 font-semibold">
                                     Total
                                 </td>
                                 <td className="px-2 py-2 text-right font-semibold text-red-600">

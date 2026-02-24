@@ -26,6 +26,7 @@ type Transaction = {
     type: 'sale' | 'payment' | 'sales_return';
     description: string;
     reference: string | null;
+    payment_info: string | null;
     debit: number;
     credit: number;
 };
@@ -223,6 +224,9 @@ export default function CustomerStatement({
                                         <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
                                             Description
                                         </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">
+                                            Payment
+                                        </th>
                                         <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">
                                             Debit
                                         </th>
@@ -238,7 +242,7 @@ export default function CustomerStatement({
                                     {transactionsWithBalance.length === 0 ? (
                                         <tr>
                                             <td
-                                                colSpan={5}
+                                                colSpan={6}
                                                 className="px-4 py-8 text-center text-muted-foreground"
                                             >
                                                 No transactions in this period
@@ -281,6 +285,9 @@ export default function CustomerStatement({
                                                                 )}
                                                             </div>
                                                         </div>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm whitespace-nowrap text-muted-foreground">
+                                                        {txn.payment_info || '—'}
                                                     </td>
                                                     <td className="px-4 py-3 text-right text-sm whitespace-nowrap">
                                                         {txn.debit > 0 && (

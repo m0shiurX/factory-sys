@@ -41,7 +41,7 @@ final class PaymentTypeController
     public function update(Request $request, PaymentType $paymentType): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:payment_types,name,' . $paymentType->id],
+            'name' => ['required', 'string', 'max:255', 'unique:payment_types,name,'.$paymentType->id],
             'is_active' => ['boolean'],
         ]);
 

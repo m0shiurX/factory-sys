@@ -32,7 +32,7 @@ final class SalesReturnController
             $search = $request->string('search')->trim()->value();
             $query->where(function ($q) use ($search): void {
                 $q->where('return_no', 'like', "%{$search}%")
-                    ->orWhereHas('customer', fn($cq) => $cq->where('name', 'like', "%{$search}%"));
+                    ->orWhereHas('customer', fn ($cq) => $cq->where('name', 'like', "%{$search}%"));
             });
         }
 

@@ -173,7 +173,8 @@ final class CustomerController
         // Get transactions within the period
         $sales = Sale::query()->where('customer_id', $customer->id)
             ->whereBetween('sale_date', [$fromDate, $toDate])
-            ->select(['id', 'bill_no', 'sale_date', 'net_amount', 'paid_amount', 'due_amount'])
+            ->with('paymentType:id,name')
+            ->select(['id', 'bill_no', 'sale_date', 'net_amount', 'paid_amount', 'due_amount', 'payment_type_id', 'payment_ref'])
             ->oldest('sale_date')
             ->orderBy('id')
             ->get()
@@ -183,6 +184,9 @@ final class CustomerController
                 'type' => 'sale',
                 'description' => "Sale #{$sale->bill_no}",
                 'reference' => $sale->bill_no,
+                'payment_info' => $sale->paymentType
+                    ? $sale->paymentType->name.($sale->payment_ref ? " ({$sale->payment_ref})" : '')
+                    : null,
                 'debit' => (float) $sale->due_amount,
                 'credit' => 0,
             ]);
@@ -200,6 +204,9 @@ final class CustomerController
                 'type' => 'payment',
                 'description' => 'Payment'.($payment->paymentType ? " ({$payment->paymentType->name})" : ''),
                 'reference' => $payment->payment_ref,
+                'payment_info' => $payment->paymentType
+                    ? $payment->paymentType->name.($payment->payment_ref ? " ({$payment->payment_ref})" : '')
+                    : ($payment->payment_ref ?: null),
                 'debit' => 0,
                 'credit' => (float) $payment->amount,
             ]);
@@ -217,6 +224,7 @@ final class CustomerController
                 'type' => 'sales_return',
                 'description' => "Sales Return #{$return->return_no}",
                 'reference' => $return->return_no,
+                'payment_info' => null,
                 'debit' => 0,
                 'credit' => (float) $return->grand_total,
             ]);

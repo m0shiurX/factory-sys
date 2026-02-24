@@ -25,6 +25,8 @@ type PrintInvoiceProps = {
     dueAmount: number;
     customerTotalDue?: number;
     totalWeight?: number;
+    paymentMethod?: string | null;
+    paymentRef?: string | null;
 };
 
 export default function PrintInvoice({
@@ -42,6 +44,8 @@ export default function PrintInvoice({
     dueAmount,
     customerTotalDue,
     totalWeight,
+    paymentMethod,
+    paymentRef,
 }: PrintInvoiceProps) {
     const { name, settings } = usePage<SharedData>().props;
 
@@ -179,6 +183,11 @@ export default function PrintInvoice({
                         {totalWeight && (
                             <p className="mt-2 text-xs text-gray-600">
                                 Total Weight: {totalWeight} kg
+                            </p>
+                        )}
+                        {paymentMethod && (
+                            <p className="mt-1 text-xs text-gray-600">
+                                Payment: {paymentMethod}{paymentRef ? ` (Ref: ${paymentRef})` : ''}
                             </p>
                         )}
                     </div>

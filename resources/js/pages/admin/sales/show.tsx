@@ -2,7 +2,7 @@ import PrintInvoice from '@/components/common/print-invoice';
 import AppLayout from '@/layouts/app-layout';
 import { numberToWords } from '@/utils/number-to-words';
 import { Link } from '@inertiajs/react';
-import { ArrowLeft, Printer, Receipt, User } from 'lucide-react';
+import { ArrowLeft, Edit, Printer, Receipt, User } from 'lucide-react';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
 
@@ -55,6 +55,7 @@ type Sale = {
     paid_amount: number;
     due_amount: number;
     notes: string | null;
+    payment_ref: string | null;
     customer: Customer;
     items: SalesItem[];
     payment_type: PaymentType | null;
@@ -113,13 +114,22 @@ export default function SaleShow({ sale, auto_print }: Props) {
                             <ArrowLeft className="h-5 w-5" />
                             <span className="font-medium">Back to Sales</span>
                         </Link>
-                        <button
-                            onClick={handlePrint}
-                            className="inline-flex items-center gap-2 rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background transition hover:bg-foreground/90"
-                        >
-                            <Printer className="h-4 w-4" />
-                            Print
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <Link
+                                href={`/dashboard/sales/${sale.id}/edit`}
+                                className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
+                            >
+                                <Edit className="h-4 w-4" />
+                                Edit
+                            </Link>
+                            <button
+                                onClick={handlePrint}
+                                className="inline-flex items-center gap-2 rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background transition hover:bg-foreground/90"
+                            >
+                                <Printer className="h-4 w-4" />
+                                Print
+                            </button>
+                        </div>
                     </div>
 
                     {/* Invoice Card */}
@@ -268,21 +278,42 @@ export default function SaleShow({ sale, auto_print }: Props) {
 
                         {/* Summary */}
                         <div className="border-t border-border bg-muted/30 px-6 py-4">
-                            <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
-                                {/* Notes */}
-                                {sale.notes && (
-                                    <div className="flex-1">
-                                        <p className="text-xs font-medium text-muted-foreground uppercase">
-                                            Note
-                                        </p>
-                                        <p className="mt-1 text-sm text-foreground">
-                                            {sale.notes}
-                                        </p>
-                                    </div>
-                                )}
+                            <div className="flex flex-col gap-4 sm:flex-row sm:justify-end">
+                                {/* Notes & Payment Info */}
+                                <div className="flex-1 space-y-3">
+                                    {sale.notes && (
+                                        <div>
+                                            <p className="text-xs font-medium text-muted-foreground uppercase">
+                                                Note
+                                            </p>
+                                            <p className="mt-1 text-sm text-foreground">
+                                                {sale.notes}
+                                            </p>
+                                        </div>
+                                    )}
+                                    {(sale.payment_type || sale.payment_ref) && (
+                                        <div className="rounded-lg border border-border bg-background p-3">
+                                            <p className="mb-1.5 text-xs font-medium text-muted-foreground uppercase">
+                                                Payment Details
+                                            </p>
+                                            {sale.payment_type && (
+                                                <div className="flex items-center gap-2 text-sm">
+                                                    <span className="text-muted-foreground">Method:</span>
+                                                    <span className="font-medium text-foreground">{sale.payment_type.name}</span>
+                                                </div>
+                                            )}
+                                            {sale.payment_ref && (
+                                                <div className="flex items-center gap-2 text-sm">
+                                                    <span className="text-muted-foreground">Reference:</span>
+                                                    <span className="font-medium text-foreground">{sale.payment_ref}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
 
                                 {/* Totals */}
-                                <div className="w-full space-y-2 sm:w-64">
+                                <div className="w-full space-y-2 sm:w-72">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-muted-foreground">
                                             Total Weight
@@ -342,16 +373,6 @@ export default function SaleShow({ sale, auto_print }: Props) {
                                             </span>
                                         </div>
                                     )}
-                                    {sale.payment_type && (
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-muted-foreground">
-                                                Payment Method
-                                            </span>
-                                            <span className="text-foreground">
-                                                {sale.payment_type.name}
-                                            </span>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                         </div>
@@ -392,6 +413,8 @@ export default function SaleShow({ sale, auto_print }: Props) {
                 dueAmount={sale.due_amount}
                 customerTotalDue={sale.customer.total_due}
                 totalWeight={sale.total_weight_kg}
+                paymentMethod={sale.payment_type?.name}
+                paymentRef={sale.payment_ref}
             />
         </AppLayout>
     );

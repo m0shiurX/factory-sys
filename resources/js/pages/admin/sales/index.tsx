@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Link, router, usePage } from '@inertiajs/react';
 import {
     Calendar,
+    Edit,
     Eye,
     FileText,
     Plus,
@@ -297,6 +298,12 @@ export default function SalesIndex({ sales, stats, filters }: Props) {
                                                 className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
                                             >
                                                 <Eye className="h-4 w-4" />
+                                            </Link>
+                                            <Link
+                                                href={`/dashboard/sales/${sale.id}/edit`}
+                                                className="rounded-lg p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                                            >
+                                                <Edit className="h-4 w-4" />
                                             </Link>
                                             <button
                                                 onClick={() =>

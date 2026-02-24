@@ -111,7 +111,7 @@ final class StoreSaleRequest extends FormRequest
             }
 
             if ($totalRequested > $product->stock_pieces) {
-                $productName = $product->name . ($product->size ? " ({$product->size})" : '');
+                $productName = $product->name.($product->size ? " ({$product->size})" : '');
                 $availableStock = $this->formatStock($product->stock_pieces, $product->pieces_per_bundle);
                 $requestedStock = $this->formatStock($totalRequested, $product->pieces_per_bundle);
 
