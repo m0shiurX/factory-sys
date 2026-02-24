@@ -6,6 +6,7 @@ import {
     Edit,
     Printer,
     RotateCcw,
+    ShoppingBag,
     Trash2,
     User,
 } from 'lucide-react';
@@ -35,14 +36,15 @@ type Product = {
 
 type SalesReturnItem = {
     id: number;
-    product_id: number;
+    product_id: number | null;
+    description?: string;
     bundles: number;
     extra_pieces: number;
     total_pieces: number;
     weight_kg: number;
     rate_per_kg: number;
     sub_total: number;
-    product: Product;
+    product: Product | null;
 };
 
 type CreatedBy = {
@@ -54,6 +56,7 @@ type SalesReturn = {
     id: number;
     return_no: string;
     return_date: string;
+    is_scrap_purchase: boolean;
     total_weight: number;
     sub_total: number;
     discount: number;
@@ -158,10 +161,19 @@ export default function SalesReturnShow({ salesReturn, auto_print }: Props) {
                             <div className="flex items-start justify-between">
                                 <div>
                                     <div className="flex items-center gap-3">
-                                        <RotateCcw className="h-6 w-6 text-white" />
+                                        {salesReturn.is_scrap_purchase ? (
+                                            <ShoppingBag className="h-6 w-6 text-white" />
+                                        ) : (
+                                            <RotateCcw className="h-6 w-6 text-white" />
+                                        )}
                                         <h1 className="text-2xl font-bold text-white">
                                             {salesReturn.return_no}
                                         </h1>
+                                        {salesReturn.is_scrap_purchase && (
+                                            <span className="rounded-full bg-white/20 px-3 py-0.5 text-xs font-medium text-white">
+                                                Scrap Purchase
+                                            </span>
+                                        )}
                                     </div>
                                     <p className="mt-1 text-red-100">
                                         {formatDate(salesReturn.return_date)}
@@ -223,11 +235,13 @@ export default function SalesReturnShow({ salesReturn, auto_print }: Props) {
                                 <thead>
                                     <tr className="border-b border-border text-left">
                                         <th className="pb-3 text-sm font-medium text-muted-foreground">
-                                            Product
+                                            {salesReturn.is_scrap_purchase ? 'Description' : 'Product'}
                                         </th>
-                                        <th className="pb-3 text-center text-sm font-medium text-muted-foreground">
-                                            Qty
-                                        </th>
+                                        {!salesReturn.is_scrap_purchase && (
+                                            <th className="pb-3 text-center text-sm font-medium text-muted-foreground">
+                                                Qty
+                                            </th>
+                                        )}
                                         <th className="pb-3 text-center text-sm font-medium text-muted-foreground">
                                             Weight
                                         </th>
@@ -243,41 +257,48 @@ export default function SalesReturnShow({ salesReturn, auto_print }: Props) {
                                     {salesReturn.items.map((item) => (
                                         <tr key={item.id}>
                                             <td className="py-3">
-                                                <p className="font-medium text-foreground">
-                                                    {item.product.name}
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    {item.product.size} •{' '}
-                                                    {
-                                                        item.product
-                                                            .pieces_per_bundle
-                                                    }{' '}
-                                                    pcs/bdl
-                                                </p>
+                                                {salesReturn.is_scrap_purchase ? (
+                                                    <p className="font-medium text-foreground">
+                                                        {item.description || 'Scrap item'}
+                                                    </p>
+                                                ) : (
+                                                    <>
+                                                        <p className="font-medium text-foreground">
+                                                            {item.product?.name}
+                                                        </p>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            {item.product?.size} •{' '}
+                                                            {item.product?.pieces_per_bundle}{' '}
+                                                            pcs/bdl
+                                                        </p>
+                                                    </>
+                                                )}
                                             </td>
-                                            <td className="py-3 text-center">
-                                                <p className="font-medium text-foreground">
-                                                    {item.bundles > 0 && (
-                                                        <span>
-                                                            {item.bundles} bdl
-                                                        </span>
-                                                    )}
-                                                    {item.bundles > 0 &&
-                                                        item.extra_pieces >
-                                                        0 && (
-                                                            <span> + </span>
+                                            {!salesReturn.is_scrap_purchase && (
+                                                <td className="py-3 text-center">
+                                                    <p className="font-medium text-foreground">
+                                                        {item.bundles > 0 && (
+                                                            <span>
+                                                                {item.bundles} bdl
+                                                            </span>
                                                         )}
-                                                    {item.extra_pieces > 0 && (
-                                                        <span>
-                                                            {item.extra_pieces}{' '}
-                                                            pcs
-                                                        </span>
-                                                    )}
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    {item.total_pieces} pcs
-                                                </p>
-                                            </td>
+                                                        {item.bundles > 0 &&
+                                                            item.extra_pieces >
+                                                            0 && (
+                                                                <span> + </span>
+                                                            )}
+                                                        {item.extra_pieces > 0 && (
+                                                            <span>
+                                                                {item.extra_pieces}{' '}
+                                                                pcs
+                                                            </span>
+                                                        )}
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {item.total_pieces} pcs
+                                                    </p>
+                                                </td>
+                                            )}
                                             <td className="py-3 text-center text-foreground">
                                                 {item.weight_kg} kg
                                             </td>
@@ -370,7 +391,9 @@ export default function SalesReturnShow({ salesReturn, auto_print }: Props) {
                 customerContact={salesReturn.customer.phone}
                 items={salesReturn.items.map((item, index) => ({
                     sl: index + 1,
-                    name: `${item.product.name}${item.product.size ? ` (${item.product.size})` : ''}`,
+                    name: salesReturn.is_scrap_purchase
+                        ? (item.description || 'Scrap item')
+                        : `${item.product?.name || ''}${item.product?.size ? ` (${item.product.size})` : ''}`,
                     rate: item.rate_per_kg,
                     qty: `${item.weight_kg} KG`,
                     total: item.sub_total,

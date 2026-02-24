@@ -8,6 +8,7 @@ import {
     Plus,
     RotateCcw,
     Search,
+    ShoppingBag,
     Trash2,
     User,
     Weight,
@@ -42,7 +43,8 @@ type Sale = {
 
 type SalesReturnItem = {
     id?: number;
-    product_id: number;
+    product_id: number | null;
+    description?: string;
     bundles: number;
     extra_pieces: number;
     total_pieces: number;
@@ -53,7 +55,8 @@ type SalesReturnItem = {
 };
 
 type ReturnItem = {
-    product_id: number;
+    product_id: number | null;
+    description: string;
     product_name: string;
     product_size: string | null;
     pieces_per_bundle: number;
@@ -71,6 +74,7 @@ type SalesReturn = {
     customer_id: number;
     sale_id: number | null;
     return_date: string;
+    is_scrap_purchase: boolean;
     total_weight: number;
     sub_total: number;
     discount: number;
@@ -119,9 +123,15 @@ export default function SalesReturnEdit({
     const bundleInputRefs = useRef<(HTMLInputElement | null)[]>([]);
     const weightInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
+    const [scrapDescription, setScrapDescription] = useState('');
+    const [scrapWeight, setScrapWeight] = useState('');
+    const [scrapRate, setScrapRate] = useState('');
+    const scrapDescRef = useRef<HTMLInputElement>(null);
+
     // Transform existing items
     const initialItems: ReturnItem[] = salesReturn.items.map((item) => ({
         product_id: item.product_id,
+        description: item.description || '',
         product_name: item.product?.name || '',
         product_size: item.product?.size || null,
         pieces_per_bundle: item.product?.pieces_per_bundle || 0,
@@ -137,6 +147,7 @@ export default function SalesReturnEdit({
         customer_id: number | null;
         sale_id: number | null;
         return_date: string;
+        is_scrap_purchase: boolean;
         total_weight: number;
         sub_total: number;
         discount: number;
@@ -147,6 +158,7 @@ export default function SalesReturnEdit({
         customer_id: salesReturn.customer_id,
         sale_id: salesReturn.sale_id,
         return_date: salesReturn.return_date.split('T')[0],
+        is_scrap_purchase: salesReturn.is_scrap_purchase,
         total_weight: Number(salesReturn.total_weight),
         sub_total: Number(salesReturn.sub_total),
         discount: Number(salesReturn.discount),
@@ -279,6 +291,7 @@ export default function SalesReturnEdit({
         } else {
             const newItem: ReturnItem = {
                 product_id: product.id,
+                description: '',
                 product_name: product.name,
                 product_size: product.size,
                 pieces_per_bundle: product.pieces_per_bundle,
@@ -325,6 +338,40 @@ export default function SalesReturnEdit({
         setData('items', newItems);
     };
 
+    function handleAddScrapItem() {
+        if (!scrapDescription.trim()) {
+            toast.error('Please enter a description');
+            scrapDescRef.current?.focus();
+            return;
+        }
+        const weight = parseFloat(scrapWeight) || 0;
+        const rate = parseFloat(scrapRate) || 0;
+        const newItem: ReturnItem = {
+            product_id: null,
+            description: scrapDescription.trim(),
+            product_name: '',
+            product_size: null,
+            pieces_per_bundle: 0,
+            bundles: 0,
+            extra_pieces: 0,
+            total_pieces: 0,
+            weight_kg: weight,
+            rate_per_kg: rate,
+            sub_total: Number((weight * rate).toFixed(2)),
+        };
+        setData('items', [...data.items, newItem]);
+        setScrapDescription('');
+        setScrapWeight('');
+        setScrapRate('');
+        setTimeout(() => scrapDescRef.current?.focus(), 50);
+    }
+
+    const updateScrapDescription = (index: number, value: string) => {
+        const newItems = [...data.items];
+        newItems[index] = { ...newItems[index], description: value };
+        setData('items', newItems);
+    };
+
     const handleSubmit: FormEventHandler = (e) => {
         e.preventDefault();
 
@@ -334,8 +381,16 @@ export default function SalesReturnEdit({
         }
 
         if (data.items.length === 0) {
-            toast.error('Please add at least one product');
+            toast.error(data.is_scrap_purchase ? 'Please add at least one scrap item' : 'Please add at least one product');
             return;
+        }
+
+        if (data.is_scrap_purchase) {
+            const missingDesc = data.items.some((item) => !item.description?.trim());
+            if (missingDesc) {
+                toast.error('Please enter description for all scrap items');
+                return;
+            }
         }
 
         const missingWeight = data.items.some((item) => item.weight_kg <= 0);
@@ -371,9 +426,9 @@ export default function SalesReturnEdit({
         return () => window.removeEventListener('keydown', handleGlobalKeyDown);
     }, []);
 
-    // Prevent Enter from submitting the form
+    // Prevent Enter from submitting the form (allow on buttons)
     const handleFormKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
-        if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
+        if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !(e.target instanceof HTMLButtonElement)) {
             e.preventDefault();
         }
     };
@@ -411,21 +466,40 @@ export default function SalesReturnEdit({
             <div className="min-h-screen bg-background p-6">
                 <div className="mx-auto max-w-6xl">
                     {/* Header */}
-                    <div className="mb-6 flex items-center gap-4">
-                        <Link
-                            href={`/dashboard/sales-returns/${salesReturn.id}`}
-                            className="rounded-lg p-2 text-muted-foreground transition hover:bg-card hover:text-foreground"
-                        >
-                            <ArrowLeft className="h-5 w-5" />
-                        </Link>
-                        <div>
-                            <h1 className="text-2xl font-semibold text-foreground">
-                                Edit Sales Return
-                            </h1>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                {salesReturn.return_no}
-                            </p>
+                    <div className="mb-6 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <Link
+                                href={`/dashboard/sales-returns/${salesReturn.id}`}
+                                className="rounded-lg p-2 text-muted-foreground transition hover:bg-card hover:text-foreground"
+                            >
+                                <ArrowLeft className="h-5 w-5" />
+                            </Link>
+                            <div>
+                                <h1 className="text-2xl font-semibold text-foreground">
+                                    {data.is_scrap_purchase ? 'Edit Scrap Purchase' : 'Edit Sales Return'}
+                                </h1>
+                                <p className="mt-1 text-sm text-muted-foreground">
+                                    {salesReturn.return_no}
+                                </p>
+                            </div>
                         </div>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setData((prev) => ({
+                                    ...prev,
+                                    is_scrap_purchase: !prev.is_scrap_purchase,
+                                    items: [],
+                                }));
+                            }}
+                            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition ${data.is_scrap_purchase
+                                    ? 'bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-400'
+                                    : 'border border-border text-muted-foreground hover:bg-muted'
+                                }`}
+                        >
+                            <ShoppingBag className="h-4 w-4" />
+                            {data.is_scrap_purchase ? 'Scrap Mode' : 'Switch to Scrap'}
+                        </button>
                     </div>
 
                     <form ref={formRef} onSubmit={handleSubmit} onKeyDown={handleFormKeyDown}>
@@ -613,74 +687,138 @@ export default function SalesReturnEdit({
                             </div>
                         </div>
 
-                        {/* Product Search */}
-                        <div className="mb-4 rounded-xl border border-border bg-card p-4">
-                            <label className="mb-2 block text-sm font-medium text-foreground">
-                                Add Products
-                            </label>
-                            <div className="relative">
-                                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                <input
-                                    ref={productSearchRef}
-                                    type="text"
-                                    placeholder="Search products... (↑↓ navigate, Enter select, Shift+Enter → discount)"
-                                    value={productSearch}
-                                    onChange={(e) => {
-                                        setProductSearch(e.target.value);
-                                        setShowProductDropdown(true);
-                                    }}
-                                    onFocus={() => setShowProductDropdown(true)}
-                                    onKeyDown={handleProductSearchKeyDown}
-                                    className="w-full rounded-lg border border-border bg-background py-2.5 pr-4 pl-10 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
-                                />
-                                {showProductDropdown &&
-                                    filteredProducts.length > 0 && (
-                                        <div ref={productDropdown.dropdownRef} className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-card shadow-lg">
-                                            {filteredProducts.map((product, index) => (
-                                                <button
-                                                    key={product.id}
-                                                    type="button"
-                                                    {...productDropdown.getItemProps(index)}
-                                                    onClick={() =>
-                                                        handleAddProductInternal(
-                                                            product,
-                                                        )
-                                                    }
-                                                    onMouseEnter={() => productDropdown.setHighlightedIndex(index)}
-                                                    className={`flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted ${productDropdown.getItemProps(index).className}`}
-                                                >
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="rounded-lg bg-primary/10 p-2">
-                                                            <Package className="h-4 w-4 text-primary" />
-                                                        </div>
-                                                        <div>
-                                                            <p className="font-medium text-foreground">
-                                                                {product.name}
-                                                            </p>
-                                                            <p className="text-xs text-muted-foreground">
-                                                                {product.size} •{' '}
-                                                                {
-                                                                    product.pieces_per_bundle
-                                                                }{' '}
-                                                                pcs/bundle
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className="font-medium">
-                                                            ৳
-                                                            {
-                                                                product.rate_per_kg
-                                                            }
-                                                            /kg
-                                                        </p>
-                                                    </div>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    )}
+                        {/* Product Search (normal mode) / Scrap Input (scrap mode) */}
+                        {data.is_scrap_purchase ? (
+                            <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-900/10">
+                                <label className="mb-2 block text-sm font-medium text-foreground">
+                                    Add Scrap Item
+                                </label>
+                                <div className="flex items-end gap-3">
+                                    <div className="flex-1">
+                                        <label className="mb-1 block text-xs text-muted-foreground">Description *</label>
+                                        <input
+                                            ref={scrapDescRef}
+                                            type="text"
+                                            placeholder="e.g., Iron scrap, Plastic waste..."
+                                            value={scrapDescription}
+                                            onChange={(e) => setScrapDescription(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    handleAddScrapItem();
+                                                }
+                                            }}
+                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
+                                        />
+                                    </div>
+                                    <div className="w-28">
+                                        <label className="mb-1 block text-xs text-muted-foreground">Weight (kg)</label>
+                                        <input
+                                            type="number"
+                                            min={0}
+                                            step="0.01"
+                                            placeholder="0"
+                                            value={scrapWeight}
+                                            onChange={(e) => setScrapWeight(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    handleAddScrapItem();
+                                                }
+                                            }}
+                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
+                                        />
+                                    </div>
+                                    <div className="w-28">
+                                        <label className="mb-1 block text-xs text-muted-foreground">Rate/kg</label>
+                                        <input
+                                            type="number"
+                                            min={0}
+                                            step="0.01"
+                                            placeholder="0"
+                                            value={scrapRate}
+                                            onChange={(e) => setScrapRate(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    handleAddScrapItem();
+                                                }
+                                            }}
+                                            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
+                                        />
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={handleAddScrapItem}
+                                        className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-700"
+                                    >
+                                        <Plus className="h-4 w-4" />
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+                        ) : (
+                            <div className="mb-4 rounded-xl border border-border bg-card p-4">
+                                <label className="mb-2 block text-sm font-medium text-foreground">
+                                    Add Products
+                                </label>
+                                <div className="relative">
+                                    <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                    <input
+                                        ref={productSearchRef}
+                                        type="text"
+                                        placeholder="Search products... (↑↓ navigate, Enter select, Shift+Enter → discount)"
+                                        value={productSearch}
+                                        onChange={(e) => {
+                                            setProductSearch(e.target.value);
+                                            setShowProductDropdown(true);
+                                        }}
+                                        onFocus={() => setShowProductDropdown(true)}
+                                        onKeyDown={handleProductSearchKeyDown}
+                                        className="w-full rounded-lg border border-border bg-background py-2.5 pr-4 pl-10 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
+                                    />
+                                    {showProductDropdown &&
+                                        filteredProducts.length > 0 && (
+                                            <div ref={productDropdown.dropdownRef} className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-card shadow-lg">
+                                                {filteredProducts.map((product, index) => (
+                                                    <button
+                                                        key={product.id}
+                                                        type="button"
+                                                        {...productDropdown.getItemProps(index)}
+                                                        onClick={() =>
+                                                            handleAddProductInternal(
+                                                                product,
+                                                            )
+                                                        }
+                                                        onMouseEnter={() => productDropdown.setHighlightedIndex(index)}
+                                                        className={`flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted ${productDropdown.getItemProps(index).className}`}
+                                                    >
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="rounded-lg bg-primary/10 p-2">
+                                                                <Package className="h-4 w-4 text-primary" />
+                                                            </div>
+                                                            <div>
+                                                                <p className="font-medium text-foreground">
+                                                                    {product.name}
+                                                                </p>
+                                                                <p className="text-xs text-muted-foreground">
+                                                                    {product.size} •{' '}
+                                                                    {product.pieces_per_bundle}{' '}
+                                                                    pcs/bundle
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="font-medium">
+                                                                ৳{product.rate_per_kg}/kg
+                                                            </p>
+                                                        </div>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Items Table */}
                         <div className="mb-6 overflow-hidden rounded-xl border border-border bg-card">
@@ -688,32 +826,36 @@ export default function SalesReturnEdit({
                                 <thead className="border-b border-border bg-muted/50">
                                     <tr>
                                         <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground">
-                                            Product
+                                            {data.is_scrap_purchase ? 'Description' : 'Product'}
                                         </th>
-                                        <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
-                                            Bundles
-                                        </th>
-                                        {showExtraPieces && (
-                                            <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
-                                                Extra Pcs
-                                            </th>
+                                        {!data.is_scrap_purchase && (
+                                            <>
+                                                <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
+                                                    Bundles
+                                                </th>
+                                                {showExtraPieces && (
+                                                    <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
+                                                        Extra Pcs
+                                                    </th>
+                                                )}
+                                                {!showExtraPieces && (
+                                                    <th className="px-4 py-3 text-center">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setShowExtraPieces(true)}
+                                                            className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                                                            title="Show extra pieces column"
+                                                        >
+                                                            <Plus className="h-3 w-3" />
+                                                            Pcs
+                                                        </button>
+                                                    </th>
+                                                )}
+                                                <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
+                                                    Total Pcs
+                                                </th>
+                                            </>
                                         )}
-                                        {!showExtraPieces && (
-                                            <th className="px-4 py-3 text-center">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setShowExtraPieces(true)}
-                                                    className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
-                                                    title="Show extra pieces column"
-                                                >
-                                                    <Plus className="h-3 w-3" />
-                                                    Pcs
-                                                </button>
-                                            </th>
-                                        )}
-                                        <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
-                                            Total Pcs
-                                        </th>
                                         <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
                                             Weight (kg)
                                         </th>
@@ -732,79 +874,69 @@ export default function SalesReturnEdit({
                                     {data.items.length === 0 ? (
                                         <tr>
                                             <td
-                                                colSpan={8}
+                                                colSpan={data.is_scrap_purchase ? 5 : 8}
                                                 className="px-4 py-8 text-center text-sm text-muted-foreground"
                                             >
                                                 <Package className="mx-auto mb-2 h-8 w-8 opacity-50" />
-                                                No products added yet
+                                                {data.is_scrap_purchase ? 'No scrap items added yet' : 'No products added yet'}
                                             </td>
                                         </tr>
                                     ) : (
                                         data.items.map((item, index) => (
                                             <tr key={index}>
                                                 <td className="px-4 py-3">
-                                                    <div>
-                                                        <p className="font-medium">
-                                                            {item.product_name}
-                                                        </p>
-                                                        <p className="text-xs text-muted-foreground">
-                                                            {item.product_size}{' '}
-                                                            •{' '}
-                                                            {
-                                                                item.pieces_per_bundle
-                                                            }{' '}
-                                                            pcs/bdl
-                                                        </p>
-                                                    </div>
-                                                </td>
-                                                <td className="px-4 py-3">
-                                                    <input
-                                                        ref={(el) => { bundleInputRefs.current[index] = el; }}
-                                                        type="number"
-                                                        min={0}
-                                                        value={item.bundles}
-                                                        onChange={(e) =>
-                                                            updateItem(
-                                                                index,
-                                                                'bundles',
-                                                                parseInt(
-                                                                    e.target
-                                                                        .value,
-                                                                ) || 0,
-                                                            )
-                                                        }
-                                                        onKeyDown={(e) => handleBundleKeyDown(e, index)}
-                                                        className="w-20 rounded-lg border border-border bg-background px-2 py-1 text-center text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
-                                                    />
-                                                </td>
-                                                {showExtraPieces && (
-                                                    <td className="px-4 py-3">
+                                                    {data.is_scrap_purchase ? (
                                                         <input
-                                                            type="number"
-                                                            min={0}
-                                                            value={
-                                                                item.extra_pieces
-                                                            }
-                                                            onChange={(e) =>
-                                                                updateItem(
-                                                                    index,
-                                                                    'extra_pieces',
-                                                                    parseInt(
-                                                                        e.target
-                                                                            .value,
-                                                                    ) || 0,
-                                                                )
-                                                            }
-                                                            className="w-20 rounded-lg border border-border bg-background px-2 py-1 text-center text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
+                                                            type="text"
+                                                            value={item.description}
+                                                            onChange={(e) => updateScrapDescription(index, e.target.value)}
+                                                            className="w-full rounded-lg border border-border bg-background px-2 py-1 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                                         />
-                                                    </td>
-                                                )}
-                                                {!showExtraPieces && (
-                                                    <td className="px-4 py-3" />
-                                                )}
-                                                <td className="px-4 py-3 text-center font-medium">
-                                                    {item.total_pieces}
+                                                    ) : (
+                                                        <div>
+                                                            <p className="font-medium">
+                                                                {item.product_name}
+                                                            </p>
+                                                            <p className="text-xs text-muted-foreground">
+                                                                {item.product_size} • {item.pieces_per_bundle} pcs/bdl
+                                                            </p>
+                                                        </div>
+                                                    )}
                                                 </td>
+                                                {!data.is_scrap_purchase && (
+                                                    <>
+                                                        <td className="px-4 py-3">
+                                                            <input
+                                                                ref={(el) => { bundleInputRefs.current[index] = el; }}
+                                                                type="number"
+                                                                min={0}
+                                                                value={item.bundles}
+                                                                onChange={(e) =>
+                                                                    updateItem(index, 'bundles', parseInt(e.target.value) || 0)
+                                                                }
+                                                                onKeyDown={(e) => handleBundleKeyDown(e, index)}
+                                                                className="w-20 rounded-lg border border-border bg-background px-2 py-1 text-center text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
+                                                            />
+                                                        </td>
+                                                        {showExtraPieces && (
+                                                            <td className="px-4 py-3">
+                                                                <input
+                                                                    type="number"
+                                                                    min={0}
+                                                                    value={item.extra_pieces}
+                                                                    onChange={(e) =>
+                                                                        updateItem(index, 'extra_pieces', parseInt(e.target.value) || 0)
+                                                                    }
+                                                                    className="w-20 rounded-lg border border-border bg-background px-2 py-1 text-center text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
+                                                                />
+                                                            </td>
+                                                        )}
+                                                        {!showExtraPieces && <td className="px-4 py-3" />}
+                                                        <td className="px-4 py-3 text-center font-medium">
+                                                            {item.total_pieces}
+                                                        </td>
+                                                    </>
+                                                )}
                                                 <td className="px-4 py-3">
                                                     <input
                                                         ref={(el) => { weightInputRefs.current[index] = el; }}

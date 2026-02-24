@@ -25,6 +25,7 @@ final class SalesReturn extends Model
         'customer_id',
         'sale_id',
         'return_date',
+        'is_scrap_purchase',
         'total_weight',
         'sub_total',
         'discount',
@@ -57,6 +58,7 @@ final class SalesReturn extends Model
     {
         return [
             'return_date' => 'date',
+            'is_scrap_purchase' => 'boolean',
             'total_weight' => 'decimal:2',
             'sub_total' => 'decimal:2',
             'discount' => 'decimal:2',

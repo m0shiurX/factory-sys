@@ -22,6 +22,7 @@ final class SalesReturnItem extends Model
     protected $fillable = [
         'sales_return_id',
         'product_id',
+        'description',
         'bundles',
         'extra_pieces',
         'total_pieces',

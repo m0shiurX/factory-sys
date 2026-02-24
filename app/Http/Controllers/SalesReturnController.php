@@ -32,7 +32,7 @@ final class SalesReturnController
             $search = $request->string('search')->trim()->value();
             $query->where(function ($q) use ($search): void {
                 $q->where('return_no', 'like', "%{$search}%")
-                    ->orWhereHas('customer', fn ($cq) => $cq->where('name', 'like', "%{$search}%"));
+                    ->orWhereHas('customer', fn($cq) => $cq->where('name', 'like', "%{$search}%"));
             });
         }
 
@@ -103,12 +103,15 @@ final class SalesReturnController
         $validated = $request->validated();
 
         $salesReturn = DB::transaction(function () use ($validated): SalesReturn {
+            $isScrap = (bool) ($validated['is_scrap_purchase'] ?? false);
+
             // Create the sales return
             $return = SalesReturn::query()->create([
                 'return_no' => $validated['return_no'],
                 'customer_id' => $validated['customer_id'],
                 'sale_id' => $validated['sale_id'] ?? null,
                 'return_date' => $validated['return_date'],
+                'is_scrap_purchase' => $isScrap,
                 'total_weight' => $validated['total_weight'],
                 'sub_total' => $validated['sub_total'],
                 'discount' => $validated['discount'] ?? 0,
@@ -117,21 +120,24 @@ final class SalesReturnController
                 'created_by' => auth()->id(),
             ]);
 
-            // Create return items and restore stock
+            // Create return items and restore stock (unless scrap)
             foreach ($validated['items'] as $item) {
                 $return->items()->create([
-                    'product_id' => $item['product_id'],
-                    'bundles' => $item['bundles'],
-                    'extra_pieces' => $item['extra_pieces'],
-                    'total_pieces' => $item['total_pieces'],
+                    'product_id' => $item['product_id'] ?? null,
+                    'description' => $item['description'] ?? null,
+                    'bundles' => $item['bundles'] ?? 0,
+                    'extra_pieces' => $item['extra_pieces'] ?? 0,
+                    'total_pieces' => $item['total_pieces'] ?? 0,
                     'weight_kg' => $item['weight_kg'],
                     'rate_per_kg' => $item['rate_per_kg'],
                     'sub_total' => $item['sub_total'],
                 ]);
 
-                // Restore stock (add back to inventory)
-                Product::query()->where('id', $item['product_id'])
-                    ->increment('stock_pieces', $item['total_pieces']);
+                // Restore stock (add back to inventory) — only for product returns
+                if (! $isScrap && ! empty($item['product_id'])) {
+                    Product::query()->where('id', $item['product_id'])
+                        ->increment('stock_pieces', $item['total_pieces']);
+                }
             }
 
             // Reduce customer total_due (they owe less now)
@@ -199,10 +205,17 @@ final class SalesReturnController
         $validated = $request->validated();
 
         DB::transaction(function () use ($validated, $salesReturn): void {
+            $isScrap = (bool) ($validated['is_scrap_purchase'] ?? false);
+            $wasScrap = (bool) $salesReturn->is_scrap_purchase;
+
             // Reverse old stock changes and customer due adjustment
-            foreach ($salesReturn->items as $oldItem) {
-                Product::query()->where('id', $oldItem->product_id)
-                    ->decrement('stock_pieces', $oldItem->total_pieces);
+            if (! $wasScrap) {
+                foreach ($salesReturn->items as $oldItem) {
+                    if ($oldItem->product_id) {
+                        Product::query()->where('id', $oldItem->product_id)
+                            ->decrement('stock_pieces', $oldItem->total_pieces);
+                    }
+                }
             }
             Customer::query()->where('id', $salesReturn->customer_id)
                 ->increment('total_due', $salesReturn->grand_total);
@@ -212,6 +225,7 @@ final class SalesReturnController
                 'customer_id' => $validated['customer_id'],
                 'sale_id' => $validated['sale_id'] ?? null,
                 'return_date' => $validated['return_date'],
+                'is_scrap_purchase' => $isScrap,
                 'total_weight' => $validated['total_weight'],
                 'sub_total' => $validated['sub_total'],
                 'discount' => $validated['discount'] ?? 0,
@@ -224,18 +238,21 @@ final class SalesReturnController
 
             foreach ($validated['items'] as $item) {
                 $salesReturn->items()->create([
-                    'product_id' => $item['product_id'],
-                    'bundles' => $item['bundles'],
-                    'extra_pieces' => $item['extra_pieces'],
-                    'total_pieces' => $item['total_pieces'],
+                    'product_id' => $item['product_id'] ?? null,
+                    'description' => $item['description'] ?? null,
+                    'bundles' => $item['bundles'] ?? 0,
+                    'extra_pieces' => $item['extra_pieces'] ?? 0,
+                    'total_pieces' => $item['total_pieces'] ?? 0,
                     'weight_kg' => $item['weight_kg'],
                     'rate_per_kg' => $item['rate_per_kg'],
                     'sub_total' => $item['sub_total'],
                 ]);
 
-                // Restore stock
-                Product::query()->where('id', $item['product_id'])
-                    ->increment('stock_pieces', $item['total_pieces']);
+                // Restore stock — only for product returns
+                if (! $isScrap && ! empty($item['product_id'])) {
+                    Product::query()->where('id', $item['product_id'])
+                        ->increment('stock_pieces', $item['total_pieces']);
+                }
             }
 
             // Reduce customer due
@@ -253,10 +270,14 @@ final class SalesReturnController
     public function destroy(SalesReturn $salesReturn): RedirectResponse
     {
         DB::transaction(function () use ($salesReturn): void {
-            // Reverse stock changes (remove from inventory)
-            foreach ($salesReturn->items as $item) {
-                Product::query()->where('id', $item->product_id)
-                    ->decrement('stock_pieces', $item->total_pieces);
+            // Reverse stock changes (remove from inventory) — only for product returns
+            if (! $salesReturn->is_scrap_purchase) {
+                foreach ($salesReturn->items as $item) {
+                    if ($item->product_id) {
+                        Product::query()->where('id', $item->product_id)
+                            ->decrement('stock_pieces', $item->total_pieces);
+                    }
+                }
             }
 
             // Restore customer due

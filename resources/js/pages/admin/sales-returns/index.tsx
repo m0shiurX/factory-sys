@@ -33,6 +33,7 @@ type SalesReturn = {
     id: number;
     return_no: string;
     return_date: string;
+    is_scrap_purchase: boolean;
     total_weight: number;
     grand_total: number;
     customer: Customer;
@@ -251,9 +252,16 @@ export default function SalesReturnsIndex({ returns, stats, filters }: Props) {
                                             <RotateCcw className="h-6 w-6 text-red-600" />
                                         </div>
                                         <div>
-                                            <h3 className="font-semibold text-foreground">
-                                                {returnItem.return_no}
-                                            </h3>
+                                            <div className="flex items-center gap-2">
+                                                <h3 className="font-semibold text-foreground">
+                                                    {returnItem.return_no}
+                                                </h3>
+                                                {returnItem.is_scrap_purchase && (
+                                                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                                                        Scrap
+                                                    </span>
+                                                )}
+                                            </div>
                                             <p className="text-sm text-muted-foreground">
                                                 {formatDate(
                                                     returnItem.return_date,

@@ -1,5 +1,6 @@
 import PrintInvoice from '@/components/common/print-invoice';
 import AppLayout from '@/layouts/app-layout';
+import { numberToWords } from '@/utils/number-to-words';
 import { Link } from '@inertiajs/react';
 import { ArrowLeft, Printer, Receipt, User } from 'lucide-react';
 import { useEffect } from 'react';
@@ -315,6 +316,11 @@ export default function SaleShow({ sale, auto_print }: Props) {
                                         <span className="text-lg font-bold text-foreground">
                                             {formatCurrency(sale.net_amount)}
                                         </span>
+                                    </div>
+                                    <div className="rounded-md bg-muted/50 px-2 py-1.5">
+                                        <p className="text-xs italic text-muted-foreground">
+                                            In Words: {numberToWords(sale.net_amount)} Taka Only
+                                        </p>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-muted-foreground">

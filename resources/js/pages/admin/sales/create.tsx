@@ -283,9 +283,9 @@ export default function SaleCreate({
         return () => window.removeEventListener('keydown', handleGlobalKeyDown);
     }, []);
 
-    // Prevent Enter from submitting the form (except Ctrl+S)
+    // Prevent Enter from submitting the form (allow on buttons)
     const handleFormKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
-        if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
+        if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !(e.target instanceof HTMLButtonElement)) {
             e.preventDefault();
         }
     };

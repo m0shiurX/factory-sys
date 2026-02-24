@@ -23,20 +23,24 @@ final class UpdateSalesReturnRequest extends FormRequest
      */
     public function rules(): array
     {
+        $isScrap = $this->boolean('is_scrap_purchase');
+
         return [
             'customer_id' => ['required', 'integer', 'exists:customers,id'],
             'sale_id' => ['nullable', 'integer', 'exists:sales,id'],
             'return_date' => ['required', 'date'],
+            'is_scrap_purchase' => ['required', 'boolean'],
             'total_weight' => ['required', 'numeric', 'min:0'],
             'sub_total' => ['required', 'numeric', 'min:0'],
             'discount' => ['nullable', 'numeric', 'min:0'],
             'grand_total' => ['required', 'numeric', 'min:0'],
             'note' => ['nullable', 'string', 'max:1000'],
             'items' => ['required', 'array', 'min:1'],
-            'items.*.product_id' => ['required', 'integer', 'exists:products,id'],
-            'items.*.bundles' => ['required', 'integer', 'min:0'],
-            'items.*.extra_pieces' => ['required', 'integer', 'min:0'],
-            'items.*.total_pieces' => ['required', 'integer', 'min:1'],
+            'items.*.product_id' => [$isScrap ? 'nullable' : 'required', 'integer', 'exists:products,id'],
+            'items.*.description' => [$isScrap ? 'required' : 'nullable', 'string', 'max:255'],
+            'items.*.bundles' => [$isScrap ? 'nullable' : 'required', 'integer', 'min:0'],
+            'items.*.extra_pieces' => [$isScrap ? 'nullable' : 'required', 'integer', 'min:0'],
+            'items.*.total_pieces' => [$isScrap ? 'nullable' : 'required', 'integer', 'min:0'],
             'items.*.weight_kg' => ['required', 'numeric', 'min:0.01'],
             'items.*.rate_per_kg' => ['required', 'numeric', 'min:0'],
             'items.*.sub_total' => ['required', 'numeric', 'min:0'],
