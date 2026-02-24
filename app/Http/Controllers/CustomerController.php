@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\Sale;
+use App\Models\SalesReturn;
 use DateTimeInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -203,8 +204,25 @@ final class CustomerController
                 'credit' => (float) $payment->amount,
             ]);
 
+        // Get sales returns within the period
+        $salesReturns = SalesReturn::query()->where('customer_id', $customer->id)
+            ->whereBetween('return_date', [$fromDate, $toDate])
+            ->select(['id', 'return_no', 'return_date', 'grand_total'])
+            ->oldest('return_date')
+            ->orderBy('id')
+            ->get()
+            ->map(fn (SalesReturn $return): array => [
+                'id' => $return->id,
+                'date' => $return->return_date->format('Y-m-d'),
+                'type' => 'sales_return',
+                'description' => "Sales Return #{$return->return_no}",
+                'reference' => $return->return_no,
+                'debit' => 0,
+                'credit' => (float) $return->grand_total,
+            ]);
+
         // Merge and sort transactions by date
-        $transactions = $sales->concat($payments)
+        $transactions = $sales->concat($payments)->concat($salesReturns)
             ->sortBy('date')
             ->values()
             ->all();
@@ -253,6 +271,11 @@ final class CustomerController
         $openingBalance -= (float) Payment::query()->where('customer_id', $customer->id)
             ->where('payment_date', '<', $startDate)
             ->sum('amount');
+
+        // Subtract all sales returns before the period (returns reduce the customer's due)
+        $openingBalance -= (float) SalesReturn::query()->where('customer_id', $customer->id)
+            ->where('return_date', '<', $startDate)
+            ->sum('grand_total');
 
         return $openingBalance;
     }

@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read float $paid_amount
  * @property-read float $due_amount
  * @property-read int|null $payment_type_id
+ * @property-read string|null $payment_ref
  * @property-read string|null $notes
  * @property-read int $created_by
  * @property-read \Carbon\CarbonInterface $created_at
@@ -54,6 +55,7 @@ final class Sale extends Model
         'paid_amount',
         'due_amount',
         'payment_type_id',
+        'payment_ref',
         'notes',
         'created_by',
     ];

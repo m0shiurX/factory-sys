@@ -3,6 +3,7 @@ import {
     BarChart3,
     Box,
     Coins,
+    CreditCard,
     Factory,
     FileText,
     LayoutGrid,

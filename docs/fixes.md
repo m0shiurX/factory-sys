@@ -1,0 +1,3 @@
+1. in sales stock must be available first to make sale. (added via production)
+2. in sales/create -> search bar should be arrow navigateable (up + down) and after selection it should go to product line -> bundle -> weight -> then back to search bar. (it should work with tab and enter button as well), with shift + enter it should go to the summary section for discount, with control + s, it should save the invoice
+3. sales return is not getting added to customer statement

@@ -4,8 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { Transition } from '@headlessui/react';
-import { Head, useForm } from '@inertiajs/react';
-import { Building2, Save } from 'lucide-react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { Building2, CreditCard, Save } from 'lucide-react';
 import { FormEventHandler } from 'react';
 
 type Settings = {
@@ -196,6 +196,29 @@ export default function SettingsIndex({ settings }: Props) {
                             </div>
                         </div>
                     </form>
+
+                    {/* Other Settings */}
+                    <div className="mt-8 rounded-xl border border-border bg-card p-6">
+                        <h2 className="mb-4 text-lg font-semibold text-foreground">
+                            Other Settings
+                        </h2>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <Link
+                                href="/dashboard/settings/payment-types"
+                                className="flex items-center gap-3 rounded-lg border border-border p-4 transition hover:bg-muted"
+                            >
+                                <CreditCard className="h-5 w-5 text-primary" />
+                                <div>
+                                    <p className="font-medium text-foreground">
+                                        Payment Types
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Manage payment methods
+                                    </p>
+                                </div>
+                            </Link>
+                        </div>
+                    </div>
                 </div>
             </div>
         </AppLayout>

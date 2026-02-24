@@ -1,8 +1,9 @@
 import InputError from '@/components/common/input-error';
+import { useSearchableDropdown } from '@/hooks/use-searchable-dropdown';
 import AppLayout from '@/layouts/app-layout';
 import { Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, Package, Search, Trash2, User } from 'lucide-react';
-import { FormEventHandler, useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowLeft, Package, Plus, Search, Trash2, User } from 'lucide-react';
+import { FormEventHandler, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 type Customer = {
@@ -62,8 +63,22 @@ export default function SaleCreate({
     const [showProductDropdown, setShowProductDropdown] = useState(false);
     const [customerSearch, setCustomerSearch] = useState('');
     const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
+    const [showExtraPieces, setShowExtraPieces] = useState(false);
     const productSearchRef = useRef<HTMLInputElement>(null);
     const customerSearchRef = useRef<HTMLInputElement>(null);
+    const discountRef = useRef<HTMLInputElement>(null);
+    const paidAmountRef = useRef<HTMLInputElement>(null);
+    const saveButtonRef = useRef<HTMLButtonElement>(null);
+    const formRef = useRef<HTMLFormElement>(null);
+
+    // Refs for item row inputs
+    const bundleInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+    const weightInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+    // Auto-focus customer field on mount
+    useEffect(() => {
+        customerSearchRef.current?.focus();
+    }, []);
 
     const { data, setData, post, processing, errors } = useForm<{
         bill_no: string;
@@ -77,6 +92,7 @@ export default function SaleCreate({
         paid_amount: number;
         due_amount: number;
         payment_type_id: number | null;
+        payment_ref: string;
         notes: string;
         items: SaleItem[];
     }>({
@@ -91,6 +107,7 @@ export default function SaleCreate({
         paid_amount: 0,
         due_amount: 0,
         payment_type_id: null,
+        payment_ref: '',
         notes: '',
         items: [],
     });
@@ -121,6 +138,24 @@ export default function SaleCreate({
             .slice(0, 10);
     }, [customerSearch, customers]);
 
+    // Product dropdown keyboard navigation
+    const productDropdown = useSearchableDropdown({
+        items: filteredProducts,
+        onSelect: handleAddProductInternal,
+        isOpen: showProductDropdown,
+        setIsOpen: setShowProductDropdown,
+        inputRef: productSearchRef,
+    });
+
+    // Customer dropdown keyboard navigation
+    const customerDropdown = useSearchableDropdown({
+        items: filteredCustomers,
+        onSelect: handleSelectCustomerInternal,
+        isOpen: showCustomerDropdown,
+        setIsOpen: setShowCustomerDropdown,
+        inputRef: customerSearchRef,
+    });
+
     // Calculate totals when items change
     useEffect(() => {
         const totalPieces = data.items.reduce(
@@ -149,30 +184,55 @@ export default function SaleCreate({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data.items, data.discount, data.paid_amount]);
 
-    // Select customer
-    const handleSelectCustomer = (customer: Customer) => {
+    // Select customer (internal for dropdown hook)
+    function handleSelectCustomerInternal(customer: Customer) {
         setSelectedCustomer(customer);
         setData('customer_id', customer.id);
         setCustomerSearch(customer.name);
         setShowCustomerDropdown(false);
-    };
+        // Focus product search after customer selection
+        setTimeout(() => productSearchRef.current?.focus(), 50);
+    }
 
-    // Add product to invoice
-    const handleAddProduct = (product: Product) => {
+    // Add product to invoice (internal for dropdown hook)
+    function handleAddProductInternal(product: Product) {
+        // Check stock availability on frontend
+        if (product.stock_pieces <= 0) {
+            toast.error(`No stock available for ${product.name}${product.size ? ` (${product.size})` : ''}`);
+            return;
+        }
+
         // Check if product already exists
         const existingIndex = data.items.findIndex(
             (item) => item.product_id === product.id,
         );
 
         if (existingIndex >= 0) {
+            // Check if adding one more bundle exceeds stock
+            const newBundles = data.items[existingIndex].bundles + 1;
+            const newTotalPieces = newBundles * product.pieces_per_bundle + data.items[existingIndex].extra_pieces;
+            if (newTotalPieces > product.stock_pieces) {
+                toast.error(`Insufficient stock for ${product.name}${product.size ? ` (${product.size})` : ''}. Available: ${product.stock_pieces} pcs`);
+                return;
+            }
+
             // Update existing item
             const newItems = [...data.items];
-            newItems[existingIndex].bundles += 1;
-            newItems[existingIndex].total_pieces =
-                newItems[existingIndex].bundles * product.pieces_per_bundle +
-                newItems[existingIndex].extra_pieces;
+            newItems[existingIndex].bundles = newBundles;
+            newItems[existingIndex].total_pieces = newTotalPieces;
             setData('items', newItems);
+
+            // Focus bundle input of existing item
+            setProductSearch('');
+            setShowProductDropdown(false);
+            setTimeout(() => bundleInputRefs.current[existingIndex]?.focus(), 50);
         } else {
+            // Check if at least one bundle fits in stock
+            if (product.pieces_per_bundle > product.stock_pieces) {
+                toast.error(`Insufficient stock for ${product.name}${product.size ? ` (${product.size})` : ''}. Available: ${product.stock_pieces} pcs`);
+                return;
+            }
+
             // Add new item
             const newItem: SaleItem = {
                 product_id: product.id,
@@ -188,11 +248,82 @@ export default function SaleCreate({
                 stock: product.stock_pieces,
             };
             setData('items', [...data.items, newItem]);
+
+            // Focus bundle input of new item
+            setProductSearch('');
+            setShowProductDropdown(false);
+            const newIndex = data.items.length;
+            setTimeout(() => bundleInputRefs.current[newIndex]?.focus(), 50);
+        }
+    }
+
+    // Handle product search keyboard event (with shortcuts)
+    const handleProductSearchKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+        // Shift+Enter -> jump to discount field
+        if (e.shiftKey && e.key === 'Enter') {
+            e.preventDefault();
+            discountRef.current?.focus();
+            return;
         }
 
-        setProductSearch('');
-        setShowProductDropdown(false);
-        productSearchRef.current?.focus();
+        // Delegate to dropdown navigation
+        productDropdown.handleKeyDown(e);
+    }, [productDropdown]);
+
+    // Global keyboard shortcuts (Ctrl+Enter to save)
+    useEffect(() => {
+        const handleGlobalKeyDown = (e: KeyboardEvent) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                formRef.current?.requestSubmit();
+            }
+        };
+
+        window.addEventListener('keydown', handleGlobalKeyDown);
+        return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+    }, []);
+
+    // Prevent Enter from submitting the form (except Ctrl+S)
+    const handleFormKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+        if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+        }
+    };
+
+    // Enter/Tab navigation: bundle → weight
+    const handleBundleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+        if (e.key === 'Enter' || (e.key === 'Tab' && !e.shiftKey)) {
+            e.preventDefault();
+            weightInputRefs.current[index]?.focus();
+        }
+    };
+
+    // Enter/Tab navigation: weight → next bundle or product search
+    const handleWeightKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+        if (e.key === 'Enter' || (e.key === 'Tab' && !e.shiftKey)) {
+            e.preventDefault();
+            if (index < data.items.length - 1) {
+                bundleInputRefs.current[index + 1]?.focus();
+            } else {
+                productSearchRef.current?.focus();
+            }
+        }
+    };
+
+    // Enter/Tab navigation: discount → paid amount
+    const handleDiscountKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' || (e.key === 'Tab' && !e.shiftKey)) {
+            e.preventDefault();
+            paidAmountRef.current?.focus();
+        }
+    };
+
+    // Enter/Tab navigation: paid amount → save button
+    const handlePaidAmountKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' || (e.key === 'Tab' && !e.shiftKey)) {
+            e.preventDefault();
+            saveButtonRef.current?.focus();
+        }
     };
 
     // Update item field
@@ -246,6 +377,17 @@ export default function SaleCreate({
             return;
         }
 
+        // Check stock availability
+        const stockExceeded = data.items.find(
+            (item) => item.total_pieces > item.stock,
+        );
+        if (stockExceeded) {
+            toast.error(
+                `Insufficient stock for ${stockExceeded.product_name}. Available: ${stockExceeded.stock} pcs, Requested: ${stockExceeded.total_pieces} pcs`,
+            );
+            return;
+        }
+
         post('/dashboard/sales', {
             onSuccess: () => {
                 toast.success('Sale created successfully');
@@ -294,7 +436,7 @@ export default function SaleCreate({
                         </div>
                     </div>
 
-                    <form onSubmit={handleSubmit}>
+                    <form ref={formRef} onSubmit={handleSubmit} onKeyDown={handleFormKeyDown}>
                         {/* Invoice Header */}
                         <div className="mb-6 grid gap-4 md:grid-cols-3">
                             {/* Bill No & Date */}
@@ -353,22 +495,25 @@ export default function SaleCreate({
                                         onFocus={() =>
                                             setShowCustomerDropdown(true)
                                         }
+                                        onKeyDown={customerDropdown.handleKeyDown}
                                         className="w-full rounded-lg border border-border bg-background py-2 pr-4 pl-10 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     />
                                     {showCustomerDropdown &&
                                         filteredCustomers.length > 0 && (
-                                            <div className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-card shadow-lg">
+                                            <div ref={customerDropdown.dropdownRef} className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-card shadow-lg">
                                                 {filteredCustomers.map(
-                                                    (customer) => (
+                                                    (customer, index) => (
                                                         <button
                                                             key={customer.id}
                                                             type="button"
+                                                            {...customerDropdown.getItemProps(index)}
                                                             onClick={() =>
-                                                                handleSelectCustomer(
+                                                                handleSelectCustomerInternal(
                                                                     customer,
                                                                 )
                                                             }
-                                                            className="flex w-full items-center justify-between px-4 py-2 text-left text-sm hover:bg-muted"
+                                                            onMouseEnter={() => customerDropdown.setHighlightedIndex(index)}
+                                                            className={`flex w-full items-center justify-between px-4 py-2 text-left text-sm hover:bg-muted ${customerDropdown.getItemProps(index).className}`}
                                                         >
                                                             <div>
                                                                 <p className="font-medium">
@@ -438,30 +583,34 @@ export default function SaleCreate({
                                 <input
                                     ref={productSearchRef}
                                     type="text"
-                                    placeholder="Search and add products..."
+                                    placeholder="Search products... (↑↓ navigate, Enter select, Shift+Enter → discount)"
                                     value={productSearch}
                                     onChange={(e) => {
                                         setProductSearch(e.target.value);
                                         setShowProductDropdown(true);
                                     }}
+                                    onKeyDown={handleProductSearchKeyDown}
                                     className="w-full rounded-lg border border-border bg-card py-3 pr-4 pl-10 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                 />
                                 {showProductDropdown &&
                                     filteredProducts.length > 0 && (
                                         <div
+                                            ref={productDropdown.dropdownRef}
                                             className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-card shadow-lg"
                                             onClick={(e) => e.stopPropagation()}
                                         >
-                                            {filteredProducts.map((product) => (
+                                            {filteredProducts.map((product, index) => (
                                                 <button
                                                     key={product.id}
                                                     type="button"
+                                                    {...productDropdown.getItemProps(index)}
                                                     onClick={() =>
-                                                        handleAddProduct(
+                                                        handleAddProductInternal(
                                                             product,
                                                         )
                                                     }
-                                                    className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted"
+                                                    onMouseEnter={() => productDropdown.setHighlightedIndex(index)}
+                                                    className={`flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted ${productDropdown.getItemProps(index).className} ${product.stock_pieces <= 0 ? 'opacity-50' : ''}`}
                                                 >
                                                     <div className="flex items-center gap-3">
                                                         <Package className="h-5 w-5 text-muted-foreground" />
@@ -490,12 +639,14 @@ export default function SaleCreate({
                                                             </p>
                                                         </div>
                                                     </div>
-                                                    <span className="text-sm text-muted-foreground">
+                                                    <span className={`text-sm ${product.stock_pieces <= 0 ? 'font-medium text-red-500' : 'text-muted-foreground'}`}>
                                                         Stock:{' '}
-                                                        {formatStock(
-                                                            product.stock_pieces,
-                                                            product.pieces_per_bundle,
-                                                        )}
+                                                        {product.stock_pieces <= 0
+                                                            ? 'Out of stock'
+                                                            : formatStock(
+                                                                product.stock_pieces,
+                                                                product.pieces_per_bundle,
+                                                            )}
                                                     </span>
                                                 </button>
                                             ))}
@@ -519,9 +670,24 @@ export default function SaleCreate({
                                         <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
                                             Bundles
                                         </th>
-                                        <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
-                                            +Pcs
-                                        </th>
+                                        {showExtraPieces && (
+                                            <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
+                                                +Pcs
+                                            </th>
+                                        )}
+                                        {!showExtraPieces && (
+                                            <th className="px-4 py-3 text-center">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowExtraPieces(true)}
+                                                    className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                                                    title="Show extra pieces column"
+                                                >
+                                                    <Plus className="h-3 w-3" />
+                                                    Pcs
+                                                </button>
+                                            </th>
+                                        )}
                                         <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
                                             Weight (kg)
                                         </th>
@@ -551,7 +717,7 @@ export default function SaleCreate({
                                         data.items.map((item, index) => (
                                             <tr
                                                 key={item.product_id}
-                                                className="hover:bg-muted/30"
+                                                className={`hover:bg-muted/30 ${item.total_pieces > item.stock ? 'bg-red-50 dark:bg-red-950/20' : ''}`}
                                             >
                                                 <td className="px-4 py-3 text-sm text-muted-foreground">
                                                     {index + 1}
@@ -564,9 +730,15 @@ export default function SaleCreate({
                                                         {item.product_size} •{' '}
                                                         {item.total_pieces} pcs
                                                     </p>
+                                                    {item.total_pieces > item.stock && (
+                                                        <p className="text-xs font-medium text-red-500">
+                                                            Exceeds stock ({item.stock} pcs available)
+                                                        </p>
+                                                    )}
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <input
+                                                        ref={(el) => { bundleInputRefs.current[index] = el; }}
                                                         type="number"
                                                         min={0}
                                                         value={item.bundles}
@@ -580,32 +752,39 @@ export default function SaleCreate({
                                                                 ) || 0,
                                                             )
                                                         }
+                                                        onKeyDown={(e) => handleBundleKeyDown(e, index)}
                                                         className="w-20 rounded-lg border border-border bg-background px-2 py-1.5 text-center text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                                     />
                                                 </td>
-                                                <td className="px-4 py-3">
-                                                    <input
-                                                        type="number"
-                                                        min={0}
-                                                        value={
-                                                            item.extra_pieces
-                                                        }
-                                                        onChange={(e) =>
-                                                            updateItem(
-                                                                index,
-                                                                'extra_pieces',
-                                                                parseInt(
-                                                                    e.target
-                                                                        .value,
-                                                                ) || 0,
-                                                            )
-                                                        }
-                                                        className="w-20 rounded-lg border border-border bg-background px-2 py-1.5 text-center text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
-                                                    />
-                                                </td>
+                                                {showExtraPieces && (
+                                                    <td className="px-4 py-3">
+                                                        <input
+                                                            type="number"
+                                                            min={0}
+                                                            value={
+                                                                item.extra_pieces
+                                                            }
+                                                            onChange={(e) =>
+                                                                updateItem(
+                                                                    index,
+                                                                    'extra_pieces',
+                                                                    parseInt(
+                                                                        e.target
+                                                                            .value,
+                                                                    ) || 0,
+                                                                )
+                                                            }
+                                                            className="w-20 rounded-lg border border-border bg-background px-2 py-1.5 text-center text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
+                                                        />
+                                                    </td>
+                                                )}
+                                                {!showExtraPieces && (
+                                                    <td className="px-4 py-3" />
+                                                )}
                                                 <td className="px-4 py-3">
                                                     <div className="relative">
                                                         <input
+                                                            ref={(el) => { weightInputRefs.current[index] = el; }}
                                                             type="number"
                                                             min={0}
                                                             step={0.01}
@@ -623,6 +802,7 @@ export default function SaleCreate({
                                                                     ) || 0,
                                                                 )
                                                             }
+                                                            onKeyDown={(e) => handleWeightKeyDown(e, index)}
                                                             placeholder="0.00"
                                                             className="w-24 rounded-lg border border-amber-400 bg-amber-50 px-2 py-1.5 text-center text-sm font-medium focus:border-amber-500 focus:ring-1 focus:ring-amber-500 focus:outline-none dark:bg-amber-950/30"
                                                         />
@@ -689,36 +869,55 @@ export default function SaleCreate({
                                     />
                                 </div>
                                 {data.paid_amount > 0 && (
-                                    <div>
-                                        <label className="mb-2 block text-sm font-medium text-foreground">
-                                            Payment Method
-                                        </label>
-                                        <select
-                                            value={data.payment_type_id || ''}
-                                            onChange={(e) =>
-                                                setData(
-                                                    'payment_type_id',
-                                                    e.target.value
-                                                        ? parseInt(
-                                                            e.target.value,
-                                                        )
-                                                        : null,
-                                                )
-                                            }
-                                            className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
-                                        >
-                                            <option value="">
-                                                Select payment method
-                                            </option>
-                                            {payment_types.map((type) => (
-                                                <option
-                                                    key={type.id}
-                                                    value={type.id}
-                                                >
-                                                    {type.name}
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="mb-2 block text-sm font-medium text-foreground">
+                                                Payment Method
+                                            </label>
+                                            <select
+                                                value={data.payment_type_id || ''}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        'payment_type_id',
+                                                        e.target.value
+                                                            ? parseInt(
+                                                                e.target.value,
+                                                            )
+                                                            : null,
+                                                    )
+                                                }
+                                                className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
+                                            >
+                                                <option value="">
+                                                    Select payment method
                                                 </option>
-                                            ))}
-                                        </select>
+                                                {payment_types.map((type) => (
+                                                    <option
+                                                        key={type.id}
+                                                        value={type.id}
+                                                    >
+                                                        {type.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="mb-2 block text-sm font-medium text-foreground">
+                                                Payment Reference
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={data.payment_ref}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        'payment_ref',
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                placeholder="e.g., Transaction ID, Check No..."
+                                                className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
+                                            />
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -755,6 +954,7 @@ export default function SaleCreate({
                                             Discount
                                         </span>
                                         <input
+                                            ref={discountRef}
                                             type="number"
                                             min={0}
                                             value={data.discount || ''}
@@ -766,6 +966,7 @@ export default function SaleCreate({
                                                     ) || 0,
                                                 )
                                             }
+                                            onKeyDown={handleDiscountKeyDown}
                                             placeholder="0"
                                             className="w-28 rounded-lg border border-border bg-background px-2 py-1 text-right text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                         />
@@ -783,6 +984,7 @@ export default function SaleCreate({
                                             Paid Amount
                                         </span>
                                         <input
+                                            ref={paidAmountRef}
                                             type="number"
                                             min={0}
                                             value={data.paid_amount || ''}
@@ -794,6 +996,7 @@ export default function SaleCreate({
                                                     ) || 0,
                                                 )
                                             }
+                                            onKeyDown={handlePaidAmountKeyDown}
                                             placeholder="0"
                                             className="w-28 rounded-lg border border-border bg-background px-2 py-1 text-right text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                         />
@@ -819,6 +1022,7 @@ export default function SaleCreate({
                                 Cancel
                             </Link>
                             <button
+                                ref={saveButtonRef}
                                 type="submit"
                                 disabled={processing || data.items.length === 0}
                                 className="rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"

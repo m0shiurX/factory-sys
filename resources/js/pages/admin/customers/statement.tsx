@@ -6,6 +6,7 @@ import {
     Calendar,
     FileText,
     Printer,
+    RotateCcw,
     TrendingDown,
     TrendingUp,
 } from 'lucide-react';
@@ -22,7 +23,7 @@ type Customer = {
 type Transaction = {
     id: number;
     date: string;
-    type: 'sale' | 'payment';
+    type: 'sale' | 'payment' | 'sales_return';
     description: string;
     reference: string | null;
     debit: number;
@@ -200,10 +201,10 @@ export default function CustomerStatement({
                                 </span>
                                 <span
                                     className={`text-lg font-semibold ${statement.opening_balance > 0
-                                            ? 'text-red-600'
-                                            : statement.opening_balance < 0
-                                                ? 'text-emerald-600'
-                                                : 'text-foreground'
+                                        ? 'text-red-600'
+                                        : statement.opening_balance < 0
+                                            ? 'text-emerald-600'
+                                            : 'text-foreground'
                                         }`}
                                 >
                                     {formatCurrency(statement.opening_balance)}
@@ -249,8 +250,8 @@ export default function CustomerStatement({
                                                 <tr
                                                     key={`${txn.type}-${txn.id}`}
                                                     className={`border-b border-border ${index % 2 === 0
-                                                            ? 'bg-background'
-                                                            : 'bg-muted/20'
+                                                        ? 'bg-background'
+                                                        : 'bg-muted/20'
                                                         }`}
                                                 >
                                                     <td className="px-4 py-3 text-sm whitespace-nowrap text-foreground">
@@ -258,9 +259,10 @@ export default function CustomerStatement({
                                                     </td>
                                                     <td className="px-4 py-3">
                                                         <div className="flex items-center gap-2">
-                                                            {txn.type ===
-                                                                'sale' ? (
+                                                            {txn.type === 'sale' ? (
                                                                 <TrendingUp className="h-4 w-4 text-red-500" />
+                                                            ) : txn.type === 'sales_return' ? (
+                                                                <RotateCcw className="h-4 w-4 text-amber-500" />
                                                             ) : (
                                                                 <TrendingDown className="h-4 w-4 text-emerald-500" />
                                                             )}
@@ -357,10 +359,10 @@ export default function CustomerStatement({
                                 </div>
                                 <span
                                     className={`text-2xl font-bold ${statement.closing_balance > 0
-                                            ? 'text-red-600'
-                                            : statement.closing_balance < 0
-                                                ? 'text-emerald-600'
-                                                : 'text-foreground'
+                                        ? 'text-red-600'
+                                        : statement.closing_balance < 0
+                                            ? 'text-emerald-600'
+                                            : 'text-foreground'
                                         }`}
                                 >
                                     {formatCurrency(statement.closing_balance)}

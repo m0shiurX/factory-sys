@@ -32,7 +32,7 @@ final class SaleController
             $search = $request->string('search')->trim()->value();
             $query->where(function ($q) use ($search): void {
                 $q->where('bill_no', 'like', "%{$search}%")
-                    ->orWhereHas('customer', fn ($cq) => $cq->where('name', 'like', "%{$search}%"));
+                    ->orWhereHas('customer', fn($cq) => $cq->where('name', 'like', "%{$search}%"));
             });
         }
 
@@ -106,6 +106,7 @@ final class SaleController
                 'paid_amount' => $validated['paid_amount'] ?? 0,
                 'due_amount' => $validated['due_amount'],
                 'payment_type_id' => $validated['payment_type_id'] ?? null,
+                'payment_ref' => $validated['payment_ref'] ?? null,
                 'notes' => $validated['notes'] ?? null,
                 'created_by' => auth()->id(),
             ]);
@@ -211,6 +212,7 @@ final class SaleController
                 'paid_amount' => $validated['paid_amount'] ?? 0,
                 'due_amount' => $validated['due_amount'],
                 'payment_type_id' => $validated['payment_type_id'] ?? null,
+                'payment_ref' => $validated['payment_ref'] ?? null,
                 'notes' => $validated['notes'] ?? null,
             ]);
 

@@ -4,7 +4,7 @@ import { usePage } from '@inertiajs/react';
 type Transaction = {
     id: number;
     date: string;
-    type: 'sale' | 'payment';
+    type: 'sale' | 'payment' | 'sales_return';
     description: string;
     reference: string | null;
     debit: number;

@@ -34,6 +34,7 @@ final class UpdateSaleRequest extends FormRequest
             'paid_amount' => ['nullable', 'numeric', 'min:0'],
             'due_amount' => ['required', 'numeric', 'min:0'],
             'payment_type_id' => ['nullable', 'integer', 'exists:payment_types,id'],
+            'payment_ref' => ['nullable', 'string', 'max:100'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'integer', 'exists:products,id'],

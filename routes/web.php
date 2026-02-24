@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PaymentTypeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductionController;
 use App\Http\Controllers\RoleController;
@@ -27,7 +28,7 @@ use App\Http\Controllers\UserTwoFactorAuthenticationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', fn () => to_route('login'))->name('home');
+Route::get('/', fn() => to_route('login'))->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -153,6 +154,12 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->group(function ():
 Route::middleware(['auth', 'verified'])->prefix('dashboard')->group(function (): void {
     Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
     Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
+
+    // Payment Types
+    Route::get('settings/payment-types', [PaymentTypeController::class, 'index'])->name('payment-types.index');
+    Route::post('settings/payment-types', [PaymentTypeController::class, 'store'])->name('payment-types.store');
+    Route::put('settings/payment-types/{paymentType}', [PaymentTypeController::class, 'update'])->name('payment-types.update');
+    Route::delete('settings/payment-types/{paymentType}', [PaymentTypeController::class, 'destroy'])->name('payment-types.destroy');
 });
 
 Route::middleware('auth')->group(function (): void {
@@ -171,7 +178,7 @@ Route::middleware('auth')->group(function (): void {
         ->name('password.update');
 
     // Appearance...
-    Route::get('settings/appearance', fn () => Inertia::render('admin/settings/appearance'))->name('appearance.edit');
+    Route::get('settings/appearance', fn() => Inertia::render('admin/settings/appearance'))->name('appearance.edit');
 
     // User Two-Factor Authentication...
     Route::get('settings/two-factor', [UserTwoFactorAuthenticationController::class, 'show'])

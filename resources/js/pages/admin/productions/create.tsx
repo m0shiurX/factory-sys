@@ -1,8 +1,9 @@
 import InputError from '@/components/common/input-error';
+import { useSearchableDropdown } from '@/hooks/use-searchable-dropdown';
 import AppLayout from '@/layouts/app-layout';
 import { Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, Factory, Package, Search } from 'lucide-react';
-import { FormEventHandler, useMemo, useRef, useState } from 'react';
+import { FormEventHandler, useEffect, useMemo, useRef, useState } from 'react';
 
 type Product = {
     id: number;
@@ -23,6 +24,7 @@ export default function ProductionCreate({ products }: Props) {
         null,
     );
     const productSearchRef = useRef<HTMLInputElement>(null);
+    const formRef = useRef<HTMLFormElement>(null);
 
     const { data, setData, post, processing, errors } = useForm({
         product_id: null as number | null,
@@ -44,14 +46,35 @@ export default function ProductionCreate({ products }: Props) {
             .slice(0, 10);
     }, [productSearch, products]);
 
-    const handleSelectProduct = (product: Product) => {
+    function handleSelectProductInternal(product: Product) {
         setSelectedProduct(product);
         setData('product_id', product.id);
         setProductSearch(
             product.name + (product.size ? ` (${product.size})` : ''),
         );
         setShowProductDropdown(false);
-    };
+    }
+
+    const productDropdown = useSearchableDropdown({
+        items: filteredProducts,
+        onSelect: handleSelectProductInternal,
+        isOpen: showProductDropdown,
+        setIsOpen: setShowProductDropdown,
+        inputRef: productSearchRef,
+    });
+
+    // Global keyboard shortcuts (Ctrl+S to save)
+    useEffect(() => {
+        const handleGlobalKeyDown = (e: KeyboardEvent) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                formRef.current?.requestSubmit();
+            }
+        };
+
+        window.addEventListener('keydown', handleGlobalKeyDown);
+        return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+    }, []);
 
     const formatStock = (pieces: number, piecesPerBundle: number) => {
         const bundles = Math.floor(pieces / piecesPerBundle);
@@ -90,7 +113,7 @@ export default function ProductionCreate({ products }: Props) {
                     </div>
 
                     {/* Form */}
-                    <form onSubmit={handleSubmit}>
+                    <form ref={formRef} onSubmit={handleSubmit}>
                         <div className="space-y-6 rounded-xl border border-border bg-card p-6">
                             {/* Product Selection */}
                             <div>
@@ -114,23 +137,26 @@ export default function ProductionCreate({ products }: Props) {
                                         onFocus={() =>
                                             setShowProductDropdown(true)
                                         }
+                                        onKeyDown={productDropdown.handleKeyDown}
                                         className="w-full rounded-lg border border-border bg-background py-2.5 pr-4 pl-10 text-sm text-foreground focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                         placeholder="Search for a product..."
                                     />
                                     {showProductDropdown &&
                                         filteredProducts.length > 0 && (
-                                            <div className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-card shadow-lg">
+                                            <div ref={productDropdown.dropdownRef} className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-card shadow-lg">
                                                 {filteredProducts.map(
-                                                    (product) => (
+                                                    (product, index) => (
                                                         <button
                                                             key={product.id}
                                                             type="button"
+                                                            {...productDropdown.getItemProps(index)}
                                                             onClick={() =>
-                                                                handleSelectProduct(
+                                                                handleSelectProductInternal(
                                                                     product,
                                                                 )
                                                             }
-                                                            className="flex w-full items-center justify-between px-4 py-2.5 text-left transition hover:bg-muted"
+                                                            onMouseEnter={() => productDropdown.setHighlightedIndex(index)}
+                                                            className={`flex w-full items-center justify-between px-4 py-2.5 text-left transition hover:bg-muted ${productDropdown.getItemProps(index).className}`}
                                                         >
                                                             <div>
                                                                 <p className="text-sm font-medium text-foreground">

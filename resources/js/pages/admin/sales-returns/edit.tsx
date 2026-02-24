@@ -1,16 +1,18 @@
 import InputError from '@/components/common/input-error';
+import { useSearchableDropdown } from '@/hooks/use-searchable-dropdown';
 import AppLayout from '@/layouts/app-layout';
 import { Link, useForm } from '@inertiajs/react';
 import {
     ArrowLeft,
     Package,
+    Plus,
     RotateCcw,
     Search,
     Trash2,
     User,
     Weight,
 } from 'lucide-react';
-import { FormEventHandler, useEffect, useMemo, useRef, useState } from 'react';
+import { FormEventHandler, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 type Customer = {
@@ -106,7 +108,16 @@ export default function SalesReturnEdit({
         salesReturn.sale?.bill_no || '',
     );
     const [showSaleDropdown, setShowSaleDropdown] = useState(false);
+    const [showExtraPieces, setShowExtraPieces] = useState(
+        salesReturn.items.some((item) => item.extra_pieces > 0),
+    );
     const productSearchRef = useRef<HTMLInputElement>(null);
+    const customerSearchRef = useRef<HTMLInputElement>(null);
+    const saleSearchRef = useRef<HTMLInputElement>(null);
+    const discountRef = useRef<HTMLInputElement>(null);
+    const formRef = useRef<HTMLFormElement>(null);
+    const bundleInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+    const weightInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
     // Transform existing items
     const initialItems: ReturnItem[] = salesReturn.items.map((item) => ({
@@ -181,6 +192,30 @@ export default function SalesReturnEdit({
             .slice(0, 10);
     }, [saleSearch, sales]);
 
+    const productDropdown = useSearchableDropdown({
+        items: filteredProducts,
+        onSelect: handleAddProductInternal,
+        isOpen: showProductDropdown,
+        setIsOpen: setShowProductDropdown,
+        inputRef: productSearchRef,
+    });
+
+    const customerDropdown = useSearchableDropdown({
+        items: filteredCustomers,
+        onSelect: handleSelectCustomerInternal,
+        isOpen: showCustomerDropdown,
+        setIsOpen: setShowCustomerDropdown,
+        inputRef: customerSearchRef,
+    });
+
+    const saleDropdown = useSearchableDropdown({
+        items: filteredSales,
+        onSelect: handleSelectSaleInternal,
+        isOpen: showSaleDropdown,
+        setIsOpen: setShowSaleDropdown,
+        inputRef: saleSearchRef,
+    });
+
     // Calculate totals
     useEffect(() => {
         const totalWeight = data.items.reduce(
@@ -202,14 +237,15 @@ export default function SalesReturnEdit({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [data.items, data.discount]);
 
-    const handleSelectCustomer = (customer: Customer) => {
+    function handleSelectCustomerInternal(customer: Customer) {
         setSelectedCustomer(customer);
         setData('customer_id', customer.id);
         setCustomerSearch(customer.name);
         setShowCustomerDropdown(false);
-    };
+        setTimeout(() => productSearchRef.current?.focus(), 50);
+    }
 
-    const handleSelectSale = (selectedSaleItem: Sale) => {
+    function handleSelectSaleInternal(selectedSaleItem: Sale) {
         setSelectedSale(selectedSaleItem);
         setData('sale_id', selectedSaleItem.id);
         setSaleSearch(selectedSaleItem.bill_no);
@@ -220,12 +256,12 @@ export default function SalesReturnEdit({
                 (c) => c.id === selectedSaleItem.customer_id,
             );
             if (customer) {
-                handleSelectCustomer(customer);
+                handleSelectCustomerInternal(customer);
             }
         }
-    };
+    }
 
-    const handleAddProduct = (product: Product) => {
+    function handleAddProductInternal(product: Product) {
         const existingIndex = data.items.findIndex(
             (item) => item.product_id === product.id,
         );
@@ -237,6 +273,9 @@ export default function SalesReturnEdit({
                 newItems[existingIndex].bundles * product.pieces_per_bundle +
                 newItems[existingIndex].extra_pieces;
             setData('items', newItems);
+            setProductSearch('');
+            setShowProductDropdown(false);
+            setTimeout(() => bundleInputRefs.current[existingIndex]?.focus(), 50);
         } else {
             const newItem: ReturnItem = {
                 product_id: product.id,
@@ -251,12 +290,12 @@ export default function SalesReturnEdit({
                 sub_total: 0,
             };
             setData('items', [...data.items, newItem]);
+            setProductSearch('');
+            setShowProductDropdown(false);
+            const newIndex = data.items.length;
+            setTimeout(() => bundleInputRefs.current[newIndex]?.focus(), 50);
         }
-
-        setProductSearch('');
-        setShowProductDropdown(false);
-        productSearchRef.current?.focus();
-    };
+    }
 
     const updateItem = (
         index: number,
@@ -312,6 +351,53 @@ export default function SalesReturnEdit({
         });
     };
 
+    const handleProductSearchKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.shiftKey && e.key === 'Enter') {
+            e.preventDefault();
+            discountRef.current?.focus();
+            return;
+        }
+        productDropdown.handleKeyDown(e);
+    }, [productDropdown]);
+
+    useEffect(() => {
+        const handleGlobalKeyDown = (e: KeyboardEvent) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                formRef.current?.requestSubmit();
+            }
+        };
+        window.addEventListener('keydown', handleGlobalKeyDown);
+        return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+    }, []);
+
+    // Prevent Enter from submitting the form
+    const handleFormKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+        if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+        }
+    };
+
+    // Enter/Tab navigation: bundle → weight
+    const handleBundleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+        if (e.key === 'Enter' || (e.key === 'Tab' && !e.shiftKey)) {
+            e.preventDefault();
+            weightInputRefs.current[index]?.focus();
+        }
+    };
+
+    // Enter/Tab navigation: weight → next bundle or product search
+    const handleWeightKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+        if (e.key === 'Enter' || (e.key === 'Tab' && !e.shiftKey)) {
+            e.preventDefault();
+            if (index < data.items.length - 1) {
+                bundleInputRefs.current[index + 1]?.focus();
+            } else {
+                productSearchRef.current?.focus();
+            }
+        }
+    };
+
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-BD', {
             style: 'currency',
@@ -342,7 +428,7 @@ export default function SalesReturnEdit({
                         </div>
                     </div>
 
-                    <form onSubmit={handleSubmit}>
+                    <form ref={formRef} onSubmit={handleSubmit} onKeyDown={handleFormKeyDown}>
                         {/* Return Header */}
                         <div className="mb-6 grid gap-4 md:grid-cols-4">
                             {/* Return No & Date */}
@@ -386,6 +472,7 @@ export default function SalesReturnEdit({
                                 <div className="relative">
                                     <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                     <input
+                                        ref={saleSearchRef}
                                         type="text"
                                         placeholder="Search sale..."
                                         value={saleSearch}
@@ -400,19 +487,22 @@ export default function SalesReturnEdit({
                                         onFocus={() =>
                                             setShowSaleDropdown(true)
                                         }
+                                        onKeyDown={saleDropdown.handleKeyDown}
                                         className="w-full rounded-lg border border-border bg-background py-2 pr-4 pl-10 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     />
                                     {showSaleDropdown &&
                                         filteredSales.length > 0 && (
-                                            <div className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-card shadow-lg">
-                                                {filteredSales.map((s) => (
+                                            <div ref={saleDropdown.dropdownRef} className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-card shadow-lg">
+                                                {filteredSales.map((s, index) => (
                                                     <button
                                                         key={s.id}
                                                         type="button"
+                                                        {...saleDropdown.getItemProps(index)}
                                                         onClick={() =>
-                                                            handleSelectSale(s)
+                                                            handleSelectSaleInternal(s)
                                                         }
-                                                        className="flex w-full items-center justify-between px-4 py-2 text-left text-sm hover:bg-muted"
+                                                        onMouseEnter={() => saleDropdown.setHighlightedIndex(index)}
+                                                        className={`flex w-full items-center justify-between px-4 py-2 text-left text-sm hover:bg-muted ${saleDropdown.getItemProps(index).className}`}
                                                     >
                                                         <div>
                                                             <p className="font-medium">
@@ -445,6 +535,7 @@ export default function SalesReturnEdit({
                                 <div className="relative">
                                     <User className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                                     <input
+                                        ref={customerSearchRef}
                                         type="text"
                                         placeholder="Search customer..."
                                         value={customerSearch}
@@ -459,22 +550,25 @@ export default function SalesReturnEdit({
                                         onFocus={() =>
                                             setShowCustomerDropdown(true)
                                         }
+                                        onKeyDown={customerDropdown.handleKeyDown}
                                         className="w-full rounded-lg border border-border bg-background py-2 pr-4 pl-10 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     />
                                     {showCustomerDropdown &&
                                         filteredCustomers.length > 0 && (
-                                            <div className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-card shadow-lg">
+                                            <div ref={customerDropdown.dropdownRef} className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-card shadow-lg">
                                                 {filteredCustomers.map(
-                                                    (customer) => (
+                                                    (customer, index) => (
                                                         <button
                                                             key={customer.id}
                                                             type="button"
+                                                            {...customerDropdown.getItemProps(index)}
                                                             onClick={() =>
-                                                                handleSelectCustomer(
+                                                                handleSelectCustomerInternal(
                                                                     customer,
                                                                 )
                                                             }
-                                                            className="flex w-full items-center justify-between px-4 py-2 text-left text-sm hover:bg-muted"
+                                                            onMouseEnter={() => customerDropdown.setHighlightedIndex(index)}
+                                                            className={`flex w-full items-center justify-between px-4 py-2 text-left text-sm hover:bg-muted ${customerDropdown.getItemProps(index).className}`}
                                                         >
                                                             <div>
                                                                 <p className="font-medium">
@@ -529,28 +623,31 @@ export default function SalesReturnEdit({
                                 <input
                                     ref={productSearchRef}
                                     type="text"
-                                    placeholder="Search products..."
+                                    placeholder="Search products... (↑↓ navigate, Enter select, Shift+Enter → discount)"
                                     value={productSearch}
                                     onChange={(e) => {
                                         setProductSearch(e.target.value);
                                         setShowProductDropdown(true);
                                     }}
                                     onFocus={() => setShowProductDropdown(true)}
+                                    onKeyDown={handleProductSearchKeyDown}
                                     className="w-full rounded-lg border border-border bg-background py-2.5 pr-4 pl-10 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                 />
                                 {showProductDropdown &&
                                     filteredProducts.length > 0 && (
-                                        <div className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-card shadow-lg">
-                                            {filteredProducts.map((product) => (
+                                        <div ref={productDropdown.dropdownRef} className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-border bg-card shadow-lg">
+                                            {filteredProducts.map((product, index) => (
                                                 <button
                                                     key={product.id}
                                                     type="button"
+                                                    {...productDropdown.getItemProps(index)}
                                                     onClick={() =>
-                                                        handleAddProduct(
+                                                        handleAddProductInternal(
                                                             product,
                                                         )
                                                     }
-                                                    className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted"
+                                                    onMouseEnter={() => productDropdown.setHighlightedIndex(index)}
+                                                    className={`flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted ${productDropdown.getItemProps(index).className}`}
                                                 >
                                                     <div className="flex items-center gap-3">
                                                         <div className="rounded-lg bg-primary/10 p-2">
@@ -596,9 +693,24 @@ export default function SalesReturnEdit({
                                         <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
                                             Bundles
                                         </th>
-                                        <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
-                                            Extra Pcs
-                                        </th>
+                                        {showExtraPieces && (
+                                            <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
+                                                Extra Pcs
+                                            </th>
+                                        )}
+                                        {!showExtraPieces && (
+                                            <th className="px-4 py-3 text-center">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setShowExtraPieces(true)}
+                                                    className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                                                    title="Show extra pieces column"
+                                                >
+                                                    <Plus className="h-3 w-3" />
+                                                    Pcs
+                                                </button>
+                                            </th>
+                                        )}
                                         <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
                                             Total Pcs
                                         </th>
@@ -647,6 +759,7 @@ export default function SalesReturnEdit({
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <input
+                                                        ref={(el) => { bundleInputRefs.current[index] = el; }}
                                                         type="number"
                                                         min={0}
                                                         value={item.bundles}
@@ -660,34 +773,41 @@ export default function SalesReturnEdit({
                                                                 ) || 0,
                                                             )
                                                         }
+                                                        onKeyDown={(e) => handleBundleKeyDown(e, index)}
                                                         className="w-20 rounded-lg border border-border bg-background px-2 py-1 text-center text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                                     />
                                                 </td>
-                                                <td className="px-4 py-3">
-                                                    <input
-                                                        type="number"
-                                                        min={0}
-                                                        value={
-                                                            item.extra_pieces
-                                                        }
-                                                        onChange={(e) =>
-                                                            updateItem(
-                                                                index,
-                                                                'extra_pieces',
-                                                                parseInt(
-                                                                    e.target
-                                                                        .value,
-                                                                ) || 0,
-                                                            )
-                                                        }
-                                                        className="w-20 rounded-lg border border-border bg-background px-2 py-1 text-center text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
-                                                    />
-                                                </td>
+                                                {showExtraPieces && (
+                                                    <td className="px-4 py-3">
+                                                        <input
+                                                            type="number"
+                                                            min={0}
+                                                            value={
+                                                                item.extra_pieces
+                                                            }
+                                                            onChange={(e) =>
+                                                                updateItem(
+                                                                    index,
+                                                                    'extra_pieces',
+                                                                    parseInt(
+                                                                        e.target
+                                                                            .value,
+                                                                    ) || 0,
+                                                                )
+                                                            }
+                                                            className="w-20 rounded-lg border border-border bg-background px-2 py-1 text-center text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
+                                                        />
+                                                    </td>
+                                                )}
+                                                {!showExtraPieces && (
+                                                    <td className="px-4 py-3" />
+                                                )}
                                                 <td className="px-4 py-3 text-center font-medium">
                                                     {item.total_pieces}
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <input
+                                                        ref={(el) => { weightInputRefs.current[index] = el; }}
                                                         type="number"
                                                         min={0}
                                                         step="0.01"
@@ -704,6 +824,7 @@ export default function SalesReturnEdit({
                                                                 ) || 0,
                                                             )
                                                         }
+                                                        onKeyDown={(e) => handleWeightKeyDown(e, index)}
                                                         className="w-24 rounded-lg border border-border bg-background px-2 py-1 text-center text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                                     />
                                                 </td>
@@ -790,6 +911,7 @@ export default function SalesReturnEdit({
                                             Discount
                                         </span>
                                         <input
+                                            ref={discountRef}
                                             type="number"
                                             min={0}
                                             value={data.discount || ''}
