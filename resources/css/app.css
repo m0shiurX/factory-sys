@@ -211,16 +211,15 @@
         margin: 0 !important;
     }
 
-    /* Prevent extra page */
+    /* Allow content to flow across pages */
     .print-invoice-container>div {
-        page-break-after: avoid;
-        page-break-inside: avoid;
+        page-break-inside: auto;
     }
 
-    /* Ensure table displays correctly */
+    /* Ensure table displays correctly and flows across pages */
     .print-invoice-container table {
         display: table !important;
-        page-break-inside: avoid;
+        page-break-inside: auto;
     }
 
     .print-invoice-container thead {
@@ -234,6 +233,10 @@
     .print-invoice-container tr {
         display: table-row !important;
         page-break-inside: avoid;
+    }
+
+    .print-invoice-container tfoot {
+        display: table-footer-group !important;
     }
 
     .print-invoice-container th,

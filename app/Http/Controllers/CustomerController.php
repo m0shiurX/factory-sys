@@ -40,6 +40,8 @@ final class CustomerController
         // Due filter
         if ($request->input('has_due') === 'true') {
             $query->where('total_due', '>', 0);
+        } elseif ($request->input('has_due') === 'false') {
+            $query->where('total_due', '<=', 0);
         }
 
         $customers = $query->orderBy('name')
@@ -178,14 +180,14 @@ final class CustomerController
             ->oldest('sale_date')
             ->orderBy('id')
             ->get()
-            ->map(fn ($sale): array => [
+            ->map(fn($sale): array => [
                 'id' => $sale->id,
                 'date' => $sale->sale_date->format('Y-m-d'),
                 'type' => 'sale',
                 'description' => "Sale #{$sale->bill_no}",
                 'reference' => $sale->bill_no,
                 'payment_info' => $sale->paymentType
-                    ? $sale->paymentType->name.($sale->payment_ref ? " ({$sale->payment_ref})" : '')
+                    ? $sale->paymentType->name . ($sale->payment_ref ? " ({$sale->payment_ref})" : '')
                     : null,
                 'debit' => (float) $sale->due_amount,
                 'credit' => 0,
@@ -198,14 +200,14 @@ final class CustomerController
             ->orderBy('payment_date')
             ->orderBy('id')
             ->get()
-            ->map(fn (Payment $payment): array => [
+            ->map(fn(Payment $payment): array => [
                 'id' => $payment->id,
                 'date' => \Illuminate\Support\Facades\Date::parse($payment->payment_date)->format('Y-m-d'),
                 'type' => 'payment',
-                'description' => 'Payment'.($payment->paymentType ? " ({$payment->paymentType->name})" : ''),
+                'description' => 'Payment' . ($payment->paymentType ? " ({$payment->paymentType->name})" : ''),
                 'reference' => $payment->payment_ref,
                 'payment_info' => $payment->paymentType
-                    ? $payment->paymentType->name.($payment->payment_ref ? " ({$payment->payment_ref})" : '')
+                    ? $payment->paymentType->name . ($payment->payment_ref ? " ({$payment->payment_ref})" : '')
                     : ($payment->payment_ref ?: null),
                 'debit' => 0,
                 'credit' => (float) $payment->amount,
@@ -218,7 +220,7 @@ final class CustomerController
             ->oldest('return_date')
             ->orderBy('id')
             ->get()
-            ->map(fn (SalesReturn $return): array => [
+            ->map(fn(SalesReturn $return): array => [
                 'id' => $return->id,
                 'date' => $return->return_date->format('Y-m-d'),
                 'type' => 'sales_return',
@@ -255,6 +257,45 @@ final class CustomerController
                 'from_date' => $fromDate->format('Y-m-d'),
                 'to_date' => $toDate->format('Y-m-d'),
             ],
+        ]);
+    }
+
+    /**
+     * Display a printable list of all customers.
+     */
+    public function print(Request $request): Response
+    {
+        $query = Customer::query();
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search): void {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('address', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->has('active')) {
+            $query->where('is_active', $request->boolean('active'));
+        }
+
+        if ($request->input('has_due') === 'true') {
+            $query->where('total_due', '>', 0);
+        } elseif ($request->input('has_due') === 'false') {
+            $query->where('total_due', '<=', 0);
+        }
+
+        $customers = $query->orderBy('name')->get();
+
+        $totals = [
+            'total_due' => $customers->sum('total_due'),
+            'count' => $customers->count(),
+        ];
+
+        return Inertia::render('admin/customers/print', [
+            'customers' => $customers,
+            'totals' => $totals,
+            'filters' => $request->only(['search', 'active', 'has_due']),
         ]);
     }
 

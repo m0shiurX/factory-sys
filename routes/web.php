@@ -28,7 +28,7 @@ use App\Http\Controllers\UserTwoFactorAuthenticationController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', fn () => to_route('login'))->name('home');
+Route::get('/', fn() => to_route('login'))->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function (): void {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -76,6 +76,7 @@ Route::middleware(['auth', 'verified'])->prefix('dashboard')->group(function ():
 Route::middleware(['auth', 'verified'])->prefix('dashboard')->group(function (): void {
     Route::get('customers', [CustomerController::class, 'index'])->name('customers.index');
     Route::get('customers/create', [CustomerController::class, 'create'])->name('customers.create');
+    Route::get('customers/print', [CustomerController::class, 'print'])->name('customers.print');
     Route::post('customers', [CustomerController::class, 'store'])->name('customers.store');
     Route::get('customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
     Route::get('customers/{customer}/statement', [CustomerController::class, 'statement'])->name('customers.statement');
@@ -178,7 +179,7 @@ Route::middleware('auth')->group(function (): void {
         ->name('password.update');
 
     // Appearance...
-    Route::get('settings/appearance', fn () => Inertia::render('admin/settings/appearance'))->name('appearance.edit');
+    Route::get('settings/appearance', fn() => Inertia::render('admin/settings/appearance'))->name('appearance.edit');
 
     // User Two-Factor Authentication...
     Route::get('settings/two-factor', [UserTwoFactorAuthenticationController::class, 'show'])

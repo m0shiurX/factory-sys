@@ -74,6 +74,7 @@ export default function SaleCreate({
     // Refs for item row inputs
     const bundleInputRefs = useRef<(HTMLInputElement | null)[]>([]);
     const weightInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+    const rateInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
     // Auto-focus customer field on mount
     useEffect(() => {
@@ -298,8 +299,16 @@ export default function SaleCreate({
         }
     };
 
-    // Enter/Tab navigation: weight → next bundle or product search
+    // Enter/Tab navigation: weight → rate
     const handleWeightKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+        if (e.key === 'Enter' || (e.key === 'Tab' && !e.shiftKey)) {
+            e.preventDefault();
+            rateInputRefs.current[index]?.focus();
+        }
+    };
+
+    // Enter/Tab navigation: rate → next bundle or product search
+    const handleRateKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
         if (e.key === 'Enter' || (e.key === 'Tab' && !e.shiftKey)) {
             e.preventDefault();
             if (index < data.items.length - 1) {
@@ -810,6 +819,7 @@ export default function SaleCreate({
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <input
+                                                        ref={(el) => { rateInputRefs.current[index] = el; }}
                                                         type="number"
                                                         min={0}
                                                         step={0.01}
@@ -824,6 +834,7 @@ export default function SaleCreate({
                                                                 ) || 0,
                                                             )
                                                         }
+                                                        onKeyDown={(e) => handleRateKeyDown(e, index)}
                                                         className="w-20 rounded-lg border border-border bg-background px-2 py-1.5 text-center text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                                     />
                                                 </td>

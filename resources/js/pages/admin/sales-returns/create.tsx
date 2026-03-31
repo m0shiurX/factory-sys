@@ -96,6 +96,7 @@ export default function SalesReturnCreate({
     // Refs for item row inputs
     const bundleInputRefs = useRef<(HTMLInputElement | null)[]>([]);
     const weightInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+    const rateInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
     // Auto-focus customer field on mount (if no sale pre-selected)
     useEffect(() => {
@@ -358,8 +359,16 @@ export default function SalesReturnCreate({
         }
     };
 
-    // Enter/Tab navigation: weight → next bundle or product search
+    // Enter/Tab navigation: weight → rate
     const handleWeightKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+        if (e.key === 'Enter' || (e.key === 'Tab' && !e.shiftKey)) {
+            e.preventDefault();
+            rateInputRefs.current[index]?.focus();
+        }
+    };
+
+    // Enter/Tab navigation: rate → next bundle or product search
+    const handleRateKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
         if (e.key === 'Enter' || (e.key === 'Tab' && !e.shiftKey)) {
             e.preventDefault();
             if (index < data.items.length - 1) {
@@ -484,8 +493,8 @@ export default function SalesReturnCreate({
                                 }));
                             }}
                             className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition ${data.is_scrap_purchase
-                                    ? 'bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-400'
-                                    : 'border border-border bg-card text-muted-foreground hover:bg-muted'
+                                ? 'bg-amber-100 text-amber-800 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-400'
+                                : 'border border-border bg-card text-muted-foreground hover:bg-muted'
                                 }`}
                         >
                             <ShoppingBag className="h-4 w-4" />
@@ -960,6 +969,7 @@ export default function SalesReturnCreate({
                                                 </td>
                                                 <td className="px-4 py-3">
                                                     <input
+                                                        ref={(el) => { rateInputRefs.current[index] = el; }}
                                                         type="number"
                                                         min={0}
                                                         step="0.01"
@@ -974,6 +984,7 @@ export default function SalesReturnCreate({
                                                                 ) || 0,
                                                             )
                                                         }
+                                                        onKeyDown={(e) => handleRateKeyDown(e, index)}
                                                         className="w-24 rounded-lg border border-border bg-background px-2 py-1 text-center text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                                     />
                                                 </td>
