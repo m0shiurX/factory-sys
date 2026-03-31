@@ -751,6 +751,7 @@ export default function SaleCreate({
                                                         type="number"
                                                         min={0}
                                                         value={item.bundles}
+                                                        onFocus={(e) => e.target.select()}
                                                         onChange={(e) =>
                                                             updateItem(
                                                                 index,
@@ -801,6 +802,7 @@ export default function SaleCreate({
                                                                 item.weight_kg ||
                                                                 ''
                                                             }
+                                                            onFocus={(e) => e.target.select()}
                                                             onChange={(e) =>
                                                                 updateItem(
                                                                     index,
@@ -824,6 +826,7 @@ export default function SaleCreate({
                                                         min={0}
                                                         step={0.01}
                                                         value={item.rate_per_kg}
+                                                        onFocus={(e) => e.target.select()}
                                                         onChange={(e) =>
                                                             updateItem(
                                                                 index,

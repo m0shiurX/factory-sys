@@ -182,12 +182,33 @@
 /* Print Styles */
 @media print {
 
-    /* Hide everything by default */
+    /* Hide everything visually */
     body * {
         visibility: hidden;
     }
 
-    /* Hide the screen version completely - prevents extra page */
+    /* Collapse layout elements so they don't take space */
+    [data-slot="sidebar"] {
+        display: none !important;
+    }
+
+    [data-slot="sidebar-wrapper"] {
+        display: block !important;
+        min-height: auto !important;
+    }
+
+    [data-slot="sidebar-inset"] {
+        display: block !important;
+        position: static !important;
+        min-height: auto !important;
+        overflow: visible !important;
+    }
+
+    [data-slot="sidebar-inset"]>header {
+        display: none !important;
+    }
+
+    /* Hide the screen version completely */
     .invoice-print-area {
         display: none !important;
         height: 0 !important;
@@ -198,13 +219,11 @@
     .print-invoice-container,
     .print-invoice-container * {
         visibility: visible !important;
-        display: block;
     }
 
     .print-invoice-container {
-        position: absolute;
-        left: 0;
-        top: 0;
+        display: block !important;
+        position: static !important;
         width: 100%;
         background: white !important;
         padding: 0 !important;
@@ -250,7 +269,7 @@
         visibility: visible !important;
     }
 
-    /* Reset body and html - prevent extra page */
+    /* Reset body and html */
     html,
     body {
         margin: 0 !important;
@@ -261,12 +280,6 @@
         overflow: visible !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
-    }
-
-    /* Hide elements that might cause extra page */
-    html::after,
-    body::after {
-        display: none !important;
     }
 
     /* Page size and margins for A4 */

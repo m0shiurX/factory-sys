@@ -920,6 +920,7 @@ export default function SalesReturnEdit({
                                                                 type="number"
                                                                 min={0}
                                                                 value={item.bundles}
+                                                                onFocus={(e) => e.target.select()}
                                                                 onChange={(e) =>
                                                                     updateItem(index, 'bundles', parseInt(e.target.value) || 0)
                                                                 }
@@ -955,6 +956,7 @@ export default function SalesReturnEdit({
                                                         value={
                                                             item.weight_kg || ''
                                                         }
+                                                        onFocus={(e) => e.target.select()}
                                                         onChange={(e) =>
                                                             updateItem(
                                                                 index,
@@ -976,6 +978,7 @@ export default function SalesReturnEdit({
                                                         min={0}
                                                         step="0.01"
                                                         value={item.rate_per_kg}
+                                                        onFocus={(e) => e.target.select()}
                                                         onChange={(e) =>
                                                             updateItem(
                                                                 index,
