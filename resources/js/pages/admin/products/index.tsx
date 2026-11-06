@@ -12,7 +12,7 @@ import {
     Search,
     Trash2,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 type Product = {
@@ -47,6 +47,7 @@ type Props = {
 
 export default function ProductsIndex({ products, stats, filters }: Props) {
     const [search, setSearch] = useState(filters.search || '');
+    const isFirstRender = useRef(true);
     const { props } = usePage<{
         flash?: { success?: string; error?: string };
     }>();
@@ -61,17 +62,25 @@ export default function ProductsIndex({ products, stats, filters }: Props) {
     }, [props.flash?.success, props.flash?.error]);
 
     useEffect(() => {
+        // Only search when the box changes; on load this would drop ?page and filters
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+
         const timeout = setTimeout(() => {
             router.get(
                 '/dashboard/products',
                 {
                     ...(search && { search }),
+                    ...(filters.active && { active: filters.active }),
                 },
                 { preserveState: true, replace: true },
             );
         }, 300);
 
         return () => clearTimeout(timeout);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search]);
 
     const handleDelete = (productId: number) => {
@@ -191,7 +200,7 @@ export default function ProductsIndex({ products, stats, filters }: Props) {
                     </div>
 
                     {/* Table */}
-                    <div className="overflow-hidden rounded-xl border border-border bg-card">
+                    <div className="overflow-x-auto rounded-xl border border-border bg-card">
                         <table className="w-full">
                             <thead>
                                 <tr className="border-b border-border bg-muted/50">

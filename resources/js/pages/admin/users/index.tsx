@@ -258,29 +258,37 @@ export default function UsersIndex({ users }: Props) {
 
                         {/* Pagination */}
                         {users.last_page > 1 && (
-                            <div className="flex items-center justify-between border-t border-border px-6 py-4">
+                            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border px-6 py-4">
                                 <div className="text-sm text-muted-foreground">
                                     Showing page {users.current_page} of{' '}
                                     {users.last_page}
                                 </div>
-                                <div className="flex gap-2">
-                                    {users.links.map((link, index) => (
-                                        <Link
-                                            key={index}
-                                            href={link.url || '#'}
-                                            preserveScroll
-                                            className={`rounded-lg px-3 py-1.5 text-sm transition ${
-                                                link.active
-                                                    ? 'bg-primary text-primary-foreground'
-                                                    : link.url
-                                                      ? 'text-muted-foreground hover:bg-muted'
-                                                      : 'cursor-not-allowed text-muted-foreground/50'
-                                            }`}
-                                            dangerouslySetInnerHTML={{
-                                                __html: link.label,
-                                            }}
-                                        />
-                                    ))}
+                                <div className="flex flex-wrap gap-2">
+                                    {users.links.map((link, index) =>
+                                        link.url ? (
+                                            <Link
+                                                key={index}
+                                                href={link.url}
+                                                preserveScroll
+                                                className={`rounded-lg px-3 py-1.5 text-sm transition ${
+                                                    link.active
+                                                        ? 'bg-primary text-primary-foreground'
+                                                        : 'text-muted-foreground hover:bg-muted'
+                                                }`}
+                                                dangerouslySetInnerHTML={{
+                                                    __html: link.label,
+                                                }}
+                                            />
+                                        ) : (
+                                            <span
+                                                key={index}
+                                                className="cursor-not-allowed rounded-lg px-3 py-1.5 text-sm text-muted-foreground/50"
+                                                dangerouslySetInnerHTML={{
+                                                    __html: link.label,
+                                                }}
+                                            />
+                                        ),
+                                    )}
                                 </div>
                             </div>
                         )}

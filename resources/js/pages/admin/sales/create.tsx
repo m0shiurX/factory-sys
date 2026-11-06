@@ -2,7 +2,7 @@ import InputError from '@/components/common/input-error';
 import { useSearchableDropdown } from '@/hooks/use-searchable-dropdown';
 import AppLayout from '@/layouts/app-layout';
 import { Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, Package, Plus, Search, Trash2, User } from 'lucide-react';
+import { ArrowLeft, Package, Search, Trash2, User } from 'lucide-react';
 import { FormEventHandler, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -24,11 +24,6 @@ type Product = {
     stock_pieces: number;
 };
 
-type PaymentType = {
-    id: number;
-    name: string;
-};
-
 type SaleItem = {
     product_id: number;
     product_name: string;
@@ -47,14 +42,12 @@ type Props = {
     bill_no: string;
     customers: Customer[];
     products: Product[];
-    payment_types: PaymentType[];
 };
 
 export default function SaleCreate({
     bill_no,
     customers,
     products,
-    payment_types,
 }: Props) {
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
         null,
@@ -63,16 +56,15 @@ export default function SaleCreate({
     const [showProductDropdown, setShowProductDropdown] = useState(false);
     const [customerSearch, setCustomerSearch] = useState('');
     const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
-    const [showExtraPieces, setShowExtraPieces] = useState(false);
     const productSearchRef = useRef<HTMLInputElement>(null);
     const customerSearchRef = useRef<HTMLInputElement>(null);
     const discountRef = useRef<HTMLInputElement>(null);
-    const paidAmountRef = useRef<HTMLInputElement>(null);
     const saveButtonRef = useRef<HTMLButtonElement>(null);
     const formRef = useRef<HTMLFormElement>(null);
 
     // Refs for item row inputs
     const bundleInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+    const extraPiecesInputRefs = useRef<(HTMLInputElement | null)[]>([]);
     const weightInputRefs = useRef<(HTMLInputElement | null)[]>([]);
     const rateInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -90,10 +82,6 @@ export default function SaleCreate({
         total_amount: number;
         discount: number;
         net_amount: number;
-        paid_amount: number;
-        due_amount: number;
-        payment_type_id: number | null;
-        payment_ref: string;
         notes: string;
         items: SaleItem[];
     }>({
@@ -105,10 +93,6 @@ export default function SaleCreate({
         total_amount: 0,
         discount: 0,
         net_amount: 0,
-        paid_amount: 0,
-        due_amount: 0,
-        payment_type_id: null,
-        payment_ref: '',
         notes: '',
         items: [],
     });
@@ -172,7 +156,6 @@ export default function SaleCreate({
             0,
         );
         const netAmount = totalAmount - (data.discount || 0);
-        const dueAmount = netAmount - (data.paid_amount || 0);
 
         setData((prev) => ({
             ...prev,
@@ -180,10 +163,9 @@ export default function SaleCreate({
             total_weight_kg: Number(totalWeight.toFixed(2)),
             total_amount: Number(totalAmount.toFixed(2)),
             net_amount: Number(netAmount.toFixed(2)),
-            due_amount: Number(dueAmount.toFixed(2)),
         }));
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data.items, data.discount, data.paid_amount]);
+    }, [data.items, data.discount]);
 
     // Select customer (internal for dropdown hook)
     function handleSelectCustomerInternal(customer: Customer) {
@@ -228,11 +210,8 @@ export default function SaleCreate({
             setShowProductDropdown(false);
             setTimeout(() => bundleInputRefs.current[existingIndex]?.focus(), 50);
         } else {
-            // Check if at least one bundle fits in stock
-            if (product.pieces_per_bundle > product.stock_pieces) {
-                toast.error(`Insufficient stock for ${product.name}${product.size ? ` (${product.size})` : ''}. Available: ${product.stock_pieces} pcs`);
-                return;
-            }
+            // Stock under one bundle can still be sold as loose pieces
+            const startBundles = product.pieces_per_bundle <= product.stock_pieces ? 1 : 0;
 
             // Add new item
             const newItem: SaleItem = {
@@ -240,9 +219,9 @@ export default function SaleCreate({
                 product_name: product.name,
                 product_size: product.size,
                 pieces_per_bundle: product.pieces_per_bundle,
-                bundles: 1,
+                bundles: startBundles,
                 extra_pieces: 0,
-                total_pieces: product.pieces_per_bundle,
+                total_pieces: startBundles * product.pieces_per_bundle,
                 weight_kg: 0,
                 rate_per_kg: product.rate_per_kg,
                 amount: 0,
@@ -291,8 +270,20 @@ export default function SaleCreate({
         }
     };
 
-    // Enter/Tab navigation: bundle → weight
+    // Enter/Tab navigation: bundle → weight (→ pieces when no bundle is counted)
     const handleBundleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+        if (e.key === 'Enter' || (e.key === 'Tab' && !e.shiftKey)) {
+            e.preventDefault();
+            if (data.items[index].bundles === 0) {
+                extraPiecesInputRefs.current[index]?.focus();
+            } else {
+                weightInputRefs.current[index]?.focus();
+            }
+        }
+    };
+
+    // Enter/Tab navigation: pieces → weight
+    const handleExtraPiecesKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
         if (e.key === 'Enter' || (e.key === 'Tab' && !e.shiftKey)) {
             e.preventDefault();
             weightInputRefs.current[index]?.focus();
@@ -319,16 +310,8 @@ export default function SaleCreate({
         }
     };
 
-    // Enter/Tab navigation: discount → paid amount
+    // Enter/Tab navigation: discount → save button
     const handleDiscountKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter' || (e.key === 'Tab' && !e.shiftKey)) {
-            e.preventDefault();
-            paidAmountRef.current?.focus();
-        }
-    };
-
-    // Enter/Tab navigation: paid amount → save button
-    const handlePaidAmountKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter' || (e.key === 'Tab' && !e.shiftKey)) {
             e.preventDefault();
             saveButtonRef.current?.focus();
@@ -379,6 +362,11 @@ export default function SaleCreate({
             return;
         }
 
+        if (data.items.some((item) => item.total_pieces <= 0)) {
+            toast.error('Please enter bundles or pieces for all items');
+            return;
+        }
+
         // Check if all items have weight
         const missingWeight = data.items.some((item) => item.weight_kg <= 0);
         if (missingWeight) {
@@ -397,11 +385,7 @@ export default function SaleCreate({
             return;
         }
 
-        post('/dashboard/sales', {
-            onSuccess: () => {
-                toast.success('Sale created successfully');
-            },
-        });
+        post('/dashboard/sales');
     };
 
     // Format currency
@@ -666,7 +650,7 @@ export default function SaleCreate({
                         </div>
 
                         {/* Items Table */}
-                        <div className="mb-6 overflow-hidden rounded-xl border border-border bg-card">
+                        <div className="mb-6 overflow-x-auto rounded-xl border border-border bg-card">
                             <table className="w-full">
                                 <thead>
                                     <tr className="border-b border-border bg-muted/50">
@@ -679,24 +663,9 @@ export default function SaleCreate({
                                         <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
                                             Bundles
                                         </th>
-                                        {showExtraPieces && (
-                                            <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
-                                                +Pcs
-                                            </th>
-                                        )}
-                                        {!showExtraPieces && (
-                                            <th className="px-4 py-3 text-center">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setShowExtraPieces(true)}
-                                                    className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
-                                                    title="Show extra pieces column"
-                                                >
-                                                    <Plus className="h-3 w-3" />
-                                                    Pcs
-                                                </button>
-                                            </th>
-                                        )}
+                                        <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
+                                            +Pcs
+                                        </th>
                                         <th className="px-4 py-3 text-center text-xs font-medium text-muted-foreground uppercase">
                                             Weight (kg)
                                         </th>
@@ -766,31 +735,27 @@ export default function SaleCreate({
                                                         className="w-20 rounded-lg border border-border bg-background px-2 py-1.5 text-center text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                                     />
                                                 </td>
-                                                {showExtraPieces && (
-                                                    <td className="px-4 py-3">
-                                                        <input
-                                                            type="number"
-                                                            min={0}
-                                                            value={
-                                                                item.extra_pieces
-                                                            }
-                                                            onChange={(e) =>
-                                                                updateItem(
-                                                                    index,
-                                                                    'extra_pieces',
-                                                                    parseInt(
-                                                                        e.target
-                                                                            .value,
-                                                                    ) || 0,
-                                                                )
-                                                            }
-                                                            className="w-20 rounded-lg border border-border bg-background px-2 py-1.5 text-center text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
-                                                        />
-                                                    </td>
-                                                )}
-                                                {!showExtraPieces && (
-                                                    <td className="px-4 py-3" />
-                                                )}
+                                                <td className="px-4 py-3">
+                                                    <input
+                                                        ref={(el) => { extraPiecesInputRefs.current[index] = el; }}
+                                                        type="number"
+                                                        min={0}
+                                                        value={item.extra_pieces}
+                                                        onFocus={(e) => e.target.select()}
+                                                        onChange={(e) =>
+                                                            updateItem(
+                                                                index,
+                                                                'extra_pieces',
+                                                                parseInt(
+                                                                    e.target
+                                                                        .value,
+                                                                ) || 0,
+                                                            )
+                                                        }
+                                                        onKeyDown={(e) => handleExtraPiecesKeyDown(e, index)}
+                                                        className="w-20 rounded-lg border border-border bg-background px-2 py-1.5 text-center text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
+                                                    />
+                                                </td>
                                                 <td className="px-4 py-3">
                                                     <div className="relative">
                                                         <input
@@ -866,7 +831,7 @@ export default function SaleCreate({
 
                         {/* Footer - Totals & Actions */}
                         <div className="grid gap-6 md:grid-cols-2">
-                            {/* Notes & Payment */}
+                            {/* Notes */}
                             <div className="space-y-4">
                                 <div>
                                     <label className="mb-2 block text-sm font-medium text-foreground">
@@ -882,58 +847,6 @@ export default function SaleCreate({
                                         className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
                                     />
                                 </div>
-                                {data.paid_amount > 0 && (
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="mb-2 block text-sm font-medium text-foreground">
-                                                Payment Method
-                                            </label>
-                                            <select
-                                                value={data.payment_type_id || ''}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        'payment_type_id',
-                                                        e.target.value
-                                                            ? parseInt(
-                                                                e.target.value,
-                                                            )
-                                                            : null,
-                                                    )
-                                                }
-                                                className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
-                                            >
-                                                <option value="">
-                                                    Select payment method
-                                                </option>
-                                                {payment_types.map((type) => (
-                                                    <option
-                                                        key={type.id}
-                                                        value={type.id}
-                                                    >
-                                                        {type.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label className="mb-2 block text-sm font-medium text-foreground">
-                                                Payment Reference
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={data.payment_ref}
-                                                onChange={(e) =>
-                                                    setData(
-                                                        'payment_ref',
-                                                        e.target.value,
-                                                    )
-                                                }
-                                                placeholder="e.g., Transaction ID, Check No..."
-                                                className="w-full rounded-lg border border-border bg-card px-4 py-2.5 text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
-                                            />
-                                        </div>
-                                    </div>
-                                )}
                             </div>
 
                             {/* Totals */}
@@ -991,36 +904,6 @@ export default function SaleCreate({
                                         </span>
                                         <span className="text-xl font-bold text-foreground">
                                             {formatCurrency(data.net_amount)}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm text-muted-foreground">
-                                            Paid Amount
-                                        </span>
-                                        <input
-                                            ref={paidAmountRef}
-                                            type="number"
-                                            min={0}
-                                            value={data.paid_amount || ''}
-                                            onChange={(e) =>
-                                                setData(
-                                                    'paid_amount',
-                                                    parseFloat(
-                                                        e.target.value,
-                                                    ) || 0,
-                                                )
-                                            }
-                                            onKeyDown={handlePaidAmountKeyDown}
-                                            placeholder="0"
-                                            className="w-28 rounded-lg border border-border bg-background px-2 py-1 text-right text-sm focus:border-ring focus:ring-1 focus:ring-ring focus:outline-none"
-                                        />
-                                    </div>
-                                    <div className="flex items-center justify-between border-t border-border pt-3">
-                                        <span className="font-semibold text-red-600">
-                                            Due Amount
-                                        </span>
-                                        <span className="text-xl font-bold text-red-600">
-                                            {formatCurrency(data.due_amount)}
                                         </span>
                                     </div>
                                 </div>

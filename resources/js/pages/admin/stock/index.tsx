@@ -11,7 +11,7 @@ import {
     Search,
     XCircle,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type Product = {
     id: number;
@@ -61,8 +61,15 @@ export default function StockIndex({
     filters,
 }: Props) {
     const [search, setSearch] = useState(filters.search || '');
+    const isFirstRender = useRef(true);
 
     useEffect(() => {
+        // Only search when the box changes; on load this would drop ?page and filters
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+
         const timeout = setTimeout(() => {
             router.get(
                 '/dashboard/stock',
@@ -229,7 +236,7 @@ export default function StockIndex({
 
                     <div className="grid gap-6 lg:grid-cols-3">
                         {/* Main Stock Table */}
-                        <div className="lg:col-span-2">
+                        <div className="min-w-0 lg:col-span-2">
                             {/* Search */}
                             <div className="mb-4">
                                 <div className="relative">
@@ -247,7 +254,7 @@ export default function StockIndex({
                             </div>
 
                             {/* Table */}
-                            <div className="overflow-hidden rounded-xl border border-border bg-card">
+                            <div className="overflow-x-auto rounded-xl border border-border bg-card">
                                 <table className="w-full">
                                     <thead>
                                         <tr className="border-b border-border bg-muted/50">
@@ -351,7 +358,7 @@ export default function StockIndex({
                         </div>
 
                         {/* Sidebar - Recent Production */}
-                        <div className="lg:col-span-1">
+                        <div className="min-w-0 lg:col-span-1">
                             <div className="rounded-xl border border-border bg-card">
                                 <div className="flex items-center justify-between border-b border-border p-4">
                                     <h3 className="font-medium text-foreground">

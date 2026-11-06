@@ -111,6 +111,18 @@ it('displays production edit page', function (): void {
             ->has('production'));
 });
 
+it('passes the stock fields the production edit page displays', function (): void {
+    $product = Product::factory()->create(['pieces_per_bundle' => 10, 'stock_pieces' => 150]);
+    $production = Production::factory()->create(['product_id' => $product->id]);
+
+    actingAs($this->user)
+        ->get(route('productions.edit', $production))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('production.product.pieces_per_bundle', 10)
+            ->where('production.product.stock_pieces', 150));
+});
+
 it('updates a production entry and adjusts stock', function (): void {
     $product = Product::factory()->create(['stock_pieces' => 150]);
     $production = Production::factory()->create([

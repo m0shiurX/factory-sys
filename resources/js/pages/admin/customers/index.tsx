@@ -133,7 +133,7 @@ export default function CustomersIndex({ customers, stats, filters }: Props) {
     const isOverLimit = (customer: Customer) => {
         return (
             customer.credit_limit > 0 &&
-            customer.total_due > customer.credit_limit
+            Number(customer.total_due) > Number(customer.credit_limit)
         );
     };
 
@@ -208,12 +208,12 @@ export default function CustomersIndex({ customers, stats, filters }: Props) {
                             </div>
                         </div>
                         <div className="rounded-xl border border-border bg-card p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
+                            <div className="flex items-center justify-between gap-2">
+                                <div className="min-w-0">
                                     <p className="text-xs font-medium text-muted-foreground">
                                         Total Outstanding
                                     </p>
-                                    <p className="mt-1 text-2xl font-semibold text-card-foreground">
+                                    <p className="mt-1 text-lg sm:text-2xl font-semibold text-card-foreground">
                                         {formatCurrency(stats.total_due)}
                                     </p>
                                 </div>
@@ -283,7 +283,7 @@ export default function CustomersIndex({ customers, stats, filters }: Props) {
                     </div>
 
                     {/* Table */}
-                    <div className="overflow-hidden rounded-xl border border-border bg-card">
+                    <div className="overflow-x-auto rounded-xl border border-border bg-card">
                         <table className="w-full">
                             <thead>
                                 <tr className="border-b border-border bg-muted/50">
@@ -319,7 +319,7 @@ export default function CustomersIndex({ customers, stats, filters }: Props) {
                                                     {customer.name}
                                                 </p>
                                                 {customer.address && (
-                                                    <p className="truncate text-xs text-muted-foreground">
+                                                    <p className="max-w-xs truncate text-xs text-muted-foreground">
                                                         {customer.address}
                                                     </p>
                                                 )}

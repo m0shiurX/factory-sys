@@ -95,7 +95,7 @@ export default function ProductShow({ product }: Props) {
                     <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
                         {/* Card Header */}
                         <div className={`px-6 py-5 ${isLowStock ? 'bg-linear-to-r from-amber-500 to-amber-600' : 'bg-linear-to-r from-emerald-500 to-emerald-600'}`}>
-                            <div className="flex items-start justify-between">
+                            <div className="flex flex-wrap items-start justify-between gap-3">
                                 <div>
                                     <div className="flex items-center gap-3">
                                         <Package className="h-6 w-6 text-white" />

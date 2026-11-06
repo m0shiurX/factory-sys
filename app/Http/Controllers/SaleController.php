@@ -7,7 +7,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreSaleRequest;
 use App\Http\Requests\UpdateSaleRequest;
 use App\Models\Customer;
-use App\Models\PaymentType;
 use App\Models\Product;
 use App\Models\Sale;
 use Illuminate\Http\RedirectResponse;
@@ -78,10 +77,6 @@ final class SaleController
                 ->select(['id', 'name', 'size', 'pieces_per_bundle', 'rate_per_kg', 'stock_pieces'])
                 ->orderBy('name')
                 ->get(),
-            'payment_types' => PaymentType::query()
-                ->where('is_active', true)
-                ->select(['id', 'name'])
-                ->get(),
         ]);
     }
 
@@ -103,10 +98,8 @@ final class SaleController
                 'total_amount' => $validated['total_amount'],
                 'discount' => $validated['discount'] ?? 0,
                 'net_amount' => $validated['net_amount'],
-                'paid_amount' => $validated['paid_amount'] ?? 0,
-                'due_amount' => $validated['due_amount'],
-                'payment_type_id' => $validated['payment_type_id'] ?? null,
-                'payment_ref' => $validated['payment_ref'] ?? null,
+                'paid_amount' => 0,
+                'due_amount' => $validated['net_amount'],
                 'notes' => $validated['notes'] ?? null,
                 'created_by' => auth()->id(),
             ]);
@@ -130,7 +123,7 @@ final class SaleController
 
             // Update customer total_due
             Customer::query()->where('id', $validated['customer_id'])
-                ->increment('total_due', $validated['due_amount']);
+                ->increment('total_due', $validated['net_amount']);
 
             return $sale;
         });
@@ -177,10 +170,6 @@ final class SaleController
                 ->select(['id', 'name', 'size', 'pieces_per_bundle', 'rate_per_kg', 'stock_pieces'])
                 ->orderBy('name')
                 ->get(),
-            'payment_types' => PaymentType::query()
-                ->where('is_active', true)
-                ->select(['id', 'name'])
-                ->get(),
         ]);
     }
 
@@ -192,13 +181,16 @@ final class SaleController
         $validated = $request->validated();
 
         DB::transaction(function () use ($validated, $sale): void {
+            // Paid amounts stay as they are: payments are posted in the Payment area
+            $cashAtSale = $sale->cashReceivedAtSale();
+
             // Restore old stock and customer due
             foreach ($sale->items as $oldItem) {
                 Product::query()->where('id', $oldItem->product_id)
                     ->increment('stock_pieces', $oldItem->total_pieces);
             }
             Customer::query()->where('id', $sale->customer_id)
-                ->decrement('total_due', $sale->due_amount);
+                ->decrement('total_due', (float) $sale->net_amount - $cashAtSale);
 
             // Update sale
             $sale->update([
@@ -209,10 +201,7 @@ final class SaleController
                 'total_amount' => $validated['total_amount'],
                 'discount' => $validated['discount'] ?? 0,
                 'net_amount' => $validated['net_amount'],
-                'paid_amount' => $validated['paid_amount'] ?? 0,
-                'due_amount' => $validated['due_amount'],
-                'payment_type_id' => $validated['payment_type_id'] ?? null,
-                'payment_ref' => $validated['payment_ref'] ?? null,
+                'due_amount' => max(0, round((float) $validated['net_amount'] - (float) $sale->paid_amount, 2)),
                 'notes' => $validated['notes'] ?? null,
             ]);
 
@@ -237,7 +226,7 @@ final class SaleController
 
             // Update customer total_due with new amount
             Customer::query()->where('id', $validated['customer_id'])
-                ->increment('total_due', $validated['due_amount']);
+                ->increment('total_due', (float) $validated['net_amount'] - $cashAtSale);
         });
 
         return to_route('sales.index')
@@ -256,9 +245,9 @@ final class SaleController
                     ->increment('stock_pieces', $item->total_pieces);
             }
 
-            // Reduce customer due
+            // Reduce customer due; payments linked to this sale stay on the customer's account
             Customer::query()->where('id', $sale->customer_id)
-                ->decrement('total_due', $sale->due_amount);
+                ->decrement('total_due', (float) $sale->net_amount - $sale->cashReceivedAtSale());
 
             // Delete items and sale
             $sale->items()->delete();

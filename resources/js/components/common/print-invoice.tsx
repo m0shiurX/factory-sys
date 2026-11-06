@@ -6,6 +6,7 @@ type InvoiceItem = {
     sl: number;
     name: string;
     rate: number;
+    bundle?: string;
     qty: string;
     total: number;
 };
@@ -48,6 +49,7 @@ export default function PrintInvoice({
     paymentRef,
 }: PrintInvoiceProps) {
     const { name, settings } = usePage<SharedData>().props;
+    const showBundle = items.some((item) => item.bundle !== undefined);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-BD', {
@@ -135,6 +137,11 @@ export default function PrintInvoice({
                                 <th className="px-2 py-2 text-right text-xs font-semibold uppercase">
                                     Rate
                                 </th>
+                                {showBundle && (
+                                    <th className="px-2 py-2 text-right text-xs font-semibold uppercase">
+                                        Bundle
+                                    </th>
+                                )}
                                 <th className="px-2 py-2 text-right text-xs font-semibold uppercase">
                                     Qty
                                 </th>
@@ -158,6 +165,11 @@ export default function PrintInvoice({
                                     <td className="px-2 py-2 text-right text-sm">
                                         {formatCurrency(item.rate)}
                                     </td>
+                                    {showBundle && (
+                                        <td className="px-2 py-2 text-right text-sm">
+                                            {item.bundle || '—'}
+                                        </td>
+                                    )}
                                     <td className="px-2 py-2 text-right text-sm">
                                         {item.qty}
                                     </td>

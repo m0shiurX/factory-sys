@@ -68,7 +68,15 @@ type Props = {
     auto_print?: boolean;
 };
 
+const formatBundleQty = (bundles: number, extraPieces: number) =>
+    [bundles > 0 && `${bundles} bdl`, extraPieces > 0 && `${extraPieces} pcs`]
+        .filter(Boolean)
+        .join(' + ');
+
 export default function SaleShow({ sale, auto_print }: Props) {
+    // Anything paid above the net amount is the customer's advance, not part of this memo
+    const memoPaid = Math.min(Number(sale.paid_amount), Number(sale.net_amount));
+
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-BD', {
             style: 'currency',
@@ -201,7 +209,7 @@ export default function SaleShow({ sale, auto_print }: Props) {
 
                         {/* Items Table */}
                         <div className="px-6 py-4">
-                            <div className="overflow-hidden rounded-lg border border-border">
+                            <div className="overflow-x-auto rounded-lg border border-border">
                                 <table className="w-full">
                                     <thead>
                                         <tr className="bg-muted/50">
@@ -244,11 +252,10 @@ export default function SaleShow({ sale, auto_print }: Props) {
                                                 </td>
                                                 <td className="px-4 py-3 text-center">
                                                     <span className="font-medium text-foreground">
-                                                        {item.bundles > 0 &&
-                                                            `${item.bundles} bdl`}
-                                                        {item.extra_pieces >
-                                                            0 &&
-                                                            ` + ${item.extra_pieces} pcs`}
+                                                        {formatBundleQty(
+                                                            item.bundles,
+                                                            item.extra_pieces,
+                                                        )}
                                                     </span>
                                                     <p className="text-xs text-muted-foreground">
                                                         ({item.total_pieces}{' '}
@@ -358,7 +365,7 @@ export default function SaleShow({ sale, auto_print }: Props) {
                                             Paid
                                         </span>
                                         <span className="font-medium text-emerald-600">
-                                            {formatCurrency(sale.paid_amount)}
+                                            {formatCurrency(memoPaid)}
                                         </span>
                                     </div>
                                     {sale.due_amount > 0 && (
@@ -403,13 +410,14 @@ export default function SaleShow({ sale, auto_print }: Props) {
                     sl: index + 1,
                     name: `${item.product.name}${item.product.size ? ` (${item.product.size})` : ''}`,
                     rate: item.rate_per_kg,
+                    bundle: formatBundleQty(item.bundles, item.extra_pieces),
                     qty: `${item.weight_kg} KG`,
                     total: item.amount,
                 }))}
                 subTotal={sale.total_amount}
                 discount={sale.discount}
                 grandTotal={sale.net_amount}
-                paidTotal={sale.paid_amount}
+                paidTotal={memoPaid}
                 dueAmount={sale.due_amount}
                 customerTotalDue={sale.customer.total_due}
                 totalWeight={sale.total_weight_kg}

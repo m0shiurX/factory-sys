@@ -830,7 +830,7 @@ export default function SalesReturnEdit({
                         )}
 
                         {/* Items Table */}
-                        <div className="mb-6 overflow-hidden rounded-xl border border-border bg-card">
+                        <div className="mb-6 overflow-x-auto rounded-xl border border-border bg-card">
                             <table className="w-full">
                                 <thead className="border-b border-border bg-muted/50">
                                     <tr>

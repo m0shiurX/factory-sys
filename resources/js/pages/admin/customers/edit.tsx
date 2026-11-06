@@ -28,7 +28,7 @@ export default function CustomerEdit({ customer }: Props) {
         phone: customer.phone || '',
         address: customer.address || '',
         opening_balance: customer.opening_balance,
-        opening_date: customer.opening_date || '',
+        opening_date: customer.opening_date?.split('T')[0] || '',
         credit_limit: customer.credit_limit,
         is_active: customer.is_active,
     });
@@ -192,9 +192,9 @@ export default function CustomerEdit({ customer }: Props) {
                                 <div className="rounded-lg border border-border bg-muted px-4 py-2.5">
                                     <span className="font-mono text-lg font-semibold text-foreground">
                                         ৳{' '}
-                                        {customer.total_due.toLocaleString(
-                                            'en-BD',
-                                        )}
+                                        {Number(
+                                            customer.total_due,
+                                        ).toLocaleString('en-BD')}
                                     </span>
                                 </div>
                                 <p className="mt-1 text-xs text-muted-foreground">

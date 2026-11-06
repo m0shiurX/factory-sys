@@ -30,7 +30,7 @@ export default function ProductionEdit({ production }: Props) {
     const { props } = usePage<{ flash?: { success?: string } }>();
     const { data, setData, put, processing, errors } = useForm({
         pieces_produced: production.pieces_produced,
-        production_date: production.production_date,
+        production_date: production.production_date.split('T')[0],
         note: production.note || '',
     });
 

@@ -61,7 +61,8 @@ export default function CustomerShow({ customer }: Props) {
     };
 
     const isOverLimit =
-        customer.credit_limit > 0 && customer.total_due > customer.credit_limit;
+        customer.credit_limit > 0 &&
+        Number(customer.total_due) > Number(customer.credit_limit);
 
     const availableCredit =
         customer.credit_limit > 0
@@ -73,7 +74,7 @@ export default function CustomerShow({ customer }: Props) {
             <div className="min-h-screen bg-background p-6">
                 <div className="mx-auto max-w-4xl">
                     {/* Header */}
-                    <div className="mb-6 flex items-center justify-between">
+                    <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
                         <Link
                             href="/dashboard/customers"
                             className="inline-flex items-center gap-2 text-muted-foreground transition hover:text-foreground"
@@ -81,7 +82,7 @@ export default function CustomerShow({ customer }: Props) {
                             <ArrowLeft className="h-5 w-5" />
                             <span className="font-medium">Back to Customers</span>
                         </Link>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                             <Link
                                 href={`/dashboard/customers/${customer.id}/statement`}
                                 className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
@@ -110,7 +111,7 @@ export default function CustomerShow({ customer }: Props) {
                     <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
                         {/* Card Header */}
                         <div className={`px-6 py-5 ${isOverLimit ? 'bg-linear-to-r from-red-500 to-red-600' : customer.total_due > 0 ? 'bg-linear-to-r from-amber-500 to-amber-600' : 'bg-linear-to-r from-emerald-500 to-emerald-600'}`}>
-                            <div className="flex items-start justify-between">
+                            <div className="flex flex-wrap items-start justify-between gap-3">
                                 <div>
                                     <div className="flex items-center gap-3">
                                         <User className="h-6 w-6 text-white" />

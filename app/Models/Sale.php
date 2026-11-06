@@ -125,4 +125,24 @@ final class Sale extends Model
     {
         return $this->hasMany(SalesItem::class);
     }
+
+    /**
+     * @return HasMany<Payment, $this>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * Cash taken on the memo itself (older sales only): paid_amount also includes linked payments.
+     */
+    public function cashReceivedAtSale(): float
+    {
+        $linkedPayments = $this->hasAttribute('payments_sum_amount')
+            ? (float) $this->getAttribute('payments_sum_amount')
+            : (float) $this->payments()->sum('amount');
+
+        return max(0.0, round((float) $this->paid_amount - $linkedPayments, 2));
+    }
 }

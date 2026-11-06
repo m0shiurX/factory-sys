@@ -12,7 +12,7 @@ import {
     Trash2,
     TrendingUp,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 type Customer = {
@@ -64,6 +64,7 @@ type Props = {
 
 export default function SalesIndex({ sales, stats, filters }: Props) {
     const [search, setSearch] = useState(filters.search || '');
+    const isFirstRender = useRef(true);
     const { props } = usePage<{
         flash?: { success?: string; error?: string };
     }>();
@@ -78,17 +79,26 @@ export default function SalesIndex({ sales, stats, filters }: Props) {
     }, [props.flash?.success, props.flash?.error]);
 
     useEffect(() => {
+        // Only search when the box changes; on load this would drop ?page and filters
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+
         const timeout = setTimeout(() => {
             router.get(
                 '/dashboard/sales',
                 {
                     ...(search && { search }),
+                    ...(filters.from_date && { from_date: filters.from_date }),
+                    ...(filters.to_date && { to_date: filters.to_date }),
                 },
                 { preserveState: true, replace: true },
             );
         }, 300);
 
         return () => clearTimeout(timeout);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search]);
 
     const handleDelete = (saleId: number) => {
@@ -173,12 +183,12 @@ export default function SalesIndex({ sales, stats, filters }: Props) {
                             </div>
                         </div>
                         <div className="rounded-xl border border-border bg-card p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
+                            <div className="flex items-center justify-between gap-2">
+                                <div className="min-w-0">
                                     <p className="text-xs font-medium text-muted-foreground">
                                         Total Amount
                                     </p>
-                                    <p className="mt-1 text-2xl font-semibold text-blue-600">
+                                    <p className="mt-1 text-lg font-semibold text-blue-600 sm:text-2xl">
                                         {formatCurrency(stats.total_amount)}
                                     </p>
                                 </div>
@@ -188,12 +198,12 @@ export default function SalesIndex({ sales, stats, filters }: Props) {
                             </div>
                         </div>
                         <div className="rounded-xl border border-border bg-card p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
+                            <div className="flex items-center justify-between gap-2">
+                                <div className="min-w-0">
                                     <p className="text-xs font-medium text-muted-foreground">
                                         Total Due
                                     </p>
-                                    <p className="mt-1 text-2xl font-semibold text-amber-600">
+                                    <p className="mt-1 text-lg font-semibold text-amber-600 sm:text-2xl">
                                         {formatCurrency(stats.total_due)}
                                     </p>
                                 </div>
@@ -284,7 +294,7 @@ export default function SalesIndex({ sales, stats, filters }: Props) {
                                                     )}
                                                 </p>
                                             )}
-                                            {sale.due_amount === 0 && (
+                                            {Number(sale.due_amount) <= 0 && (
                                                 <p className="text-sm text-emerald-600">
                                                     Paid
                                                 </p>
@@ -321,7 +331,7 @@ export default function SalesIndex({ sales, stats, filters }: Props) {
                     </div>
 
                     {/* Pagination */}
-                    {sales.data.length > 0 && (
+                    {sales.links.length > 3 && (
                         <div className="mt-6">
                             <Paginator pagination={sales.links} />
                         </div>
