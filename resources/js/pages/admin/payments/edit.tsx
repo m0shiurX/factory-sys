@@ -39,6 +39,7 @@ type Payment = {
     customer_id: number;
     sale_id: number | null;
     amount: number;
+    payment_type_id: number | null;
     payment_ref: string | null;
     payment_date: string;
     note: string | null;
@@ -78,7 +79,7 @@ export default function PaymentEdit({
         customer_id: payment.customer_id,
         sale_id: payment.sale_id,
         amount: payment.amount,
-        payment_type_id: null, // Will be set from payment_type relation if needed
+        payment_type_id: payment.payment_type_id,
         payment_ref: payment.payment_ref || '',
         payment_date: payment.payment_date.split('T')[0],
         note: payment.note || '',
@@ -128,11 +129,7 @@ export default function PaymentEdit({
             return;
         }
 
-        put(`/dashboard/payments/${payment.id}`, {
-            onSuccess: () => {
-                toast.success('Payment updated successfully');
-            },
-        });
+        put(`/dashboard/payments/${payment.id}`);
     };
 
     const formatCurrency = (amount: number) => {
@@ -142,6 +139,11 @@ export default function PaymentEdit({
             minimumFractionDigits: 0,
         }).format(amount);
     };
+
+    const formatBalance = (totalDue: number) =>
+        Number(totalDue) < 0
+            ? `Advance: ${formatCurrency(Math.abs(Number(totalDue)))}`
+            : `Due: ${formatCurrency(totalDue)}`;
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-BD', {
@@ -188,9 +190,11 @@ export default function PaymentEdit({
                                                 {selectedCustomer.name}
                                             </p>
                                             <p className="text-sm text-muted-foreground">
-                                                {selectedCustomer.phone} • Due:{' '}
-                                                <span className="font-medium text-red-600">
-                                                    {formatCurrency(
+                                                {selectedCustomer.phone} •{' '}
+                                                <span
+                                                    className={`font-medium ${Number(selectedCustomer.total_due) < 0 ? 'text-emerald-600' : 'text-red-600'}`}
+                                                >
+                                                    {formatBalance(
                                                         selectedCustomer.total_due,
                                                     )}
                                                 </span>
@@ -297,7 +301,7 @@ export default function PaymentEdit({
                                             }`}
                                         >
                                             <p className="font-medium text-foreground">
-                                                General Payment
+                                                Advance / General Payment
                                             </p>
                                             <p className="text-sm text-muted-foreground">
                                                 Not linked to a specific invoice

@@ -123,7 +123,7 @@ final class ProductionController
      */
     public function edit(Production $production): Response
     {
-        $production->load('product:id,name,size');
+        $production->load('product:id,name,size,pieces_per_bundle,stock_pieces');
 
         $products = Product::query()
             ->where('is_active', true)

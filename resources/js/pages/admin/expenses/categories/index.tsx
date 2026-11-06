@@ -42,7 +42,7 @@ export default function CategoriesIndex({ categories }: Props) {
 
     const handleAdd: FormEventHandler = (e) => {
         e.preventDefault();
-        addForm.post('/dashboard/expenses/categories', {
+        addForm.post('/dashboard/expense-categories', {
             onSuccess: () => {
                 addForm.reset();
                 setShowAdd(false);
@@ -61,7 +61,7 @@ export default function CategoriesIndex({ categories }: Props) {
     const handleEdit: FormEventHandler = (e) => {
         e.preventDefault();
         if (!editingId) return;
-        editForm.put(`/dashboard/expenses/categories/${editingId}`, {
+        editForm.put(`/dashboard/expense-categories/${editingId}`, {
             onSuccess: () => {
                 setEditingId(null);
                 editForm.reset();
@@ -71,7 +71,7 @@ export default function CategoriesIndex({ categories }: Props) {
 
     const handleDelete = (categoryId: number) => {
         if (confirm('Are you sure you want to delete this category?')) {
-            router.delete(`/dashboard/expenses/categories/${categoryId}`);
+            router.delete(`/dashboard/expense-categories/${categoryId}`);
         }
     };
 

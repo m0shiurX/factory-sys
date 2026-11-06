@@ -176,21 +176,22 @@ final class CustomerController
         $sales = Sale::query()->where('customer_id', $customer->id)
             ->whereBetween('sale_date', [$fromDate, $toDate])
             ->with('paymentType:id,name')
+            ->withSum('payments', 'amount')
             ->select(['id', 'bill_no', 'sale_date', 'net_amount', 'paid_amount', 'due_amount', 'payment_type_id', 'payment_ref'])
             ->oldest('sale_date')
             ->orderBy('id')
             ->get()
-            ->map(fn($sale): array => [
+            ->map(fn ($sale): array => [
                 'id' => $sale->id,
                 'date' => $sale->sale_date->format('Y-m-d'),
                 'type' => 'sale',
                 'description' => "Sale #{$sale->bill_no}",
                 'reference' => $sale->bill_no,
                 'payment_info' => $sale->paymentType
-                    ? $sale->paymentType->name . ($sale->payment_ref ? " ({$sale->payment_ref})" : '')
+                    ? $sale->paymentType->name.($sale->payment_ref ? " ({$sale->payment_ref})" : '')
                     : null,
-                'debit' => (float) $sale->due_amount,
-                'credit' => 0,
+                'debit' => (float) $sale->net_amount,
+                'credit' => $sale->cashReceivedAtSale(),
             ]);
 
         $payments = Payment::query()->where('customer_id', $customer->id)
@@ -200,14 +201,14 @@ final class CustomerController
             ->orderBy('payment_date')
             ->orderBy('id')
             ->get()
-            ->map(fn(Payment $payment): array => [
+            ->map(fn (Payment $payment): array => [
                 'id' => $payment->id,
                 'date' => \Illuminate\Support\Facades\Date::parse($payment->payment_date)->format('Y-m-d'),
                 'type' => 'payment',
-                'description' => 'Payment' . ($payment->paymentType ? " ({$payment->paymentType->name})" : ''),
+                'description' => 'Payment'.($payment->paymentType ? " ({$payment->paymentType->name})" : ''),
                 'reference' => $payment->payment_ref,
                 'payment_info' => $payment->paymentType
-                    ? $payment->paymentType->name . ($payment->payment_ref ? " ({$payment->payment_ref})" : '')
+                    ? $payment->paymentType->name.($payment->payment_ref ? " ({$payment->payment_ref})" : '')
                     : ($payment->payment_ref ?: null),
                 'debit' => 0,
                 'credit' => (float) $payment->amount,
@@ -220,7 +221,7 @@ final class CustomerController
             ->oldest('return_date')
             ->orderBy('id')
             ->get()
-            ->map(fn(SalesReturn $return): array => [
+            ->map(fn (SalesReturn $return): array => [
                 'id' => $return->id,
                 'date' => $return->return_date->format('Y-m-d'),
                 'type' => 'sales_return',
@@ -240,6 +241,7 @@ final class CustomerController
         // Calculate totals
         $totalDebit = array_sum(array_column($transactions, 'debit'));
         $totalCredit = array_sum(array_column($transactions, 'credit'));
+        $totalReturn = (float) $salesReturns->sum('credit');
         $closingBalance = $openingBalance + $totalDebit - $totalCredit;
 
         return Inertia::render('admin/customers/statement', [
@@ -251,6 +253,9 @@ final class CustomerController
                 'transactions' => $transactions,
                 'total_debit' => $totalDebit,
                 'total_credit' => $totalCredit,
+                'total_sale' => $totalDebit,
+                'total_collection' => $totalCredit - $totalReturn,
+                'total_return' => $totalReturn,
                 'closing_balance' => $closingBalance,
             ],
             'filters' => [
@@ -311,10 +316,12 @@ final class CustomerController
             $openingBalance = (float) $customer->opening_balance;
         }
 
-        // Add all sales dues before the period
-        $openingBalance += (float) Sale::query()->where('customer_id', $customer->id)
+        // Add all sales before the period, less any cash taken on the memo itself
+        $openingBalance += Sale::query()->where('customer_id', $customer->id)
             ->where('sale_date', '<', $startDate)
-            ->sum('due_amount');
+            ->withSum('payments', 'amount')
+            ->get(['id', 'net_amount', 'paid_amount'])
+            ->sum(fn (Sale $sale): float => (float) $sale->net_amount - $sale->cashReceivedAtSale());
 
         // Subtract all payments before the period
         $openingBalance -= (float) Payment::query()->where('customer_id', $customer->id)

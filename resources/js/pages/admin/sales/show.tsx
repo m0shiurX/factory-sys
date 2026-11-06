@@ -68,7 +68,15 @@ type Props = {
     auto_print?: boolean;
 };
 
+const formatBundleQty = (bundles: number, extraPieces: number) =>
+    [bundles > 0 && `${bundles} bdl`, extraPieces > 0 && `${extraPieces} pcs`]
+        .filter(Boolean)
+        .join(' + ');
+
 export default function SaleShow({ sale, auto_print }: Props) {
+    // Anything paid above the net amount is the customer's advance, not part of this memo
+    const memoPaid = Math.min(Number(sale.paid_amount), Number(sale.net_amount));
+
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-BD', {
             style: 'currency',
@@ -201,7 +209,7 @@ export default function SaleShow({ sale, auto_print }: Props) {
 
                         {/* Items Table */}
                         <div className="px-6 py-4">
-                            <div className="overflow-hidden rounded-lg border border-border">
+                            <div className="overflow-x-auto rounded-lg border border-border">
                                 <table className="w-full">
                                     <thead>
                                         <tr className="bg-muted/50">
@@ -244,11 +252,10 @@ export default function SaleShow({ sale, auto_print }: Props) {
                                                 </td>
                                                 <td className="px-4 py-3 text-center">
                                                     <span className="font-medium text-foreground">
-                                                        {item.bundles > 0 &&
-                                                            `${item.bundles} bdl`}
-                                                        {item.extra_pieces >
-                                                            0 &&
-                                                            ` + ${item.extra_pieces} pcs`}
+                                                        {formatBundleQty(
+                                                            item.bundles,
+                                                            item.extra_pieces,
+                                                        )}
                                                     </span>
                                                     <p className="text-xs text-muted-foreground">
                                                         ({item.total_pieces}{' '}
@@ -278,9 +285,18 @@ export default function SaleShow({ sale, auto_print }: Props) {
 
                         {/* Summary */}
                         <div className="border-t border-border bg-muted/30 px-6 py-4">
-                            <div className="flex flex-col gap-4 sm:flex-row sm:justify-end">
+                            <div className="flex flex-col gap-6 sm:flex-row sm:justify-end sm:gap-10">
                                 {/* Notes & Payment Info */}
-                                <div className="flex-1 space-y-3">
+                                <div className="min-w-0 flex-1 space-y-5">
+                                    <div>
+                                        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                                            Amount in words
+                                        </p>
+                                        <p className="mt-1.5 max-w-prose text-sm leading-6 font-medium text-foreground">
+                                            {numberToWords(sale.net_amount)} Taka
+                                            Only
+                                        </p>
+                                    </div>
                                     {sale.notes && (
                                         <div>
                                             <p className="text-xs font-medium text-muted-foreground uppercase">
@@ -313,7 +329,7 @@ export default function SaleShow({ sale, auto_print }: Props) {
                                 </div>
 
                                 {/* Totals */}
-                                <div className="w-full space-y-2 sm:w-72">
+                                <div className="w-full space-y-2 tabular-nums sm:w-72 sm:shrink-0">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-muted-foreground">
                                             Total Weight
@@ -348,17 +364,12 @@ export default function SaleShow({ sale, auto_print }: Props) {
                                             {formatCurrency(sale.net_amount)}
                                         </span>
                                     </div>
-                                    <div className="rounded-md bg-muted/50 px-2 py-1.5">
-                                        <p className="text-xs italic text-muted-foreground">
-                                            In Words: {numberToWords(sale.net_amount)} Taka Only
-                                        </p>
-                                    </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-muted-foreground">
                                             Paid
                                         </span>
                                         <span className="font-medium text-emerald-600">
-                                            {formatCurrency(sale.paid_amount)}
+                                            {formatCurrency(memoPaid)}
                                         </span>
                                     </div>
                                     {sale.due_amount > 0 && (
@@ -403,13 +414,14 @@ export default function SaleShow({ sale, auto_print }: Props) {
                     sl: index + 1,
                     name: `${item.product.name}${item.product.size ? ` (${item.product.size})` : ''}`,
                     rate: item.rate_per_kg,
+                    bundle: formatBundleQty(item.bundles, item.extra_pieces),
                     qty: `${item.weight_kg} KG`,
                     total: item.amount,
                 }))}
                 subTotal={sale.total_amount}
                 discount={sale.discount}
                 grandTotal={sale.net_amount}
-                paidTotal={sale.paid_amount}
+                paidTotal={memoPaid}
                 dueAmount={sale.due_amount}
                 customerTotalDue={sale.customer.total_due}
                 totalWeight={sale.total_weight_kg}

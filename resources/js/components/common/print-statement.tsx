@@ -23,6 +23,9 @@ type PrintStatementProps = {
     closingBalance: number;
     totalDebit: number;
     totalCredit: number;
+    totalSale: number;
+    totalCollection: number;
+    totalReturn: number;
     transactions: Transaction[];
 };
 
@@ -36,6 +39,9 @@ export default function PrintStatement({
     closingBalance,
     totalDebit,
     totalCredit,
+    totalSale,
+    totalCollection,
+    totalReturn,
     transactions,
 }: PrintStatementProps) {
     const { settings } = usePage<SharedData>().props;
@@ -199,6 +205,13 @@ export default function PrintStatement({
                             </tr>
                         </tfoot>
                     </table>
+                </div>
+
+                {/* Totals */}
+                <div className="mb-2 flex justify-between px-2 text-sm font-medium">
+                    <span>Total Sale: {formatCurrency(totalSale)}</span>
+                    <span>Total Collection: {formatCurrency(totalCollection)}</span>
+                    <span>Total Return: {formatCurrency(totalReturn)}</span>
                 </div>
 
                 {/* Closing Balance */}

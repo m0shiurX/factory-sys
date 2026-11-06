@@ -179,10 +179,6 @@ export function ExpenseBreakdownChart({
                     paddingAngle={2}
                     dataKey="value"
                     nameKey="name"
-                    label={({ name, percent }) =>
-                        `${name ?? ''} ${((percent ?? 0) * 100).toFixed(0)}%`
-                    }
-                    labelLine={false}
                 >
                     {data.map((_, index) => (
                         <Cell
@@ -191,6 +187,15 @@ export function ExpenseBreakdownChart({
                         />
                     ))}
                 </Pie>
+                <Legend
+                    iconType="circle"
+                    iconSize={8}
+                    formatter={(name) => {
+                        const value =
+                            data.find((item) => item.name === name)?.value ?? 0;
+                        return `${name} ${((value / total) * 100).toFixed(0)}%`;
+                    }}
+                />
                 <Tooltip
                     content={({ active, payload }) => {
                         if (active && payload && payload.length) {

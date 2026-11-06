@@ -11,7 +11,7 @@ import {
     Search,
     Trash2,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 type Product = {
@@ -51,6 +51,9 @@ type Props = {
     stats: Stats;
     filters: {
         search?: string;
+        product_id?: string;
+        from_date?: string;
+        to_date?: string;
     };
 };
 
@@ -60,6 +63,7 @@ export default function ProductionsIndex({
     filters,
 }: Props) {
     const [search, setSearch] = useState(filters.search || '');
+    const isFirstRender = useRef(true);
     const { props } = usePage<{
         flash?: { success?: string; error?: string };
     }>();
@@ -74,17 +78,29 @@ export default function ProductionsIndex({
     }, [props.flash?.success, props.flash?.error]);
 
     useEffect(() => {
+        // Only search when the box changes; on load this would drop ?page and filters
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+
         const timeout = setTimeout(() => {
             router.get(
                 '/dashboard/productions',
                 {
                     ...(search && { search }),
+                    ...(filters.product_id && {
+                        product_id: filters.product_id,
+                    }),
+                    ...(filters.from_date && { from_date: filters.from_date }),
+                    ...(filters.to_date && { to_date: filters.to_date }),
                 },
                 { preserveState: true, replace: true },
             );
         }, 300);
 
         return () => clearTimeout(timeout);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search]);
 
     const handleDelete = (productionId: number) => {
@@ -201,7 +217,7 @@ export default function ProductionsIndex({
                     </div>
 
                     {/* Table */}
-                    <div className="overflow-hidden rounded-xl border border-border bg-card">
+                    <div className="overflow-x-auto rounded-xl border border-border bg-card">
                         <table className="w-full">
                             <thead>
                                 <tr className="border-b border-border bg-muted/50">

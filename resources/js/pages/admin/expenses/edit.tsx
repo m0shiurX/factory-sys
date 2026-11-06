@@ -29,7 +29,7 @@ export default function ExpenseEdit({ expense, categories }: Props) {
     const { data, setData, put, processing, errors } = useForm({
         expense_category_id: expense.expense_category_id,
         amount: expense.amount,
-        expense_date: expense.expense_date,
+        expense_date: expense.expense_date.split('T')[0],
         description: expense.description || '',
     });
 

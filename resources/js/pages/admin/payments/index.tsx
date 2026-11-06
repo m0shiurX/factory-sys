@@ -11,7 +11,7 @@ import {
     TrendingUp,
     Wallet,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 type Customer = {
@@ -67,6 +67,7 @@ type Props = {
 
 export default function PaymentsIndex({ payments, stats, filters }: Props) {
     const [search, setSearch] = useState(filters.search || '');
+    const isFirstRender = useRef(true);
     const { props } = usePage<{
         flash?: { success?: string; error?: string };
     }>();
@@ -81,17 +82,29 @@ export default function PaymentsIndex({ payments, stats, filters }: Props) {
     }, [props.flash?.success, props.flash?.error]);
 
     useEffect(() => {
+        // Only search when the box changes; on load this would drop ?page and filters
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+
         const timeout = setTimeout(() => {
             router.get(
                 '/dashboard/payments',
                 {
                     ...(search && { search }),
+                    ...(filters.from_date && { from_date: filters.from_date }),
+                    ...(filters.to_date && { to_date: filters.to_date }),
+                    ...(filters.customer_id && {
+                        customer_id: filters.customer_id,
+                    }),
                 },
                 { preserveState: true, replace: true },
             );
         }, 300);
 
         return () => clearTimeout(timeout);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search]);
 
     const handleDelete = (paymentId: number) => {
@@ -176,12 +189,12 @@ export default function PaymentsIndex({ payments, stats, filters }: Props) {
                             </div>
                         </div>
                         <div className="rounded-xl border border-border bg-card p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
+                            <div className="flex items-center justify-between gap-2">
+                                <div className="min-w-0">
                                     <p className="text-xs font-medium text-muted-foreground">
                                         Total Collected
                                     </p>
-                                    <p className="mt-1 text-2xl font-semibold text-blue-600">
+                                    <p className="mt-1 text-lg font-semibold text-blue-600 sm:text-2xl">
                                         {formatCurrency(stats.total_amount)}
                                     </p>
                                 </div>
@@ -191,12 +204,12 @@ export default function PaymentsIndex({ payments, stats, filters }: Props) {
                             </div>
                         </div>
                         <div className="rounded-xl border border-border bg-card p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
+                            <div className="flex items-center justify-between gap-2">
+                                <div className="min-w-0">
                                     <p className="text-xs font-medium text-muted-foreground">
                                         Today's Amount
                                     </p>
-                                    <p className="mt-1 text-2xl font-semibold text-amber-600">
+                                    <p className="mt-1 text-lg font-semibold text-amber-600 sm:text-2xl">
                                         {formatCurrency(stats.today_amount)}
                                     </p>
                                 </div>
@@ -311,7 +324,7 @@ export default function PaymentsIndex({ payments, stats, filters }: Props) {
                     </div>
 
                     {/* Pagination */}
-                    {payments.data.length > 0 && (
+                    {payments.links.length > 3 && (
                         <div className="mt-6">
                             <Paginator pagination={payments.links} />
                         </div>

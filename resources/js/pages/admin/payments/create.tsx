@@ -96,7 +96,7 @@ export default function PaymentCreate({
             ...prev,
             customer_id: customer.id,
             sale_id: null,
-            amount: customer.total_due, // Default to full due amount
+            amount: Math.max(0, Number(customer.total_due)), // Default to full due amount
         }));
         setCustomerSearch(customer.name);
         setShowCustomerDropdown(false);
@@ -151,11 +151,7 @@ export default function PaymentCreate({
             return;
         }
 
-        post('/dashboard/payments', {
-            onSuccess: () => {
-                toast.success('Payment recorded successfully');
-            },
-        });
+        post('/dashboard/payments');
     };
 
     const formatCurrency = (amount: number) => {
@@ -165,6 +161,16 @@ export default function PaymentCreate({
             minimumFractionDigits: 0,
         }).format(amount);
     };
+
+    const formatBalance = (totalDue: number) =>
+        Number(totalDue) < 0
+            ? `Advance: ${formatCurrency(Math.abs(Number(totalDue)))}`
+            : `Due: ${formatCurrency(totalDue)}`;
+
+    // Whatever exceeds the customer's total due is kept as advance
+    const advanceAmount = selectedCustomer
+        ? data.amount - Math.max(0, Number(selectedCustomer.total_due))
+        : 0;
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-BD', {
@@ -211,9 +217,11 @@ export default function PaymentCreate({
                                                 {selectedCustomer.name}
                                             </p>
                                             <p className="text-sm text-muted-foreground">
-                                                {selectedCustomer.phone} • Due:{' '}
-                                                <span className="font-medium text-red-600">
-                                                    {formatCurrency(
+                                                {selectedCustomer.phone} •{' '}
+                                                <span
+                                                    className={`font-medium ${Number(selectedCustomer.total_due) < 0 ? 'text-emerald-600' : 'text-red-600'}`}
+                                                >
+                                                    {formatBalance(
                                                         selectedCustomer.total_due,
                                                     )}
                                                 </span>
@@ -275,8 +283,10 @@ export default function PaymentCreate({
                                                                         }
                                                                     </p>
                                                                 </div>
-                                                                <span className="text-sm font-medium text-red-600">
-                                                                    {formatCurrency(
+                                                                <span
+                                                                    className={`text-sm font-medium ${Number(customer.total_due) < 0 ? 'text-emerald-600' : 'text-red-600'}`}
+                                                                >
+                                                                    {formatBalance(
                                                                         customer.total_due,
                                                                     )}
                                                                 </span>
@@ -299,8 +309,8 @@ export default function PaymentCreate({
                                     </h2>
                                     <p className="mb-3 text-sm text-muted-foreground">
                                         Select an invoice to apply this payment
-                                        to, or leave blank for a general
-                                        payment.
+                                        to, or leave blank to post it to the
+                                        customer's account as an advance.
                                     </p>
 
                                     <div className="space-y-2">
@@ -316,7 +326,7 @@ export default function PaymentCreate({
                                             }`}
                                         >
                                             <p className="font-medium text-foreground">
-                                                General Payment
+                                                Advance / General Payment
                                             </p>
                                             <p className="text-sm text-muted-foreground">
                                                 Not linked to a specific invoice
@@ -400,6 +410,12 @@ export default function PaymentCreate({
                                             />
                                         </div>
                                         <InputError message={errors.amount} />
+                                        {advanceAmount > 0 && (
+                                            <p className="mt-1 text-xs text-emerald-600">
+                                                {formatCurrency(advanceAmount)}{' '}
+                                                will be saved as advance
+                                            </p>
+                                        )}
                                     </div>
 
                                     {/* Payment Date */}

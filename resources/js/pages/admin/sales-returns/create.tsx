@@ -444,11 +444,7 @@ export default function SalesReturnCreate({
             }
         }
 
-        post('/dashboard/sales-returns', {
-            onSuccess: () => {
-                toast.success('Sales return recorded successfully');
-            },
-        });
+        post('/dashboard/sales-returns');
     };
 
     const formatCurrency = (amount: number) => {
@@ -828,7 +824,7 @@ export default function SalesReturnCreate({
                         )}
 
                         {/* Items Table */}
-                        <div className="mb-6 overflow-hidden rounded-xl border border-border bg-card">
+                        <div className="mb-6 overflow-x-auto rounded-xl border border-border bg-card">
                             <table className="w-full">
                                 <thead className="border-b border-border bg-muted/50">
                                     <tr>

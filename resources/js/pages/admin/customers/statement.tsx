@@ -38,6 +38,9 @@ type Statement = {
     transactions: Transaction[];
     total_debit: number;
     total_credit: number;
+    total_sale: number;
+    total_collection: number;
+    total_return: number;
     closing_balance: number;
 };
 
@@ -320,7 +323,7 @@ export default function CustomerStatement({
                                 <tfoot>
                                     <tr className="border-t-2 border-border bg-muted/50">
                                         <td
-                                            colSpan={2}
+                                            colSpan={3}
                                             className="px-4 py-3 text-sm font-medium text-foreground"
                                         >
                                             Period Total
@@ -378,27 +381,38 @@ export default function CustomerStatement({
                         </div>
 
                         {/* Summary Cards */}
-                        <div className="grid grid-cols-3 gap-4 border-t border-border p-6 print:hidden">
+                        <div className="grid grid-cols-2 gap-4 border-t border-border p-6 md:grid-cols-4 print:hidden">
                             <div className="rounded-lg bg-red-500/10 p-4">
                                 <div className="flex items-center gap-2">
                                     <TrendingUp className="h-5 w-5 text-red-600" />
                                     <span className="text-sm font-medium text-muted-foreground">
-                                        Total Sales
+                                        Total Sale
                                     </span>
                                 </div>
                                 <p className="mt-2 text-xl font-semibold text-red-600">
-                                    {formatCurrency(statement.total_debit)}
+                                    {formatCurrency(statement.total_sale)}
                                 </p>
                             </div>
                             <div className="rounded-lg bg-emerald-500/10 p-4">
                                 <div className="flex items-center gap-2">
                                     <TrendingDown className="h-5 w-5 text-emerald-600" />
                                     <span className="text-sm font-medium text-muted-foreground">
-                                        Total Payments
+                                        Total Collection
                                     </span>
                                 </div>
                                 <p className="mt-2 text-xl font-semibold text-emerald-600">
-                                    {formatCurrency(statement.total_credit)}
+                                    {formatCurrency(statement.total_collection)}
+                                </p>
+                            </div>
+                            <div className="rounded-lg bg-amber-500/10 p-4">
+                                <div className="flex items-center gap-2">
+                                    <RotateCcw className="h-5 w-5 text-amber-600" />
+                                    <span className="text-sm font-medium text-muted-foreground">
+                                        Total Return
+                                    </span>
+                                </div>
+                                <p className="mt-2 text-xl font-semibold text-amber-600">
+                                    {formatCurrency(statement.total_return)}
                                 </p>
                             </div>
                             <div className="rounded-lg bg-muted p-4">
@@ -444,6 +458,9 @@ export default function CustomerStatement({
                 closingBalance={statement.closing_balance}
                 totalDebit={statement.total_debit}
                 totalCredit={statement.total_credit}
+                totalSale={statement.total_sale}
+                totalCollection={statement.total_collection}
+                totalReturn={statement.total_return}
                 transactions={transactionsWithBalance}
             />
         </AppLayout>

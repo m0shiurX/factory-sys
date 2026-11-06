@@ -73,7 +73,6 @@ final class PaymentController
     {
         $customers = Customer::query()
             ->where('is_active', true)
-            ->where('total_due', '>', 0)
             ->select(['id', 'name', 'phone', 'address', 'total_due'])
             ->orderBy('name')
             ->get();
@@ -125,16 +124,7 @@ final class PaymentController
 
             // If linked to a sale, update the sale's paid_amount and due_amount
             if (! empty($validated['sale_id'])) {
-                /** @var Sale|null $sale */
-                $sale = Sale::query()->find($validated['sale_id']);
-                if ($sale instanceof Sale) {
-                    $newPaid = (float) $sale->paid_amount + (float) $validated['amount'];
-                    $newDue = (float) $sale->net_amount - $newPaid;
-                    $sale->update([
-                        'paid_amount' => $newPaid,
-                        'due_amount' => max(0, $newDue),
-                    ]);
-                }
+                $this->adjustSalePaid($validated['sale_id'], (float) $validated['amount']);
             }
         });
 
@@ -209,14 +199,7 @@ final class PaymentController
 
             // If old sale was linked, restore its due
             if ($payment->sale_id) {
-                /** @var Sale|null $oldSale */
-                $oldSale = Sale::query()->find($payment->sale_id);
-                if ($oldSale instanceof Sale) {
-                    $oldSale->update([
-                        'paid_amount' => (float) $oldSale->paid_amount - $oldAmount,
-                        'due_amount' => (float) $oldSale->due_amount + $oldAmount,
-                    ]);
-                }
+                $this->adjustSalePaid($payment->sale_id, -$oldAmount);
             }
 
             // Update payment
@@ -232,14 +215,7 @@ final class PaymentController
 
             // If new sale is linked, update its paid/due
             if (! empty($validated['sale_id'])) {
-                /** @var Sale|null $newSale */
-                $newSale = Sale::query()->find($validated['sale_id']);
-                if ($newSale instanceof Sale) {
-                    $newSale->update([
-                        'paid_amount' => (float) $newSale->paid_amount + $newAmount,
-                        'due_amount' => max(0, (float) $newSale->due_amount - $newAmount),
-                    ]);
-                }
+                $this->adjustSalePaid($validated['sale_id'], $newAmount);
             }
         });
 
@@ -259,14 +235,7 @@ final class PaymentController
 
             // Restore sale due if linked
             if ($payment->sale_id) {
-                /** @var Sale|null $sale */
-                $sale = Sale::query()->find($payment->sale_id);
-                if ($sale instanceof Sale) {
-                    $sale->update([
-                        'paid_amount' => (float) $sale->paid_amount - (float) $payment->amount,
-                        'due_amount' => (float) $sale->due_amount + (float) $payment->amount,
-                    ]);
-                }
+                $this->adjustSalePaid($payment->sale_id, -(float) $payment->amount);
             }
 
             $payment->delete();
@@ -274,5 +243,24 @@ final class PaymentController
 
         return to_route('payments.index')
             ->with('success', 'Payment deleted successfully.');
+    }
+
+    /**
+     * Add to (or take from) a sale's paid amount. The due never goes below zero: whatever is
+     * paid above the net amount is the customer's advance, held in a negative total_due.
+     */
+    private function adjustSalePaid(int $saleId, float $amount): void
+    {
+        /** @var Sale|null $sale */
+        $sale = Sale::query()->find($saleId);
+
+        if ($sale instanceof Sale) {
+            $paid = max(0, round((float) $sale->paid_amount + $amount, 2));
+
+            $sale->update([
+                'paid_amount' => $paid,
+                'due_amount' => max(0, round((float) $sale->net_amount - $paid, 2)),
+            ]);
+        }
     }
 }

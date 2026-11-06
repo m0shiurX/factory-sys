@@ -13,7 +13,7 @@ import {
     TrendingUp,
     Wallet,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 type Category = {
@@ -67,6 +67,7 @@ export default function ExpensesIndex({
     filters,
 }: Props) {
     const [search, setSearch] = useState(filters.search || '');
+    const isFirstRender = useRef(true);
     const [showFilters, setShowFilters] = useState(false);
     const { props } = usePage<{
         flash?: { success?: string; error?: string };
@@ -82,6 +83,12 @@ export default function ExpensesIndex({
     }, [props.flash?.success, props.flash?.error]);
 
     useEffect(() => {
+        // Only search when the box changes; on load this would drop ?page and filters
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+
         const timeout = setTimeout(() => {
             router.get(
                 '/dashboard/expenses',
@@ -156,7 +163,7 @@ export default function ExpensesIndex({
                         </div>
                         <div className="flex items-center gap-2">
                             <Link
-                                href="/dashboard/expenses/categories"
+                                href="/dashboard/expense-categories"
                                 className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-muted"
                             >
                                 Categories
@@ -189,12 +196,12 @@ export default function ExpensesIndex({
                             </div>
                         </div>
                         <div className="rounded-xl border border-border bg-card p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
+                            <div className="flex items-center justify-between gap-2">
+                                <div className="min-w-0">
                                     <p className="text-xs font-medium text-muted-foreground">
                                         Today
                                     </p>
-                                    <p className="mt-1 text-2xl font-semibold text-amber-600">
+                                    <p className="mt-1 text-lg sm:text-2xl font-semibold text-amber-600">
                                         {formatCurrency(stats.today_amount)}
                                     </p>
                                 </div>
@@ -204,12 +211,12 @@ export default function ExpensesIndex({
                             </div>
                         </div>
                         <div className="rounded-xl border border-border bg-card p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
+                            <div className="flex items-center justify-between gap-2">
+                                <div className="min-w-0">
                                     <p className="text-xs font-medium text-muted-foreground">
                                         This Month
                                     </p>
-                                    <p className="mt-1 text-2xl font-semibold text-blue-600">
+                                    <p className="mt-1 text-lg sm:text-2xl font-semibold text-blue-600">
                                         {formatCurrency(
                                             stats.this_month_amount,
                                         )}
@@ -221,12 +228,12 @@ export default function ExpensesIndex({
                             </div>
                         </div>
                         <div className="rounded-xl border border-border bg-card p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
+                            <div className="flex items-center justify-between gap-2">
+                                <div className="min-w-0">
                                     <p className="text-xs font-medium text-muted-foreground">
                                         Total Amount
                                     </p>
-                                    <p className="mt-1 text-2xl font-semibold text-red-600">
+                                    <p className="mt-1 text-lg sm:text-2xl font-semibold text-red-600">
                                         {formatCurrency(stats.total_amount)}
                                     </p>
                                 </div>
@@ -325,7 +332,7 @@ export default function ExpensesIndex({
                     </div>
 
                     {/* Table */}
-                    <div className="overflow-hidden rounded-xl border border-border bg-card">
+                    <div className="overflow-x-auto rounded-xl border border-border bg-card">
                         <table className="w-full">
                             <thead>
                                 <tr className="border-b border-border bg-muted/50">
