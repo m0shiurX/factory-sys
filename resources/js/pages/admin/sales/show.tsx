@@ -285,9 +285,18 @@ export default function SaleShow({ sale, auto_print }: Props) {
 
                         {/* Summary */}
                         <div className="border-t border-border bg-muted/30 px-6 py-4">
-                            <div className="flex flex-col gap-4 sm:flex-row sm:justify-end">
+                            <div className="flex flex-col gap-6 sm:flex-row sm:justify-end sm:gap-10">
                                 {/* Notes & Payment Info */}
-                                <div className="flex-1 space-y-3">
+                                <div className="min-w-0 flex-1 space-y-5">
+                                    <div>
+                                        <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                                            Amount in words
+                                        </p>
+                                        <p className="mt-1.5 max-w-prose text-sm leading-6 font-medium text-foreground">
+                                            {numberToWords(sale.net_amount)} Taka
+                                            Only
+                                        </p>
+                                    </div>
                                     {sale.notes && (
                                         <div>
                                             <p className="text-xs font-medium text-muted-foreground uppercase">
@@ -320,7 +329,7 @@ export default function SaleShow({ sale, auto_print }: Props) {
                                 </div>
 
                                 {/* Totals */}
-                                <div className="w-full space-y-2 sm:w-72">
+                                <div className="w-full space-y-2 tabular-nums sm:w-72 sm:shrink-0">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-muted-foreground">
                                             Total Weight
@@ -354,11 +363,6 @@ export default function SaleShow({ sale, auto_print }: Props) {
                                         <span className="text-lg font-bold text-foreground">
                                             {formatCurrency(sale.net_amount)}
                                         </span>
-                                    </div>
-                                    <div className="rounded-md bg-muted/50 px-2 py-1.5">
-                                        <p className="text-xs italic text-muted-foreground">
-                                            In Words: {numberToWords(sale.net_amount)} Taka Only
-                                        </p>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-muted-foreground">
